@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-auth.js"></script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+  
+  <title>Pair</title>
+</head>
+
+<body>
+  <form action="/auth" id="loginForm">
+    <input type="text" name="id" placeholder="User Name">
+    <input type="password" name="psk" placeholder="Password">
+    <input type="submit" value="Submit" id="submitBtn">
+  </form>
+
+  <script src="javascripts/auth-client.js"></script>
+</body>
+
+</html>
