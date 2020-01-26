@@ -3,7 +3,7 @@ const router = express.Router();
 const admin = require('firebase-admin');
 
 /* GET home page. */
-router.get('/', function (req, res) {
+router.get('/', (req, res) => {
   // res.render('index');
   const sessionCookie = req.cookies.session || '';
   admin.auth().verifySessionCookie(sessionCookie, true)
@@ -17,7 +17,7 @@ router.get('/', function (req, res) {
 });
 
 /* GET OUT. */
-router.get('/sessionLogout', function (req, res) {
+router.get('/sessionLogout', (req, res) => {
   res.clearCookie('session');
   res.redirect('/');
 });

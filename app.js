@@ -16,6 +16,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// no more cache
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  next();
+});
+
 app.use('/', require('./routes/index-server'));
 app.use('/home', require('./routes/home-server'));
 app.use('/auth', require('./routes/auth-server'));
@@ -36,6 +42,8 @@ const io = require('socket.io')(server);
 server.listen(80);
 
 io.on('connection', socket => {
+  socket.on('android', data => console.log(data))
+  
   socket.on('nodemcu', data => {
     // add some info
     data['account'] = "";

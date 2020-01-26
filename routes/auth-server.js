@@ -7,9 +7,19 @@ router.get('/', function (req, res) {
   res.render('auth');
 });
 
-/* POST auth page. */
+router.post('/thirdParty', (req, res) => {
+  let uid = req.body.idToken.toString();
+
+  admin.auth().createCustomToken(uid).then((customToken) => {
+    // send back to client
+    res.end(customToken);
+  }).catch(error => console.log(error))
+})
+
+/* POST /auth page. */
 router.post('/', (req, res) => {
   const idToken = req.body.idToken.toString();
+  // 5 min
   const expiresIn = 5 * 60 * 1000;
 
   admin.auth().createSessionCookie(idToken, { expiresIn })

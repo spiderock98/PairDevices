@@ -13,13 +13,72 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+
     <title>Document</title>
 </head>
 
 <body>
-    <button id="btnOut">Log Out</button>
-    <h1>HOME</h1>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">
+            <img src="images/bootstrap-solid.svg" width="30" height="30" class="d-inline-block align-top" alt="">
+            ootstrap
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#lstDevices">
+                        <i class="fas fa-plug"></i> Devices
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#about">
+                        <i class="fas fa-address-card"></i> About
+                    </a>
+                </li>
+            </ul>
+            <button id="btnOut" type="button" class="btn btn-outline-danger">Log Out</button>
+        </div>
+    </nav>
+
+    <div id="lstDevices">
+        <h2>Available Devices</h2>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Locat</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>Pump Water</td>
+                    <td><i class="fas fa-check"></i> Online</td>
+                    <td>Home</td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>Lighter</td>
+                    <td><i class="fas fa-times-circle"></i> Offline</td>
+                    <td>Home</td>
+                </tr>
+            </tbody>
+        </table>
+    </div class="center-block">
 </body>
 
 <script src="javascripts/home-client.js"></script>
+
 </html>

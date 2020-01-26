@@ -15,17 +15,48 @@
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
-  
+  <link rel="stylesheet" href="stylesheets/auth.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
   <title>Pair</title>
 </head>
 
 <body>
-  <form action="/auth" id="loginForm">
-    <input type="text" name="id" placeholder="User Name">
-    <input type="password" name="psk" placeholder="Password">
-    <input type="submit" value="Submit" id="submitBtn">
-  </form>
+  <div class="login-form">
+    <form action="/auth" id="loginForm">
+      <h2 class="text-center">Sign in</h2>
+      <div class="text-center social-btn">
+        <a id="authFacebook" class="btn btn-primary btn-block"><i class="fab fa-facebook"></i> Sign in with
+          <b>Facebook</b></a>
+        <a id="authGoogle" class="btn btn-danger btn-block"><i class="fab fa-google"></i> Sign in with <b>Google</b></a>
+      </div>
+      <div class="or-seperator"><i>or</i></div>
+      <div class="form-group">
+        <div class="input-group">
+          <span class="input-group-addon"><i class="fas fa-user-alt"></i></span>
+          <input type="text" class="form-control" name="id" placeholder="Username" required="required">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="input-group">
+          <span class="input-group-addon"><i class="fas fa-key"></i></span>
+          <input type="password" class="form-control" name="psk" placeholder="Password" required="required">
+        </div>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-success btn-block login-btn">Sign in</button>
+      </div>
+      <div class="clearfix">
+        <label class="pull-left checkbox-inline"><input type="checkbox"> Remember me</label>
+        <a href="#" class="pull-right text-success">Forgot Password?</a>
+      </div>
+
+    </form>
+    <div class="hint-text small">Don't have an account? <a href="#" class="text-success">Register Now!</a></div>
+  </div>
 
   <script src="javascripts/auth-client.js"></script>
 </body>

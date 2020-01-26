@@ -9,6 +9,5 @@ firebase.initializeApp({
 });
 
 $("#btnOut").click(() => {
-    firebase.auth().signOut()
     location.href = '/sessionLogout'; // to index-server
 })
