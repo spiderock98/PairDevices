@@ -20,7 +20,7 @@ router.post('/thirdParty', (req, res) => {
 router.post('/', (req, res) => {
   const idToken = req.body.idToken.toString();
   // 5 min
-  const expiresIn = 5 * 60 * 1000;
+  const expiresIn = 10 * 60 * 1000;
 
   admin.auth().createSessionCookie(idToken, { expiresIn })
     .then(sessionCookie => {

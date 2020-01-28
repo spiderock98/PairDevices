@@ -41,14 +41,32 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 server.listen(80);
 
+// class FirebaseDevices {
+//   constructor(name = "", user = "", loc = "", network = "", stt = "") {
+//     this.objInfo = new Object();
+//     this.name = name;
+//     this.objInfo['name'] = this.name;
+//     this.user = user;
+//     this.objInfo['user'] = this.user;
+//     this.network = network;
+//     this.objInfo['network'] = this.network;
+//     this.stt = stt;
+//     this.objInfo['stt'] = this.stt;
+//     this.loc = loc;
+//     this.objInfo['loc'] = this.loc;
+
+//     console.log(this.objInfo);
+//   }
+// }
+
 io.on('connection', socket => {
   socket.on('android', data => console.log(data))
-  
+
   socket.on('nodemcu', data => {
     // add some info
     data['account'] = "";
     data['connected'] = false;
-    
+
     console.log(data);
   });
 });
