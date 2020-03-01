@@ -7,21 +7,18 @@ router.get('/', function (req, res) {
   res.render('auth');
 });
 
+/* POST /auth thirdparty app token. */
 router.post('/thirdParty', (req, res) => {
   let uid = req.body.idToken.toString();
-
   admin.auth().createCustomToken(uid).then((customToken) => {
-    // send back to client
     res.end(customToken);
   }).catch(error => console.log(error))
 })
 
-/* POST /auth page. */
+/* POST /auth token. */
 router.post('/', (req, res) => {
   const idToken = req.body.idToken.toString();
-  // 5 min
-  const expiresIn = 10 * 60 * 1000;
-
+  const expiresIn = 60 * 60 * 1000; // 60 min
   admin.auth().createSessionCookie(idToken, { expiresIn })
     .then(sessionCookie => {
       const options = { maxAge: expiresIn, httpOnly: true, secure: false };
@@ -31,6 +28,19 @@ router.post('/', (req, res) => {
       console.log(error);
       res.status(401).send('UNAUTHORIZED REQUEST!');
     })
+})
+
+// router.post('/getCurrentUID', (req, res) => {
+//   admin.auth().verifyIdToken(req.body.idToken).then(decodedToken => { res.end(decodedToken.uid) })
+// })
+
+router.post('/getCurrentUID', (req, res) => {
+  let cookie = req.cookies.session || "";
+  admin.auth().verifySessionCookie(cookie, true)
+    .then((decodedClaims) => {
+      res.end(decodedClaims.uid)
+    })
+    .catch(err => console.log(err))
 })
 
 module.exports = router;

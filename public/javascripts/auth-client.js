@@ -1,4 +1,5 @@
 const socket = io();
+let _UID;
 
 // Initialize Firebase
 firebase.initializeApp({
@@ -14,18 +15,26 @@ firebase.initializeApp({
 firebase.auth().signOut(); // !!!!! IMPORTANT
 
 firebase.auth().onAuthStateChanged(user => {
-    user.getIdToken().then(idToken => {
-        $.ajax({
-            url: '/auth',
-            method: 'POST',
-            data: { idToken: idToken },
-            success: (data, stt) => { location.href = '/home'; }
-        })
-    })
+    if (user) {
+        Swal.showLoading()
+        user.getIdToken().then(idToken => {
+            $.ajax({
+                url: '/auth',
+                method: 'POST',
+                data: { idToken: idToken },
+                success: (data, stt) => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Access Granted'
+                    }).then(() => location.href = '/home')
+                }
+            })
+        }).catch(err => console.log(err))
+    }
 })
 
 $("#authGoogle").click(() => {
-    firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function (result) {
+    firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(result => {
         let uid = result.user.uid;   // TODO: risk here
         // let idToken = result.credential.idToken;
         // let displayName = result.user.displayName;
@@ -47,6 +56,8 @@ $("#authFacebook").click(() => {
     firebase.auth().signInWithPopup(new firebase.auth.FacebookAuthProvider()).then((result) => {
         // let token = result.credential.accessToken;
         let uid = result.user.uid;  // TODO: risk here
+        console.log(uid);
+
         $.ajax({
             url: '/auth/thirdParty',
             method: 'POST',
@@ -60,6 +71,7 @@ $("#authFacebook").click(() => {
 
 $('#loginForm').submit((event) => {
     event.preventDefault();
+    Swal.showLoading();
 
     let id = $('#loginForm').find("input[name='id']").val();
     let psk = $('#loginForm').find("input[name='psk']").val();
@@ -69,7 +81,10 @@ $('#loginForm').submit((event) => {
 
     // sign in
     firebase.auth().signInWithEmailAndPassword(id, psk).catch((error) => {
-        console.log(error);
+        Swal.fire({
+            title: error,
+            icon: 'error',
+        });
 
         // firebase.auth().createUserWithEmailAndPassword(id, psk)
         //     .then(() => {
