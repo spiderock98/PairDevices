@@ -7,8 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <!-- The core Firebase JS SDK is always required and must be listed first -->
-    <script defer src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/7.7.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.7.0/firebase-auth.js"></script>
 
     <script src="/socket.io/socket.io.js"></script>
 
@@ -181,18 +181,15 @@
                 </tr>
             </thead>
             <tbody>
+                <% count = 0 %>
+                <% snap.forEach(function(child){ %>
                 <tr>
-                    <th scope="row">1</th>
-                    <td>Pump Water</td>
+                    <th scope="row"><%= ++count%></th>
+                    <td><%= child.key %></td>
                     <td><i class="fas fa-check"></i> Online</td>
-                    <td>Home</td>
+                    <td><%= child.val()['loc'] %></td>
                 </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Lighter</td>
-                    <td><i class="fas fa-times-circle"></i> Offline</td>
-                    <td>Home</td>
-                </tr>
+                <% }) %>
             </tbody>
         </table>
     </div class="center-block">

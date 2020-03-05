@@ -42,14 +42,44 @@ class FirebaseDevices {
 }
 
 // setTimeout(() => {
-//     let device = new FirebaseDevices('abcde', 'name3', 'user', 'loc3', 'ssid', 'psk', 'stt');
+//     ref = admin.database().ref('ZpG8DOQ6McRQHwkG1mTBH60CuX12/DeviceNodes');
+//     ref.once('value', snap => {
+//         console.log(snap.val());
+
+//         snap.forEach(child => {
+//             console.log(child.val());
+//             console.log(child.key);
+
+//         })
+//     })
 // }, 500);
+
+function getSnapshotCurrentDevice(uid) {
+    return new Promise(resolve => {
+        admin.database().ref(`${uid}/DeviceNodes`).once('value', snap => {
+            resolve(snap)
+        })
+    })
+}
 
 router.get('/', (req, res) => {
     let sessionCookie = req.cookies.session || '';
     admin.auth().verifySessionCookie(sessionCookie, true)
         .then(decodedClaims => {
-            res.render('home');
+            // res.render('home', { snap: 'value' });
+            getSnapshotCurrentDevice(decodedClaims.uid)
+                .then(snapDevices => {
+                    // res.render('home', { snap: 'snapDevices' }, { async: true });
+                    res.render('home', { snap: snapDevices });
+                    console.log(snapDevices.key); // DeviceNodes
+                    console.log(snapDevices.val()); //{ Fanner: { loc: 'living room' }, Pumper: { loc: 'backyard' } }
+                    snapDevices.forEach(child => {
+                        console.log(child.key);
+                        console.log(child.val());
+                    })
+
+                })
+
         })
         .catch(error => {
             // Session cookie is unavailable or invalid. Force user to login.
