@@ -61,7 +61,6 @@
         </div>
     </nav>
 
-
     <div>
         <!-- Button trigger modal -->
         <button id="btnAdd" type="button" class="btn btn-block btn-outline-success" data-toggle="modal"
@@ -74,7 +73,7 @@
             <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
                 <form action="/home/newDevices" method="POST" id="formDevice" class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalScrollableTitle">Modal title</h5>
+                        <h5 class="modal-title" id="exampleModalScrollableTitle">New Device Infomation</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -87,8 +86,8 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Device Name</span>
                                     </div>
-                                    <input class="form-control" id="name" type="text" name="name" aria-label="Username"
-                                        aria-describedby="addon-wrapping">
+                                    <input required class="form-control" id="name" type="text" name="name"
+                                        aria-label="Username" aria-describedby="addon-wrapping">
                                 </div>
 
                                 <div class="row align-items-center input-group mb-3">

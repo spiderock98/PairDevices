@@ -7,34 +7,49 @@ const path = require('path')
 
 
 class FirebaseDevices {
-    constructor(name = "", user = "", loc = "", ssid = "", psk = "", stt = "") {
+    constructor(uid = "", name = "", user = "", loc = "", ssid = "", psk = "", stt = "") {
         this.objInfo = new Object();
 
         this.name = name;
-        this.objInfo['name'] = this.name;
-
         this.user = user;
-        this.objInfo['user'] = this.user;
-
-        this.objInfo['network'] = { 'ssid': ssid, 'psk': psk };
-
-        this.stt = stt;
-        this.objInfo['stt'] = this.stt;
-
         this.loc = loc;
-        this.objInfo['loc'] = this.loc;
+        this.ssid = ssid;
+        this.psk = psk;
+        this.uid = uid;
+
+        this.objInfo['network'] = { [this.ssid]: this.psk };
+
+        this.objInfo['DeviceNodes'] = { [this.name]: { loc: this.loc } };
+    }
+    pushNewDevice() {
+        admin.database().ref(this.uid).set(this.objInfo)
+            .catch(err => console.log('[INFO] ', err))
+    }
+    isExistUID() {
+        return new Promise(resolve => {
+            admin.database().ref().orderByKey().equalTo(this.uid).once('value')
+                .then((snap) => {
+                    if (snap.val() == null) resolve(false)
+                    else resolve(true)
+                })
+        })
+    }
+    updateMoreNode() {
+        admin.database().ref(`${this.uid}/DeviceNodes/${this.name}`).set({ loc: this.loc })
     }
 
     get objDeviceInfo() { return this.objInfo; }
 }
 
+// setTimeout(() => {
+//     let device = new FirebaseDevices('abcde', 'name3', 'user', 'loc3', 'ssid', 'psk', 'stt');
+// }, 500);
+
 router.get('/', (req, res) => {
     let sessionCookie = req.cookies.session || '';
     admin.auth().verifySessionCookie(sessionCookie, true)
         .then(decodedClaims => {
-            // console.log(decodedClaims);
             res.render('home');
-            // res.send('home herer')
         })
         .catch(error => {
             // Session cookie is unavailable or invalid. Force user to login.
@@ -52,14 +67,18 @@ router.post('/newDevices', (req, res) => {
             let ssid = req.body.ssid;
             let psk = req.body.psk;
             let baud = req.body.baud;
-            let stt = 'pending'; // initial on pending state 
+            let stt = 'pending'; // initial on pending state
             let user = decodedClaims.name || "";
             let email = decodedClaims.email || "";
             let port = req.body.port;
+            let uid = decodedClaims.uid;
 
-            let device = new FirebaseDevices(name, user, loc, ssid, psk, stt);
-            admin.database().ref('/xxx').set(device.objDeviceInfo)
-                .catch(err => console.log('[INFO] ', err))
+            // TODO: warning on duplicate name
+            let device = new FirebaseDevices(uid, name, user, loc, ssid, psk, stt);
+            device.isExistUID().then(exist => {
+                if (exist) device.updateMoreNode();
+                else device.pushNewDevice();
+            })
         })
         .catch(err => console.log('[INFO] ', err))
 
