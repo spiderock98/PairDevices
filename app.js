@@ -45,7 +45,9 @@ server.listen(8080);
 io.on("connection", socket => {
   // socket.on('android', data => console.log(data))
 
-  // console.log(socket.request.headers.cookie);
+  // socket.on('disconnect', () => {
+
+  // })
 
   //TODO: fix re-emit when reload web
   socket.on("nodemcu", data => {
@@ -54,18 +56,12 @@ io.on("connection", socket => {
     data["connected"] = false;
     data["socketType"] = "NodeMCU";
 
-    // socket.emit('hello', 'from nodejs');
-
-    socket.join('bApb0Ypwg5YszGanWOBKre39zlg1'); // put socket into room to
-
-    // socket.to('roomBrowser').emit('message', data)
-    // nspBrowser.emit('message', data)
+    socket.join(data.UID); // put node socket into room
   });
 
   socket.on("socketType", data => {
     if (data.platform == "browser") {
-      // console.log(`[Hello] ${socket.id}`);
-      socket.to('bApb0Ypwg5YszGanWOBKre39zlg1').emit('led', data.state)
+      socket.to(data.uid).emit('led', data.state)
     }
   });
 });

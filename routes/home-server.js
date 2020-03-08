@@ -19,7 +19,7 @@ class FirebaseDevices {
 
         this.objInfo['network'] = { [this.ssid]: this.psk };
 
-        this.objInfo['DeviceNodes'] = { [this.name]: { loc: this.loc } };
+        this.objInfo['DeviceNodes'] = { [this.name]: { loc: this.loc, state: 'off' } };
     }
     pushNewDevice() {
         admin.database().ref(this.uid).set(this.objInfo)
@@ -35,7 +35,7 @@ class FirebaseDevices {
         })
     }
     updateMoreNode() {
-        admin.database().ref(`${this.uid}/DeviceNodes/${this.name}`).set({ loc: this.loc })
+        admin.database().ref(`${this.uid}/DeviceNodes/${this.name}`).set({ loc: this.loc, state: 'off' })
     }
 
     get objDeviceInfo() { return this.objInfo; }

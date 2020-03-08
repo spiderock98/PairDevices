@@ -21,39 +21,41 @@ function getCurrentUID() {
     })
   })
 }
-async function doWork() {
-  hi = await getCurrentUID();
-  console.log(hi);
-}
-doWork();
+let myCurrentUID;
+getCurrentUID().then(uid => { myCurrentUID = uid }) // Global Var
 
-// socket.emit("socketType",
-//   {
-//     uid: await getCurrentUID(),
-//     platform: "browser",
-//     href: window.location.href,
-//     value: 'hello nodemcu from chrome'
-//   }
-// );
-
-// socket.on('message', data => console.log(data))
 socket.on("message", data => console.log(data));
 
-objDeviceName = $('td.dvName');
+// window.onbeforeunload = function () {
+//   return "Do you really want to close?";
+// };
 
+objDeviceName = $('td.dvName');
+// TODO: get database state
 let arrState = ['off', 'off', 'off'];
 for (let i = 0; i < objDeviceName.length; i++) {
   const element = objDeviceName[i];
-
   $(`#customSwitch${i + 1}`).change(() => {
     if (arrState[i] == 'off') {
       arrState[i] = 'on';
-      socket.emit("socketType", { platform: "browser", state: 'on' });
+      socket.emit("socketType",
+        {
+          uid: myCurrentUID,
+          platform: "browser",
+          state: 'on'
+        }
+      );
       console.log(`ON ${element.innerHTML}`);
     }
     else {
       arrState[i] = 'off';
-      socket.emit("socketType", { platform: "browser", state: 'off' });
+      socket.emit("socketType",
+        {
+          uid: myCurrentUID,
+          platform: "browser",
+          state: 'off'
+        }
+      );
       console.log(`OFF ${element.innerHTML}`);
     }
   });
