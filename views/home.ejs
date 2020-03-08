@@ -12,7 +12,7 @@
 
     <script src="/socket.io/socket.io.js"></script>
 
-    <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
     <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
 
@@ -163,12 +163,6 @@
         </div>
     </div>
 
-
-    <div class="custom-control custom-switch" id="demoSw">
-        <input type="checkbox" class="custom-control-input" id="customSwitch1">
-        <label class="custom-control-label" for="customSwitch1">Toggle this switch element</label>
-    </div>
-
     <div id="lstDevices">
         <h2>Available Devices</h2>
         <table class="table table-hover">
@@ -178,23 +172,28 @@
                     <th scope="col">Name</th>
                     <th scope="col">Status</th>
                     <th scope="col">Locat</th>
+                    <th scope="col">Switch</th>
                 </tr>
             </thead>
             <tbody>
                 <% count = 0 %>
-                <% snap.forEach(function(child){ %>
+                <% snap.forEach((child) => { %>
                 <tr>
                     <th scope="row"><%= ++count%></th>
-                    <td><%= child.key %></td>
+                    <td class="dvName"><%= child.key %></td>
                     <td><i class="fas fa-check"></i> Online</td>
                     <td><%= child.val()['loc'] %></td>
+                    <td>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input" id="customSwitch<%-count%>">
+                            <label class="custom-control-label" for="customSwitch<%-count%>"></label>
+                        </div>
+                    </td>
                 </tr>
                 <% }) %>
             </tbody>
         </table>
     </div class="center-block">
 </body>
-
-
 
 </html>

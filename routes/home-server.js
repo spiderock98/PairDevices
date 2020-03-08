@@ -71,15 +71,13 @@ router.get('/', (req, res) => {
                 .then(snapDevices => {
                     // res.render('home', { snap: 'snapDevices' }, { async: true });
                     res.render('home', { snap: snapDevices });
-                    console.log(snapDevices.key); // DeviceNodes
-                    console.log(snapDevices.val()); //{ Fanner: { loc: 'living room' }, Pumper: { loc: 'backyard' } }
-                    snapDevices.forEach(child => {
-                        console.log(child.key);
-                        console.log(child.val());
-                    })
-
+                    // console.log(snapDevices.key); // DeviceNodes
+                    // console.log(snapDevices.val()); //{ Fanner: { loc: 'living room' }, Pumper: { loc: 'backyard' } }
+                    // snapDevices.forEach(child => {
+                    //     console.log(child.key);
+                    //     console.log(child.val());
+                    // })
                 })
-
         })
         .catch(error => {
             // Session cookie is unavailable or invalid. Force user to login.
