@@ -66,17 +66,9 @@ router.get('/', (req, res) => {
     let sessionCookie = req.cookies.session || '';
     admin.auth().verifySessionCookie(sessionCookie, true)
         .then(decodedClaims => {
-            // res.render('home', { snap: 'value' });
             getSnapshotCurrentDevice(decodedClaims.uid)
                 .then(snapDevices => {
-                    // res.render('home', { snap: 'snapDevices' }, { async: true });
                     res.render('home', { snap: snapDevices });
-                    // console.log(snapDevices.key); // DeviceNodes
-                    // console.log(snapDevices.val()); //{ Fanner: { loc: 'living room' }, Pumper: { loc: 'backyard' } }
-                    // snapDevices.forEach(child => {
-                    //     console.log(child.key);
-                    //     console.log(child.val());
-                    // })
                 })
         })
         .catch(error => {
@@ -85,6 +77,18 @@ router.get('/', (req, res) => {
             res.redirect('/');
         });
 });
+
+router.post('/removeDevices', (req, res) => {
+    let cookie = req.cookies.session || ""
+    admin.auth().verifySessionCookie(cookie, true)
+        .then(decodedClaims => {
+            let uid = decodedClaims.uid
+            admin.database().ref(`${uid}/DeviceNodes/${req.body.name}`).remove(err => {
+                if (err) console.log("[INFO] ", err)
+                else res.end();
+            })
+        })
+})
 
 router.post('/newDevices', (req, res) => {
     let cookie = req.cookies.session || "";

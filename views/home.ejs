@@ -173,6 +173,7 @@
                     <th scope="col">Status</th>
                     <th scope="col">Locat</th>
                     <th scope="col">Switch</th>
+                    <th scope="col"></th>
                 </tr>
             </thead>
             <tbody>
@@ -189,6 +190,8 @@
                             <label class="custom-control-label" for="customSwitch<%-count%>"></label>
                         </div>
                     </td>
+                    <td id="btnRemoveDevices<%-count%>"><button type="button" class="btn btn-danger"><i
+                                class="fas fa-trash-alt"></i></button></td>
                 </tr>
                 <% }) %>
             </tbody>

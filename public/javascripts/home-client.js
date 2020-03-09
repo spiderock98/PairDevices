@@ -30,11 +30,13 @@ socket.on("message", data => console.log(data));
 //   return "Do you really want to close?";
 // };
 
-objDeviceName = $('td.dvName');
+objDeviceName = $('td.dvName'); // list all items
 // TODO: get database state
-let arrState = ['off', 'off', 'off'];
+let arrState = new Array;
 for (let i = 0; i < objDeviceName.length; i++) {
   const element = objDeviceName[i];
+
+  arrState[i] = 'off';
   $(`#customSwitch${i + 1}`).change(() => {
     if (arrState[i] == 'off') {
       arrState[i] = 'on';
@@ -45,7 +47,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
           state: 'on'
         }
       );
-      console.log(`ON ${element.innerHTML}`);
+      // console.log(`ON ${element.innerHTML}`);
     }
     else {
       arrState[i] = 'off';
@@ -56,9 +58,19 @@ for (let i = 0; i < objDeviceName.length; i++) {
           state: 'off'
         }
       );
-      console.log(`OFF ${element.innerHTML}`);
+      // console.log(`OFF ${element.innerHTML}`);
     }
   });
+
+  $(`#btnRemoveDevices${i + 1}`).click(() => {
+    deviceName = $(`#btnRemoveDevices${i + 1}`).siblings().eq(1)
+    $.ajax({
+      url: "/home/removeDevices",
+      method: "POST",
+      data: { name: deviceName[0].innerHTML },
+      success: () => { location.href = '/' }
+    })
+  })
 }
 
 $("#btnOut").click(() => {
