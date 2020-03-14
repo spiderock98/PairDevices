@@ -94,6 +94,8 @@ router.post('/newDevices', (req, res) => {
     let cookie = req.cookies.session || "";
     admin.auth().verifySessionCookie(cookie, true)
         .then((decodedClaims) => {
+            res.end()
+
             let name = req.body.name;
             let loc = req.body.loc;
             let ssid = req.body.ssid;

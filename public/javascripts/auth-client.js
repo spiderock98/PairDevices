@@ -12,7 +12,7 @@ firebase.initializeApp({
     appId: "1:979300938513:web:45ee0e73b4bbfc953192b0"
 });
 
-firebase.auth().signOut(); // !!!!! IMPORTANT
+firebase.auth().signOut(); //!!!! IMPORTANT
 
 firebase.auth().onAuthStateChanged(user => {
     if (user) {

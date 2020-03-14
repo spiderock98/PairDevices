@@ -63,12 +63,30 @@ for (let i = 0; i < objDeviceName.length; i++) {
   });
 
   $(`#btnRemoveDevices${i + 1}`).click(() => {
-    deviceName = $(`#btnRemoveDevices${i + 1}`).siblings().eq(1)
-    $.ajax({
-      url: "/home/removeDevices",
-      method: "POST",
-      data: { name: deviceName[0].innerHTML },
-      success: () => { location.href = '/' }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.value) {
+        deviceName = $(`#btnRemoveDevices${i + 1}`).siblings().eq(1)
+        $.ajax({
+          url: "/home/removeDevices",
+          method: "POST",
+          data: { name: deviceName[0].innerHTML },
+          success: () => {
+            Swal.fire(
+              'Deleted!',
+              `Your ${deviceName[0].innerHTML} has been deleted.`,
+              'success'
+            ).then(() => location.href = '/')
+          }
+        })
+      }
     })
   })
 }

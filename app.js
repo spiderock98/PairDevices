@@ -43,12 +43,6 @@ const io = require("socket.io")(server);
 server.listen(8080);
 
 io.on("connection", socket => {
-  // socket.on('android', data => console.log(data))
-
-  // socket.on('disconnect', () => {
-
-  // })
-
   //TODO: fix re-emit when reload web
   socket.on("nodemcu", data => {
     // add some stuff
@@ -61,7 +55,7 @@ io.on("connection", socket => {
 
   socket.on("socketType", data => {
     if (data.platform == "browser") {
-      socket.to(data.uid).emit('led', data.state)
+      socket.to(data.uid).emit('led', `${data.state}\n`)
     }
   });
 });
