@@ -34,40 +34,34 @@ firebase.auth().onAuthStateChanged(user => {
 })
 
 $("#authGoogle").click(() => {
-    firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(result => {
-        let uid = result.user.uid;   // TODO: risk here
-        // let idToken = result.credential.idToken;
-        // let displayName = result.user.displayName;
-
-        $.ajax({
-            url: '/auth/thirdParty',
-            method: 'POST',
-            data: { idToken: uid },
-            success: (customToken) => {
-                firebase.auth().signInWithCustomToken(customToken).catch(error => console.log(error))
-            }
+    firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider())
+        .then(result => {
+            console.log(result);
         })
-    }).catch(function (error) {
-        console.log(error);
-    });
+        .catch(error => console.log(error))
 })
-
 $("#authFacebook").click(() => {
-    firebase.auth().signInWithPopup(new firebase.auth.FacebookAuthProvider()).then((result) => {
-        // let token = result.credential.accessToken;
-        let uid = result.user.uid;  // TODO: risk here
-        console.log(uid);
-
-        $.ajax({
-            url: '/auth/thirdParty',
-            method: 'POST',
-            data: { idToken: uid },
-            success: (customToken) => {
-                firebase.auth().signInWithCustomToken(customToken).catch(error => console.log(error))
-            }
+    firebase.auth().signInWithRedirect(new firebase.auth.FacebookAuthProvider())
+        .then((result) => {
+            console.log(result)
         })
-    }).catch(error => console.log(error));
+        .catch(error => console.log(error));
 })
+firebase.auth().getRedirectResult().then(result => {
+    let uid = result.user.uid;   // TODO: risk here
+
+    let idToken = result.credential.idToken;
+    let displayName = result.user.displayName;
+
+    $.ajax({
+        url: '/auth/thirdParty',
+        method: 'POST',
+        data: { idToken: uid },
+        success: (customToken) => {
+            firebase.auth().signInWithCustomToken(customToken).catch(error => console.log(error))
+        }
+    })
+}).catch(err => console.log(err))
 
 $('#loginForm').submit((event) => {
     event.preventDefault();
