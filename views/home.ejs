@@ -47,17 +47,18 @@
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
                     <a class="nav-link" href="#lstDevices">
-                        <i class="fas fa-plug"></i> Devices
+                        <img src="images/icons8-disconnected.svg" width="30" height="30" alt=""> Devices
                         <span class="sr-only">(current)</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#about">
-                        <i class="fas fa-address-card"></i> About
+                        <img src="images/icons8-info.svg" width="30" height="30" alt=""> About
                     </a>
                 </li>
             </ul>
-            <button id="btnOut" type="button" class="btn btn-outline-danger">Log Out</button>
+            <button id="btnOut" type="button" class="btn btn-outline-danger"><img src="images/icons8-login.svg"
+                    width="30" height="30" alt=""> Sign Out</button>
         </div>
     </nav>
 
@@ -65,7 +66,7 @@
         <!-- Button trigger modal -->
         <button id="btnAdd" type="button" class="btn btn-block btn-outline-success" data-toggle="modal"
             data-target="#exampleModalScrollable">
-            New Devices
+            <img src="images/icons8-plus.svg" width="30" height="30" alt=""> Devices
         </button>
         <!-- Modal -->
         <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog"
@@ -128,6 +129,15 @@
                                     <select name="port" class="custom-select" id="inputGroupSelectPORT">
                                     </select>
                                 </div>
+                                <div class="row align-items-center input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Board</span>
+                                    </div>
+                                    <select name="board" class="custom-select" id="inputGroupSelecBOARD">
+                                        <option>WeMos D1 R1</option>
+                                        <option>NodeMCU v1.0</option>
+                                    </select>
+                                </div>
 
                                 <div class="row align-items-center input-group mb-3">
                                     <div class="input-group-prepend">
@@ -182,7 +192,7 @@
                 <tr>
                     <th scope="row"><%= ++count%></th>
                     <td class="dvName"><%= child.key %></td>
-                    <td><i class="fas fa-check"></i> Online</td>
+                    <td><img src="images/icons8-wi-fi_connected.svg" width="30" height="30" alt=""></td>
                     <td><%= child.val()['loc'] %></td>
                     <td>
                         <div class="custom-control custom-switch">
