@@ -45,7 +45,6 @@ server.listen(8080);
 io.on("connection", socket => {
   //TODO: fix re-emit when reload web
   socket.on("nodemcu", data => {
-    console.log(data);
 
     // add some stuff
     data["account"] = "";
@@ -53,11 +52,14 @@ io.on("connection", socket => {
     data["socketType"] = "NodeMCU";
 
     socket.join(data.UID); // put node socket into room
+    // console.log("[INFO] " + data.UID + " joined");
+
+    // console.log("[INFO] " + data.UID + " joined");
   });
 
   socket.on("socketType", data => {
     if (data.platform == "browser") {
-      socket.to(data.uid).emit('led', `${data.state}`)
+      socket.to(data.uid).emit(data.physicalName, `${data.state}`)
     }
   });
 });

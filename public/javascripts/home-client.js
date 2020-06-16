@@ -43,6 +43,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
       socket.emit("socketType",
         {
           uid: myCurrentUID,
+          physicalName: element.innerHTML,
           platform: "browser",
           state: 'on'
         }
@@ -54,6 +55,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
       socket.emit("socketType",
         {
           uid: myCurrentUID,
+          physicalName: element.innerHTML,
           platform: "browser",
           state: 'off'
         }
