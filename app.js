@@ -62,6 +62,22 @@ io.on("connection", socket => {
       socket.to(data.uid).emit(data.physicalName, `${data.state}`)
     }
   });
+
+  let arrTimeConfig = new Object()
+  socket.on('timeConfig', data => {
+    let index = 0
+    Object.values(data.timeObj).forEach((element) => {
+      // arrTimeConfig.push(element.substring(0, 2))
+      // arrTimeConfig.push(element.substring(3))
+      arrTimeConfig[index] = element.substring(0, 2);
+      index += 1
+      arrTimeConfig[index] = element.substring(3);
+      index += 1
+    });
+    console.log(arrTimeConfig);
+
+    socket.to(data.uid).emit(data.physicalName, arrTimeConfig)
+  })
 });
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

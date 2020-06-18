@@ -75,7 +75,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.value) {
-        deviceName = $(`#btnRemoveDevices${i + 1}`).siblings().eq(1)
+        deviceName = $(`#btnRemoveDevices${i + 1}`).siblings().eq(2)
         $.ajax({
           url: "/home/removeDevices",
           method: "POST",
@@ -89,6 +89,51 @@ for (let i = 0; i < objDeviceName.length; i++) {
           }
         })
       }
+    })
+  })
+
+  $(`#btnConfigure${i + 1}`).click(() => {
+    deviceName = $(`#btnRemoveDevices${i + 1}`).siblings().eq(2)
+
+    $(`#btnTimeConfirm${i + 1}`).click(() => {
+      // console.log('click');
+
+      let objTimeConfig = {
+        deviceName: deviceName[0].innerHTML,
+        startTime: $(`#startTime${i + 1}`).val(),
+        midTime: $(`#midTime${i + 1}`).val(),
+        endTime: $(`#endTime${i + 1}`).val()
+      }
+
+      $.ajax({
+        type: "POST",
+        url: "/home/configTime",
+        data: objTimeConfig,
+        success: () => {
+          socket.emit("timeConfig",
+            {
+              uid: myCurrentUID,
+              physicalName: element.innerHTML,
+              platform: "browser",
+              timeObj: {
+                startTime: $(`#startTime${i + 1}`).val(),
+                midTime: $(`#midTime${i + 1}`).val(),
+                endTime: $(`#endTime${i + 1}`).val()
+              }
+            })
+        }
+      })
+
+      Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      }).fire({
+        icon: 'success',
+        title: 'Updated time successfully'
+      })
     })
   })
 }
@@ -121,6 +166,10 @@ $("#inputGroupSelectSSID").change(() => {
     $("#inputGroupSelectSSID").attr("name", "ssid");
   }
 });
+
+// $('#startTime').change((data) => {
+//   console.log(data.target.value)
+// })
 
 // $('#formDevice').submit((event) => {
 //     event.preventDefault()

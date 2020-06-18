@@ -78,6 +78,19 @@ router.get('/', (req, res) => {
         });
 });
 
+router.post('/configTime', (req, res) => {
+    let cookie = req.cookies.session || ""
+    admin.auth().verifySessionCookie(cookie, true)
+        .then((decodedClaims) => {
+            admin.database().ref(`${decodedClaims.uid}/DeviceNodes/${req.body.deviceName}`).update({
+                startTime: `${req.body.startTime}`,
+                midTime: `${req.body.midTime}`,
+                endTime: `${req.body.endTime}`
+            })
+            res.end();
+        })
+})
+
 router.post('/removeDevices', (req, res) => {
     let cookie = req.cookies.session || ""
     admin.auth().verifySessionCookie(cookie, true)
