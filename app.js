@@ -36,30 +36,45 @@ admin.initializeApp({
 // ref.on("value", function(snapshot) {
 //   console.log(snapshot.val());
 // });
+// admin.database().ref("bApb0Ypwg5YszGanWOBKre39zlg1/DeviceNodes").on('value', (snap) => {
+//   console.log(snap.val());
+// })
 
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
-// const nspBrowser = io.of('/nspBrowser')
-server.listen(8080);
+server.listen(8880);
 
 io.on("connection", socket => {
-  //TODO: fix re-emit when reload web
-  socket.on("nodemcu", data => {
+  // from browser: onLoad() to put browser in to owm room
+  socket.on('regBrowser', () => {
+    socket.join('browser')
+    console.log('[INFO] reg browser successfull');
+  })
 
+  // from esp8266: register new node to server
+  socket.on("regEsp", data => {
     // add some stuff
     data["account"] = "";
     data["connected"] = false;
     data["socketType"] = "NodeMCU";
 
     socket.join(data.UID); // put node socket into room
-    // console.log("[INFO] " + data.UID + " joined");
-
-    // console.log("[INFO] " + data.UID + " joined");
   });
+
+  // from esp8266: sync virtual button state with physical button state
+  socket.on('controller', data => {
+    admin.database().ref(`${data.uid}/DeviceNodes/${data.physicalName}`).update({
+      state: `${data.state}`
+    })
+    socket.to('browser').emit(`${data.physicalName}`, data.state) // sync custom switch state
+  })
 
   socket.on("socketType", data => {
     if (data.platform == "browser") {
       socket.to(data.uid).emit(data.physicalName, `${data.state}`)
+      admin.database().ref(`${data.uid}/DeviceNodes/${data.physicalName}`).update({
+        state: `${data.state}`
+      })
     }
   });
 
@@ -77,6 +92,11 @@ io.on("connection", socket => {
     console.log(arrTimeConfig);
 
     socket.to(data.uid).emit(data.physicalName, arrTimeConfig)
+  })
+
+  socket.on('espcam', img => {
+    console.log(img);
+    io.emit('espcam', img.data);
   })
 });
 // catch 404 and forward to error handler

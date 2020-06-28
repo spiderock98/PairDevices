@@ -24,7 +24,24 @@ function getCurrentUID() {
 let myCurrentUID;
 getCurrentUID().then(uid => { myCurrentUID = uid }) // Global Var
 
-socket.on("message", data => console.log(data));
+let urlObj;
+const imgFrame = document.getElementById('cap')
+
+$(document).ready(() => {
+  socket.emit('regBrowser');
+});
+
+socket.on("espcam", data => {
+  console.log(data);
+
+  if (urlObj) {
+    URL.revokeObjectURL(urlObj)
+  }
+  urlObj = URL.createObjectURL(new Blob([data]))
+  console.log(urlObj);
+
+  imgFrame.src = urlObj
+});
 
 // window.onbeforeunload = function () {
 //   return "Do you really want to close?";
@@ -36,7 +53,19 @@ let arrState = new Array;
 for (let i = 0; i < objDeviceName.length; i++) {
   const element = objDeviceName[i];
 
-  arrState[i] = 'off';
+  socket.on(`${element.innerHTML}`, btnState => {
+    if (btnState == 'on') {
+      $(`#customSwitch${i + 1}`).prop("checked", true);
+      arrState[i] = 'on'
+    }
+
+    else if (btnState == 'off') {
+      $(`#customSwitch${i + 1}`).prop("checked", false);
+      arrState[i] = 'off'
+    }
+
+  })
+
   $(`#customSwitch${i + 1}`).change(() => {
     if (arrState[i] == 'off') {
       arrState[i] = 'on';
@@ -48,7 +77,6 @@ for (let i = 0; i < objDeviceName.length; i++) {
           state: 'on'
         }
       );
-      // console.log(`ON ${element.innerHTML}`);
     }
     else {
       arrState[i] = 'off';
