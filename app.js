@@ -28,7 +28,7 @@ app.use("/auth", require("./routes/auth-server"));
 
 const admin = require("firebase-admin");
 admin.initializeApp({
-  credential: admin.credential.cert(require("./private-sdk-key.json")),
+  credential: admin.credential.cert(require("./pairdevices-e7bf9-firebase-adminsdk-tvzye-107bb73eb8.json")),
   databaseURL: "https://pairdevices-e7bf9.firebaseio.com"
 });
 // var db = admin.database();

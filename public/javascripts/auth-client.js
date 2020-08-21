@@ -1,5 +1,5 @@
 const socket = io();
-let _UID;
+// let _UID;
 
 // Initialize Firebase
 firebase.initializeApp({
