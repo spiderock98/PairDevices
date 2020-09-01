@@ -28,8 +28,10 @@ app.use("/auth", require("./routes/auth-server"));
 
 const admin = require("firebase-admin");
 admin.initializeApp({
-  credential: admin.credential.cert(require("./pairdevices-e7bf9-firebase-adminsdk-tvzye-107bb73eb8.json")),
-  databaseURL: "https://pairdevices-e7bf9.firebaseio.com"
+  credential: admin.credential.cert(
+    require("./pairdevices-e7bf9-firebase-adminsdk-tvzye-107bb73eb8.json")
+  ),
+  databaseURL: "https://pairdevices-e7bf9.firebaseio.com",
 });
 // var db = admin.database();
 // var ref = db.ref("demo");
@@ -44,15 +46,15 @@ const server = require("http").Server(app);
 const io = require("socket.io")(server);
 server.listen(8880);
 
-io.on("connection", socket => {
+io.on("connection", (socket) => {
   // from browser: onLoad() to put browser in to owm room
-  socket.on('regBrowser', () => {
-    socket.join('browser')
-    console.log('[INFO] reg browser successfull');
-  })
+  socket.on("regBrowser", () => {
+    socket.join("browser");
+    console.log("[INFO] reg browser successfull");
+  });
 
   // from esp8266: register new node to server
-  socket.on("regEsp", data => {
+  socket.on("regEsp", (data) => {
     // add some stuff
     data["account"] = "";
     data["connected"] = false;
@@ -62,42 +64,48 @@ io.on("connection", socket => {
   });
 
   // from esp8266: sync virtual button state with physical button state
-  socket.on('controller', data => {
-    admin.database().ref(`${data.uid}/DeviceNodes/${data.physicalName}`).update({
-      state: `${data.state}`
-    })
-    socket.to('browser').emit(`${data.physicalName}`, data.state) // sync custom switch state
-  })
+  socket.on("controller", (data) => {
+    admin
+      .database()
+      .ref(`${data.uid}/DeviceNodes/${data.physicalName}`)
+      .update({
+        state: `${data.state}`,
+      });
+    socket.to("browser").emit(`${data.physicalName}`, data.state); // sync custom switch state
+  });
 
-  socket.on("socketType", data => {
+  socket.on("socketType", (data) => {
     if (data.platform == "browser") {
-      socket.to(data.uid).emit(data.physicalName, `${data.state}`)
-      admin.database().ref(`${data.uid}/DeviceNodes/${data.physicalName}`).update({
-        state: `${data.state}`
-      })
+      socket.to(data.uid).emit(data.physicalName, `${data.state}`);
+      admin
+        .database()
+        .ref(`${data.uid}/DeviceNodes/${data.physicalName}`)
+        .update({
+          state: `${data.state}`,
+        });
     }
   });
 
-  let arrTimeConfig = new Object()
-  socket.on('timeConfig', data => {
-    let index = 0
+  let arrTimeConfig = new Object();
+  socket.on("timeConfig", (data) => {
+    let index = 0;
     Object.values(data.timeObj).forEach((element) => {
       // arrTimeConfig.push(element.substring(0, 2))
       // arrTimeConfig.push(element.substring(3))
       arrTimeConfig[index] = element.substring(0, 2);
-      index += 1
+      index += 1;
       arrTimeConfig[index] = element.substring(3);
-      index += 1
+      index += 1;
     });
     console.log(arrTimeConfig);
 
-    socket.to(data.uid).emit(data.physicalName, arrTimeConfig)
-  })
+    socket.to(data.uid).emit(data.physicalName, arrTimeConfig);
+  });
 
-  socket.on('espcam', img => {
+  socket.on("espcam", (img) => {
     console.log(img);
-    io.emit('espcam', img.data);
-  })
+    // io.emit("espcam", img.data);
+  });
 });
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
