@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
+const WebSocket = require("ws");
 
 var app = express();
 
@@ -42,6 +43,23 @@ admin.initializeApp({
 //   console.log(snap.val());
 // })
 
+//================Vanilla WebSocket================//
+const wsServer = new WebSocket.Server({ port: 81 });
+let arrSocket = new Array();
+wsServer.on("connection", (ws) => {
+  arrSocket.push(ws);
+  ws.on("message", (payload) => {
+    arrSocket.forEach((ws, i) => {
+      if (ws.readyState === ws.OPEN) {
+        ws.send(payload);
+      } else {
+        arrSocket.splice(i, 1);
+      }
+    });
+  });
+});
+
+//================SocketIO================//
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
 server.listen(8880);
@@ -50,7 +68,7 @@ io.on("connection", (socket) => {
   // from browser: onLoad() to put browser in to owm room
   socket.on("regBrowser", () => {
     socket.join("browser");
-    console.log("[INFO] reg browser successfull");
+    console.log("[INFO] reg browser successful");
   });
 
   // from esp8266: register new node to server

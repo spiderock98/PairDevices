@@ -5,123 +5,134 @@ firebase.initializeApp({
   projectId: "pairdevices-e7bf9",
   storageBucket: "pairdevices-e7bf9.appspot.com",
   messagingSenderId: "979300938513",
-  appId: "1:979300938513:web:45ee0e73b4bbfc953192b0"
+  appId: "1:979300938513:web:45ee0e73b4bbfc953192b0",
 });
 
 const socket = io();
+//================VanillaWebsocket================//
+const WS_URL = "ws:///192.168.1.3:81";
+const ws = new WebSocket(WS_URL);
 
 function getCurrentUID() {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     $.ajax({
       url: "/auth/getCurrentUID",
       method: "POST",
       success: (uid) => {
-        resolve(uid)
-      }
-    })
-  })
+        resolve(uid);
+      },
+    });
+  });
 }
 let myCurrentUID;
-getCurrentUID().then(uid => { myCurrentUID = uid }) // Global Var
+getCurrentUID().then((uid) => {
+  myCurrentUID = uid;
+}); // Global Var
 
 let urlObj;
-const imgFrame = document.getElementById('cap')
+let imgFrame = document.getElementById("cap");
+ws.onopen = () => console.log("Connected to", WS_URL);
+ws.onmessage = (payload) => {
+  const arrBuffer = payload.data;
+  if (urlObj) {
+    URL.revokeObjectURL(urlObj);
+  }
+  urlObj = URL.createObjectURL(new Blob([arrBuffer]));
+  imgFrame.src = urlObj;
+  console.log(urlObj);
+};
 
 $(document).ready(() => {
-  socket.emit('regBrowser');
+  socket.emit("regBrowser");
 });
 
-socket.on("espcam", data => {
-  console.log(data);
+// socket.on("espcam", (data) => {
+//   console.log(data);
 
-  if (urlObj) {
-    URL.revokeObjectURL(urlObj)
-  }
-  urlObj = URL.createObjectURL(new Blob([data]))
-  console.log(urlObj);
+//   if (urlObj) {
+//     URL.revokeObjectURL(urlObj);
+//   }
+//   urlObj = URL.createObjectURL(new Blob([data]));
+//   console.log(urlObj);
 
-  imgFrame.src = urlObj
-});
+//   imgFrame.src = urlObj;
+// });
 
 // window.onbeforeunload = function () {
 //   return "Do you really want to close?";
 // };
 
-objDeviceName = $('td.dvName'); // list all items
+objDeviceName = $("td.dvName"); // list all items
 // TODO: get database state
-let arrState = new Array;
+let arrState = new Array();
 for (let i = 0; i < objDeviceName.length; i++) {
   const element = objDeviceName[i];
 
-  socket.on(`${element.innerHTML}`, btnState => {
-    if (btnState == 'on') {
+  socket.on(`${element.innerHTML}`, (btnState) => {
+    if (btnState == "on") {
       $(`#customSwitch${i + 1}`).prop("checked", true);
-      arrState[i] = 'on'
-    }
-
-    else if (btnState == 'off') {
+      arrState[i] = "on";
+    } else if (btnState == "off") {
       $(`#customSwitch${i + 1}`).prop("checked", false);
-      arrState[i] = 'off'
+      arrState[i] = "off";
     }
-
-  })
+  });
 
   $(`#customSwitch${i + 1}`).change(() => {
-    if (arrState[i] == 'off') {
-      arrState[i] = 'on';
-      socket.emit("socketType",
-        {
-          uid: myCurrentUID,
-          physicalName: element.innerHTML,
-          platform: "browser",
-          state: 'on'
-        }
-      );
-    }
-    else {
-      arrState[i] = 'off';
-      socket.emit("socketType",
-        {
-          uid: myCurrentUID,
-          physicalName: element.innerHTML,
-          platform: "browser",
-          state: 'off'
-        }
-      );
+    if (arrState[i] == "off") {
+      arrState[i] = "on";
+      socket.emit("socketType", {
+        uid: myCurrentUID,
+        physicalName: element.innerHTML,
+        platform: "browser",
+        state: "on",
+      });
+    } else {
+      arrState[i] = "off";
+      socket.emit("socketType", {
+        uid: myCurrentUID,
+        physicalName: element.innerHTML,
+        platform: "browser",
+        state: "off",
+      });
       // console.log(`OFF ${element.innerHTML}`);
     }
   });
 
   $(`#btnRemoveDevices${i + 1}`).click(() => {
     Swal.fire({
-      title: 'Are you sure?',
+      title: "Are you sure?",
       text: "You won't be able to revert this!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.value) {
-        deviceName = $(`#btnRemoveDevices${i + 1}`).siblings().eq(2)
+        deviceName = $(`#btnRemoveDevices${i + 1}`)
+          .siblings()
+          .eq(2);
         $.ajax({
           url: "/home/removeDevices",
           method: "POST",
           data: { name: deviceName[0].innerHTML },
           success: () => {
             Swal.fire(
-              'Deleted!',
+              "Deleted!",
               `Your ${deviceName[0].innerHTML} has been deleted.`,
-              'success'
-            ).then(() => location.href = '/')
-          }
-        })
+              "success"
+            ).then(() => (location.href = "/"));
+          },
+        });
       }
-    })
-  })
+    });
+  });
 
   $(`#btnConfigure${i + 1}`).click(() => {
-    deviceName = $(`#btnRemoveDevices${i + 1}`).siblings().eq(2)
+    deviceName = $(`#btnRemoveDevices${i + 1}`)
+      .siblings()
+      .eq(2);
 
     $(`#btnTimeConfirm${i + 1}`).click(() => {
       // console.log('click');
@@ -130,40 +141,39 @@ for (let i = 0; i < objDeviceName.length; i++) {
         deviceName: deviceName[0].innerHTML,
         startTime: $(`#startTime${i + 1}`).val(),
         midTime: $(`#midTime${i + 1}`).val(),
-        endTime: $(`#endTime${i + 1}`).val()
-      }
+        endTime: $(`#endTime${i + 1}`).val(),
+      };
 
       $.ajax({
         type: "POST",
         url: "/home/configTime",
         data: objTimeConfig,
         success: () => {
-          socket.emit("timeConfig",
-            {
-              uid: myCurrentUID,
-              physicalName: element.innerHTML,
-              platform: "browser",
-              timeObj: {
-                startTime: $(`#startTime${i + 1}`).val(),
-                midTime: $(`#midTime${i + 1}`).val(),
-                endTime: $(`#endTime${i + 1}`).val()
-              }
-            })
-        }
-      })
+          socket.emit("timeConfig", {
+            uid: myCurrentUID,
+            physicalName: element.innerHTML,
+            platform: "browser",
+            timeObj: {
+              startTime: $(`#startTime${i + 1}`).val(),
+              midTime: $(`#midTime${i + 1}`).val(),
+              endTime: $(`#endTime${i + 1}`).val(),
+            },
+          });
+        },
+      });
 
       Swal.mixin({
         toast: true,
-        position: 'top-end',
+        position: "top-end",
         showConfirmButton: false,
         timer: 3000,
         timerProgressBar: true,
       }).fire({
-        icon: 'success',
-        title: 'Updated time successfully'
-      })
-    })
-  })
+        icon: "success",
+        title: "Updated time successfully",
+      });
+    });
+  });
 }
 
 $("#btnOut").click(() => {
