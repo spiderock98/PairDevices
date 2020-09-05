@@ -3,7 +3,6 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
-const WebSocket = require("ws");
 
 var app = express();
 
@@ -43,22 +42,6 @@ admin.initializeApp({
 //   console.log(snap.val());
 // })
 
-//================Vanilla WebSocket================//
-const wsServer = new WebSocket.Server({ port: 81 });
-let arrSocket = new Array();
-wsServer.on("connection", (ws) => {
-  arrSocket.push(ws);
-  ws.on("message", (payload) => {
-    arrSocket.forEach((ws, i) => {
-      if (ws.readyState === ws.OPEN) {
-        ws.send(payload);
-      } else {
-        arrSocket.splice(i, 1);
-      }
-    });
-  });
-});
-
 //================SocketIO================//
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
@@ -71,6 +54,8 @@ io.on("connection", (socket) => {
     console.log("[INFO] reg browser successful");
   });
 
+  socket.on("event_name", (data) => console.log(data));
+
   // from esp8266: register new node to server
   socket.on("regEsp", (data) => {
     // add some stuff
@@ -79,6 +64,7 @@ io.on("connection", (socket) => {
     data["socketType"] = "NodeMCU";
 
     socket.join(data.UID); // put node socket into room
+    console.log("[INFO] reg ESP8266 successfully");
   });
 
   // from esp8266: sync virtual button state with physical button state

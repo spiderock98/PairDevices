@@ -39,7 +39,6 @@ ws.onmessage = (payload) => {
   }
   urlObj = URL.createObjectURL(new Blob([arrBuffer]));
   imgFrame.src = urlObj;
-  console.log(urlObj);
 };
 
 $(document).ready(() => {
