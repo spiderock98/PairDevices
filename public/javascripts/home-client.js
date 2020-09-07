@@ -31,7 +31,7 @@ getCurrentUID().then((uid) => {
 
 let urlObj;
 let imgFrame = document.getElementById("cap");
-ws.onopen = () => console.log("Connected to", WS_URL);
+ws.onopen = () => console.log("[INFO] Connected to", WS_URL);
 ws.onmessage = (payload) => {
   const arrBuffer = payload.data;
   if (urlObj) {
@@ -44,22 +44,6 @@ ws.onmessage = (payload) => {
 $(document).ready(() => {
   socket.emit("regBrowser");
 });
-
-// socket.on("espcam", (data) => {
-//   console.log(data);
-
-//   if (urlObj) {
-//     URL.revokeObjectURL(urlObj);
-//   }
-//   urlObj = URL.createObjectURL(new Blob([data]));
-//   console.log(urlObj);
-
-//   imgFrame.src = urlObj;
-// });
-
-// window.onbeforeunload = function () {
-//   return "Do you really want to close?";
-// };
 
 objDeviceName = $("td.dvName"); // list all items
 // TODO: get database state

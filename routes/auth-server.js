@@ -25,7 +25,7 @@ router.post('/', (req, res) => {
       res.cookie('session', sessionCookie, options);
       res.end(JSON.stringify({ status: 'success' }));
     }, error => {
-      console.log(error);
+      console.error(error);
       res.status(401).send('UNAUTHORIZED REQUEST!');
     })
 })
@@ -41,6 +41,24 @@ router.post('/getCurrentUID', (req, res) => {
       res.end(decodedClaims.uid)
     })
     .catch(err => console.log(err))
+})
+
+router.post('/register', (req, res) => {
+  admin.auth().createUser({
+    email: req.body.email,
+    password: req.body.password,
+    displayName: req.body.displayName,
+    emailVerified: false,
+    disabled: false
+  })
+    .then(function (userRecord) {
+      console.log('Successfully created new user:', userRecord.uid);
+      res.send(userRecord.uid);
+    })
+    .catch(function (err) {
+      console.error(err);
+      res.send(err);
+    });
 })
 
 module.exports = router;

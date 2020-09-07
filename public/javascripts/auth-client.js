@@ -1,4 +1,6 @@
-const socket = io();
+// const { default: Swal } = require("sweetalert2");
+
+// const socket = io();
 // let _UID;
 
 // Initialize Firebase
@@ -12,8 +14,8 @@ firebase.initializeApp({
   appId: "1:979300938513:web:45ee0e73b4bbfc953192b0",
 });
 
+//!================//automatically send ajax when onAuthStateChanged(user)//================!//
 firebase.auth().signOut(); //!!!! IMPORTANT
-
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     Swal.showLoading();
@@ -28,11 +30,18 @@ firebase.auth().onAuthStateChanged((user) => {
             Swal.fire({
               icon: "success",
               title: "Access Granted",
+              allowOutsideClick: false
             }).then(() => (location.href = "/home"));
           },
         });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.error(err);
+        Swal.fire({
+          title: err,
+          icon: "error"
+        })
+      });
   }
 });
 
@@ -43,7 +52,7 @@ $("#authGoogle").click(() => {
     .then((result) => {
       console.log(result);
     })
-    .catch((error) => console.log(error));
+    .catch((err) => console.error(err));
 });
 $("#authFacebook").click(() => {
   firebase
@@ -52,17 +61,18 @@ $("#authFacebook").click(() => {
     .then((result) => {
       console.log(result);
     })
-    .catch((error) => console.log(error));
+    .catch((err) => console.error(err));
 });
+
 firebase
   .auth()
   .getRedirectResult()
   .then((result) => {
-    let uid = result.user.uid; // TODO: risk here
-
-    let idToken = result.credential.idToken;
-    let displayName = result.user.displayName;
-
+    try {
+      uid = result.user.uid; // TODO: risk here
+      // let idToken = result.credential.idToken;
+      // let displayName = result.user.displayName;
+    } catch (err) { console.error(err); return; }
     $.ajax({
       url: "/auth/thirdParty",
       method: "POST",
@@ -71,11 +81,17 @@ firebase
         firebase
           .auth()
           .signInWithCustomToken(customToken)
-          .catch((error) => console.log(error));
+          .catch((error) => console.error(error));
       },
     });
   })
-  .catch((err) => console.log(err));
+  .catch((err) => {
+    console.error(err);
+    Swal.fire({
+      title: err,
+      icon: "error",
+    })
+  });
 
 $("#loginForm").submit((event) => {
   event.preventDefault();
@@ -87,7 +103,7 @@ $("#loginForm").submit((event) => {
   // As httpOnly cookies are to be used, do not persist any state client side.
   // firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
 
-  // sign in
+  //!=============//signInWithEmailAndPassword(id, psk) on client-side//==============!//
   firebase
     .auth()
     .signInWithEmailAndPassword(id, psk)
@@ -95,11 +111,82 @@ $("#loginForm").submit((event) => {
       Swal.fire({
         title: error,
         icon: "error",
-      });
+        allowOutsideClick: false
+      }).then(result => {
+        if (result.value) {
+          Swal.fire({
+            icon: 'question',
+            confirmButtonText: 'Đăng ký tài khoản mới'
+          }).then((result) => {
+            if (result.value) {
+              Swal.mixin({
+                input: 'text',
+                confirmButtonText: 'Next &rarr;',
+                showCancelButton: true,
+                progressSteps: ['1', '2', '3']
+              }).queue([
+                {
+                  title: 'Email',
+                  input: 'email',
+                  inputPlaceholder: 'Enter your email address'
+                },
+                {
+                  title: 'Mật Khẩu',
+                  input: 'password',
+                  inputPlaceholder: 'Enter your password'
+                },
+                {
+                  title: 'Họ và Tên',
+                  input: 'text',
+                  inputValidator: txtDisplayName => {
+                    if (!txtDisplayName) {
+                      return 'You need to write something!'
+                    }
+                  }
+                }
+              ]).then((result) => {
+                if (result.value) {
+                  Swal.showLoading();
+                  $.ajax({
+                    method: "POST",
+                    url: "/auth/register",
+                    data: {
+                      email: result.value[0],
+                      password: result.value[1],
+                      displayName: result.value[2]
+                    },
+                    success: (data) => {
+                      switch (data.code) {
+                        case "auth/email-already-exists":
+                          Swal.fire({
+                            title: "The provided email is already in use by an existing user. Each user must have a unique email",
+                            text: "choose an other email address",
+                            icon: "error",
+                            showConfirmButton: false,
+                            timer: 4000
+                          })
+                          break;
 
-      // firebase.auth().createUserWithEmailAndPassword(id, psk)
-      //     .then(() => {
-      //         window.alert('Successfully Sign Up')
-      //     }).catch(err => console.log(err))
+                        case "auth/invalid-password":
+                          Swal.fire({
+                            title: "The provided value for the password user property is invalid. It must be a string with at least 6 characters",
+                            icon: "error",
+                            showConfirmButton: false,
+                            timer: 4000
+                          })
+                          break;
+
+                        default:
+                          location.href = "/home"
+                          break;
+                      }
+                    }
+                  })
+                }
+              })
+            }
+          })
+        }
+      })
     });
 });
