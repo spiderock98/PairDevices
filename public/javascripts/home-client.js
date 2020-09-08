@@ -7,9 +7,9 @@ firebase.initializeApp({
   messagingSenderId: "979300938513",
   appId: "1:979300938513:web:45ee0e73b4bbfc953192b0",
 });
-
 const socket = io();
-//================VanillaWebsocket================//
+
+//!================//VanillaWebsocket//================!//
 const WS_URL = "ws:///192.168.1.3:81";
 const ws = new WebSocket(WS_URL);
 

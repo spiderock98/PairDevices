@@ -17,6 +17,6 @@
     "morgan": "~1.10.0",
     "nodemon": "^2.0.4",
     "socket.io": "^2.3.0",
-    "sweetalert2": "^9.17.2"
+    "sweetalert2": "^10.0.1"
   }
 }

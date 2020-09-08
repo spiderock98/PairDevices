@@ -72,7 +72,7 @@ firebase
       uid = result.user.uid; // TODO: risk here
       // let idToken = result.credential.idToken;
       // let displayName = result.user.displayName;
-    } catch (err) { console.error(err); return; }
+    } catch (err) { console.error("[INFO] return;", err); return; }
     $.ajax({
       url: "/auth/thirdParty",
       method: "POST",

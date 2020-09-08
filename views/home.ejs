@@ -12,24 +12,30 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
-    <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
         crossorigin="anonymous"></script>
+
+    <script defer src='https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.2/velocity.min.js'></script>
+    <script defer src='https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.2/velocity.ui.min.js'></script>
+
+    <script defer src="javascripts/openModal.js"></script>
     <script defer src="javascripts/home-client.js"></script>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
     <link rel="stylesheet" href="stylesheets/home.css">
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
 
     <title>Document</title>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
         <a class="navbar-brand" href="/">
-            <img src="images/bootstrap-solid.svg" width="30" height="30" class="d-inline-block align-top" alt="">
-            ootstrap
+            <img src="images/favicon.ico" width="65" height="65">
+            <i class="glow">Khu Vườn Trên Mây</i>
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +45,12 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item active">
+                    <a class="nav-link" href="#lstDevices">
+                        <img src="images/icons8-disconnected.svg" width="30" height="30" alt=""> Dashboard
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="#lstDevices">
                         <img src="images/icons8-disconnected.svg" width="30" height="30" alt=""> Devices
                         <span class="sr-only">(current)</span>
@@ -50,24 +62,24 @@
                     </a>
                 </li>
             </ul>
-            <button id="btnOut" type="button" class="btn btn-outline-danger"><img src="images/icons8-login.svg"
-                    width="30" height="30" alt=""> Sign Out</button>
+            <button id="btnOut" type="button" class="btn-sm btn-outline-danger"><img src="images/icons8-login.svg"
+                    width="15" height="15" alt=""> Sign Out</button>
         </div>
     </nav>
 
     <div>
         <!-- Button trigger modal -->
         <button id="btnAdd" type="button" class="btn btn-block btn-outline-success" data-toggle="modal"
-            data-target="#exampleModalScrollable">
+            data-target="#modalNewDevices">
             <img src="images/icons8-plus.svg" width="30" height="30" alt=""> Devices
         </button>
         <!-- Modal -->
-        <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog"
-            aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+        <div class="modal" data-easein="flipBounceYIn" id="modalNewDevices" tabindex="-1" role="dialog"
+            aria-labelledby="mdTitleNewDevices" aria-hidden="true">
             <div class="modal-dialog modal-dialog-scrollable modal-xl" role="document">
                 <form action="/home/newDevices" method="POST" id="formDevice" class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalScrollableTitle">New Device Infomation</h5>
+                        <h5 class="modal-title" id="mdTitleNewDevices">New Device Infomation</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -147,7 +159,7 @@
                                 </div>
                                 <div class="progress row">
                                     <div id="progressCompiler"
-                                        class="progress-bar progress-bar-striped progress-bar-animated"
+                                        class="progress-bar progress-bar-striped bg-danger progress-bar-animated"
                                         role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"
                                         style="width: 0%"></div>
                                 </div>
