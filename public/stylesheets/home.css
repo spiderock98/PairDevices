@@ -1,3 +1,10 @@
+@import url('https://fonts.googleapis.com/css?family=Damion|Muli:400,600');
+
+body{
+  font-family: 'Muli', sans-serif;
+  /* background: url("https://www.toptal.com/designers/subtlepatterns/patterns/geometry2.png"); */
+}
+
 /*==================== legend border ====================*/
 fieldset.scheduler-border {
   border: 1px groove #ddd !important;
@@ -32,11 +39,8 @@ html {
 }
 
 /*==================== glowing title ====================*/
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
-}
-
 .glow {
+  font-family: 'Damion';
   color: #fff;
   text-align: center;
   -webkit-animation: glow 1s ease-in-out infinite alternate;
@@ -53,3 +57,29 @@ body {
     text-shadow: 0 0 20px #fff, 0 0 30px #ff4da6, 0 0 40px #ff4da6, 0 0 50px #ff4da6, 0 0 60px #ff4da6, 0 0 70px #ff4da6, 0 0 80px #ff4da6;
   }
 }
+
+/*==================== green line title <h2> effect ====================*/
+h1 {
+    font-family: 'Damion', cursive;
+    font-weight: 400;
+    color: #4caf50;
+    font-size: 35px;
+    text-align: center;
+    position: relative;
+}
+h1:before {
+    position: absolute;
+    content: '';
+    width: 100%;
+    left: 0;
+    top: 22px;
+    background: #4caf50;
+    height: 1px;
+}
+h1 i {
+    font-style: normal;
+    background: #fff;
+    position: relative;
+    padding: 10px; 
+}
+:focus{outline: none;}
