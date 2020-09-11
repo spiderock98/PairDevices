@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./app --ignore ./Arduino"
+    "start": "nodemon ./app"
   },
   "dependencies": {
     "cookie-parser": "~1.4.5",
@@ -17,6 +17,9 @@
     "morgan": "~1.10.0",
     "nodemon": "^2.0.4",
     "socket.io": "^2.3.0",
-    "sweetalert2": "^10.0.1"
+    "sweetalert2": "^10.0.2"
+  },
+  "devDependencies": {
+    "livereload": "^0.9.1"
   }
 }

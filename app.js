@@ -4,7 +4,13 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const app = express();
+const livereload = require('livereload').createServer({
+  exts: ['js', 'ejs', 'css']
+});
+livereload.watch(path.join(__dirname, 'public'));
+livereload.watch(path.join(__dirname, 'views'));
 
+app.set("port", process.env.PORT || 8880)
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 app.use(logger("dev"));
@@ -29,10 +35,14 @@ admin.initializeApp({
   ),
   databaseURL: "https://pairdevices-e7bf9.firebaseio.com",
 });
-//!====================//SocketIO//====================!//
+//!====================//SocketIO middeware//====================!//
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
-server.listen(8880);
+server.listen(app.get("port"), () => {
+  console.log(`Server started at: http://localhost:${app.get('port')}`);
+});
+// Reload code here
+// reload(app)
 
 io.on("connection", (socket) => {
   // from browser: onLoad() to put browser in to owm room
