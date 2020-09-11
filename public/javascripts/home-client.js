@@ -9,6 +9,23 @@ firebase.initializeApp({
 });
 const socket = io();
 
+//!================//MapInit onload//================!//
+var myMap;
+function initMap() {
+  myMap = new google.maps.Map(document.getElementById("myMap"), {
+    center: new google.maps.LatLng(10.769444, 106.681944),
+    zoom: 9,
+    fullscreenControl: false,
+    keyboardShortcuts: false,
+    mapTypeControl: false,
+    panControl: false,
+    rotateControl: false,
+    scaleControl: false,
+    streetViewControl: false,
+    zoomControl: false,
+  });
+}
+
 //!================//VanillaWebsocket//================!//
 const WS_URL = "ws:///192.168.1.3:81";
 const ws = new WebSocket(WS_URL);

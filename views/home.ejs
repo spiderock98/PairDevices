@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
 
     <!-- The core Firebase JS SDK is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/7.19.1/firebase-app.js"></script>
@@ -17,167 +18,404 @@
         crossorigin="anonymous"></script>
     <script defer src='https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.2/velocity.min.js'></script>
     <script defer src='https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.2/velocity.ui.min.js'></script>
-    <script defer src="/reload/reload.js"></script>
+    <script defer
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.js"></script>
 
-    <script defer src="javascripts/openModal.js"></script>
+    <script defer src="javascripts/UI/openModal.js"></script>
     <script defer src="javascripts/home-client.js"></script>
+    <script defer src="javascripts/UI/bs-init.js"></script>
+    <script defer src="javascripts/UI/theme.js"></script>
+
+    <script src="javascripts/UI/mapBypass.js"></script>
+    <script defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7pWv_ReH_hkeTgscLBJFkJ6eXVQCkoJs&callback=initMap"
+        type="text/javascript">
+        </script>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
         integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
     <link rel="stylesheet" href="stylesheets/home.css">
     <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
-
-    <title>Document</title>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
 </head>
 
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
-        <a class="navbar-brand" href="/">
-            <img src="images/favicon.ico" width="65" height="65">
-            <i class="glow">Khu Vườn Trên Mây</i>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+<body id="page-tops">
+    <div id="wrapper">
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="#lstDevices">
-                        <img src="images/icons8-disconnected.svg" width="30" height="30" alt=""> Dashboard
-                        <span class="sr-only">(current)</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#lstDevices">
-                        <img src="images/icons8-disconnected.svg" width="30" height="30" alt=""> Devices
-                        <span class="sr-only">(current)</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#about">
-                        <img src="images/icons8-info.svg" width="30" height="30" alt=""> About
-                    </a>
-                </li>
-            </ul>
-            <button id="btnOut" type="button" class="btn-sm btn-outline-danger"><img src="images/icons8-login.svg"
-                    width="15" height="15" alt=""> Sign Out</button>
-        </div>
-    </nav>
-
-    <div>
-        <!-- Button trigger modal -->
-        <button style="margin: 20px;" id="btnAdd" type="button" class="btn btn-block btn-outline-success"
-            data-toggle="modal" data-target="#modalNewDevices">
-            <img src="images/icons8-plus.svg" width="30" height="30" alt=""> Devices
-        </button>
-        <!-- Modal -->
-        <div class="modal" data-easein="flipYIn" id="modalNewDevices" tabindex="-1" role="dialog"
-            aria-labelledby="mdTitleNewDevices" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-scrollable modal" role="document">
-                <form action="/home/newDevices" method="POST" id="formDevice" class="modal-content">
-                    <div>
-                        <h1 class="modal-title" id="mdTitleNewDevices"><i>New Device Infomation</i></h1>
+                <nav class="fixed-top navbar navbar-light navbar-expand bg-white shadow mb-4 topbar static-top">
+                    <div class="container-fluid">
+                        <!-- <a class="navbar-brand" href="#">Brand</a> -->
+                        <a href="">
+                            <img width="250" height="45" src="images/banner.png" alt="banner">
+                        </a>
+                        <ul class="nav navbar-nav text-light" id="accordionSidebar">
+                            <li class="nav-item"><a class="nav-link" href="#sectionDashboard"><i
+                                        class="fas fa-tachometer-alt"></i><span>&nbsp;Dashboard</span></a></li>
+                            <li class="nav-item"><a class="nav-link" href="#"><i
+                                        class="fas fa-user"></i><span>&nbsp;Profile</span></a></li>
+                            <li class="nav-item"><a class="nav-link" href="#sectionDevices"><i
+                                        class="fas fa-table"></i><span>&nbsp;Devices</span></a></li>
+                            <li class="nav-item">
+                                <button id="btnOut" class="nav-link" style="border: none; background-color: #fff;">
+                                    <i class="far fa-user-circle"></i>
+                                    <span>&nbsp;Logout</span>
+                                </button>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="modal-body">
-                        <div class="container-fluid">
-                            <fieldset class="scheduler-border">
-                                <legend class="scheduler-border">Details</legend>
-                                <div class="row align-items-center input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Device Name</span>
-                                    </div>
-                                    <input required class="form-control" id="name" type="text" name="name"
-                                        aria-label="Username" aria-describedby="addon-wrapping">
-                                </div>
-                                <div class="row align-items-center input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Location</span>
-                                    </div>
-                                    <input class="form-control" id="loc" type="text" name="loc">
-                                </div>
-                            </fieldset>
+                </nav>
 
-                            <fieldset class="scheduler-border">
-                                <legend class="scheduler-border">Firmware Configuration</legend>
-                                <div class="row align-items-center input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">SSID</span>
-                                    </div>
-                                    <select required class="custom-select" id="inputGroupSelectSSID">
-                                        <option selected>Choose...</option>
-                                        <option>Other</option>
-                                    </select>
-                                    <!-- OR -->
-                                    <input type="text" class="form-control d-none" id="showhideInputTextSSID"
-                                        placeholder="Manual SSID">
-                                </div>
-                                <div id="show_hide_password" class="row align-items-center input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Password</span>
-                                    </div>
-                                    <input class="form-control" id="psk" type="password" name="psk">
-                                    <div class="input-group-addon">
-                                        <a><i class="fa fa-eye-slash" aria-hidden="true"></i></a>
-                                    </div>
-                                </div>
-                                <div class="row align-items-center input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Port</span>
-                                    </div>
-                                    <select name="port" class="custom-select" id="inputGroupSelectPORT">
-                                    </select>
-                                </div>
-                                <div class="row align-items-center input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Board</span>
-                                    </div>
-                                    <select name="board" class="custom-select" id="inputGroupSelecBOARD">
-                                        <option>WeMos D1 R1</option>
-                                        <option>NodeMCU v1.0</option>
-                                    </select>
-                                </div>
 
-                                <div class="row align-items-center input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Baudrate</span>
+                <div id="sectionDashboard" style="margin-top: 100px;" class="container-fluid">
+                    <div class="d-sm-flex justify-content-between align-items-center mb-4">
+                        <h3 class="text-dark mb-0 glow">KHU VƯỜN TRÊN MÂY</h3><a
+                            class="btn btn-primary btn-sm d-none d-sm-inline-block" role="button" href="#"><i
+                                class="fas fa-download fa-sm text-white-50"></i>&nbsp;Generate Report</a>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-xl-3 mb-4">
+                            <div class="card shadow border-left-primary py-2">
+                                <div class="card-body">
+                                    <div class="row align-items-center no-gutters">
+                                        <div class="col mr-2">
+                                            <div class="text-uppercase text-primary font-weight-bold text-xs mb-1">
+                                                <span>Earnings (monthly)</span></div>
+                                            <div class="text-dark font-weight-bold h5 mb-0"><span>$40,000</span></div>
+                                        </div>
+                                        <div class="col-auto"><i class="fas fa-calendar fa-2x text-gray-300"></i></div>
                                     </div>
-                                    <select name="baud" class="custom-select" id="inputGroupSelectBAUD">
-                                        <option>115200</option>
-                                        <option>9600</option>
-                                    </select>
                                 </div>
-                                <div class="row align-items-center input-group mb-3">
-                                    <button type="button" class="btn btn-block btn-outline-primary"
-                                        id="btnReSSID">Refresh</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3 mb-4">
+                            <div class="card shadow border-left-success py-2">
+                                <div class="card-body">
+                                    <div class="row align-items-center no-gutters">
+                                        <div class="col mr-2">
+                                            <div class="text-uppercase text-success font-weight-bold text-xs mb-1">
+                                                <span>Earnings (annual)</span></div>
+                                            <div class="text-dark font-weight-bold h5 mb-0"><span>$215,000</span></div>
+                                        </div>
+                                        <div class="col-auto"><i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="progress row">
-                                    <div id="progressCompiler"
-                                        class="progress-bar progress-bar-striped bg-danger progress-bar-animated"
-                                        role="progressbar" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"
-                                        style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3 mb-4">
+                            <div class="card shadow border-left-info py-2">
+                                <div class="card-body">
+                                    <div class="row align-items-center no-gutters">
+                                        <div class="col mr-2">
+                                            <div class="text-uppercase text-info font-weight-bold text-xs mb-1">
+                                                <span>Tasks</span></div>
+                                            <div class="row no-gutters align-items-center">
+                                                <div class="col-auto">
+                                                    <div class="text-dark font-weight-bold h5 mb-0 mr-3">
+                                                        <span>50%</span></div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="progress progress-sm">
+                                                        <div class="progress-bar bg-info" aria-valuenow="50"
+                                                            aria-valuemin="0" aria-valuemax="100" style="width: 50%;">
+                                                            <span class="sr-only">50%</span></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-auto"><i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="row align-items-center input-group mb-3">
-                                    <p id="compilerLog"></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-3 mb-4">
+                            <div class="card shadow border-left-warning py-2">
+                                <div class="card-body">
+                                    <div class="row align-items-center no-gutters">
+                                        <div class="col mr-2">
+                                            <div class="text-uppercase text-warning font-weight-bold text-xs mb-1">
+                                                <span>Pending Requests</span></div>
+                                            <div class="text-dark font-weight-bold h5 mb-0"><span>18</span></div>
+                                        </div>
+                                        <div class="col-auto"><i class="fas fa-comments fa-2x text-gray-300"></i></div>
+                                    </div>
                                 </div>
-                            </fieldset>
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save and Upload to ESP</button>
+                    <!-- Start: Chart -->
+                    <div class="row">
+                        <div class="col-lg-7 col-xl-8">
+                            <div class="card shadow mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="text-primary font-weight-bold m-0">Earnings Overview</h6>
+                                    <div class="dropdown no-arrow"><button class="btn btn-link btn-sm dropdown-toggle"
+                                            data-toggle="dropdown" aria-expanded="false" type="button"><i
+                                                class="fas fa-ellipsis-v text-gray-400"></i></button>
+                                        <div class="dropdown-menu shadow dropdown-menu-right animated--fade-in">
+                                            <p class="text-center dropdown-header">dropdown header:</p><a
+                                                class="dropdown-item" href="#">&nbsp;Action</a><a class="dropdown-item"
+                                                href="#">&nbsp;Another action</a>
+                                            <div class="dropdown-divider"></div><a class="dropdown-item"
+                                                href="#">&nbsp;Something else here</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="myMap" style="height:400px; "></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-5 col-xl-4">
+                            <div class="card shadow mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="text-primary font-weight-bold m-0">Revenue Sources</h6>
+                                    <div class="dropdown no-arrow"><button class="btn btn-link btn-sm dropdown-toggle"
+                                            data-toggle="dropdown" aria-expanded="false" type="button"><i
+                                                class="fas fa-ellipsis-v text-gray-400"></i></button>
+                                        <div class="dropdown-menu shadow dropdown-menu-right animated--fade-in">
+                                            <p class="text-center dropdown-header">dropdown header:</p><a
+                                                class="dropdown-item" href="#">&nbsp;Action</a><a class="dropdown-item"
+                                                href="#">&nbsp;Another action</a>
+                                            <div class="dropdown-divider"></div><a class="dropdown-item"
+                                                href="#">&nbsp;Something else here</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-area"><canvas
+                                            data-bs-chart="{&quot;type&quot;:&quot;doughnut&quot;,&quot;data&quot;:{&quot;labels&quot;:[&quot;Direct&quot;,&quot;Social&quot;,&quot;Referral&quot;],&quot;datasets&quot;:[{&quot;label&quot;:&quot;&quot;,&quot;backgroundColor&quot;:[&quot;#4e73df&quot;,&quot;#1cc88a&quot;,&quot;#36b9cc&quot;],&quot;borderColor&quot;:[&quot;#ffffff&quot;,&quot;#ffffff&quot;,&quot;#ffffff&quot;],&quot;data&quot;:[&quot;50&quot;,&quot;30&quot;,&quot;15&quot;]}]},&quot;options&quot;:{&quot;maintainAspectRatio&quot;:false,&quot;legend&quot;:{&quot;display&quot;:false},&quot;title&quot;:{}}}"></canvas>
+                                    </div>
+                                    <div class="text-center small mt-4"><span class="mr-2"><i
+                                                class="fas fa-circle text-primary"></i>&nbsp;Direct</span><span
+                                            class="mr-2"><i
+                                                class="fas fa-circle text-success"></i>&nbsp;Social</span><span
+                                            class="mr-2"><i class="fas fa-circle text-info"></i>&nbsp;Refferal</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
+                    <!-- End: Chart -->
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="text-primary font-weight-bold m-0">Projects</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h4 class="small font-weight-bold">Server migration<span
+                                            class="float-right">20%</span></h4>
+                                    <div class="progress mb-4">
+                                        <div class="progress-bar bg-danger" aria-valuenow="20" aria-valuemin="0"
+                                            aria-valuemax="100" style="width: 20%;"><span class="sr-only">20%</span>
+                                        </div>
+                                    </div>
+                                    <h4 class="small font-weight-bold">Sales tracking<span
+                                            class="float-right">40%</span></h4>
+                                    <div class="progress mb-4">
+                                        <div class="progress-bar bg-warning" aria-valuenow="40" aria-valuemin="0"
+                                            aria-valuemax="100" style="width: 40%;"><span class="sr-only">40%</span>
+                                        </div>
+                                    </div>
+                                    <h4 class="small font-weight-bold">Customer Database<span
+                                            class="float-right">60%</span></h4>
+                                    <div class="progress mb-4">
+                                        <div class="progress-bar bg-primary" aria-valuenow="60" aria-valuemin="0"
+                                            aria-valuemax="100" style="width: 60%;"><span class="sr-only">60%</span>
+                                        </div>
+                                    </div>
+                                    <h4 class="small font-weight-bold">Payout Details<span
+                                            class="float-right">80%</span></h4>
+                                    <div class="progress mb-4">
+                                        <div class="progress-bar bg-info" aria-valuenow="80" aria-valuemin="0"
+                                            aria-valuemax="100" style="width: 80%;"><span class="sr-only">80%</span>
+                                        </div>
+                                    </div>
+                                    <h4 class="small font-weight-bold">Account setup<span
+                                            class="float-right">Complete!</span></h4>
+                                    <div class="progress mb-4">
+                                        <div class="progress-bar bg-success" aria-valuenow="100" aria-valuemin="0"
+                                            aria-valuemax="100" style="width: 100%;"><span class="sr-only">100%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="row">
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card text-white bg-primary shadow">
+                                        <div class="card-body">
+                                            <p class="m-0">Primary</p>
+                                            <p class="text-white-50 small m-0">#4e73df</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card text-white bg-success shadow">
+                                        <div class="card-body">
+                                            <p class="m-0">Success</p>
+                                            <p class="text-white-50 small m-0">#1cc88a</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card text-white bg-info shadow">
+                                        <div class="card-body">
+                                            <p class="m-0">Info</p>
+                                            <p class="text-white-50 small m-0">#36b9cc</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card text-white bg-warning shadow">
+                                        <div class="card-body">
+                                            <p class="m-0">Warning</p>
+                                            <p class="text-white-50 small m-0">#f6c23e</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card text-white bg-danger shadow">
+                                        <div class="card-body">
+                                            <p class="m-0">Danger</p>
+                                            <p class="text-white-50 small m-0">#e74a3b</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card text-white bg-secondary shadow">
+                                        <div class="card-body">
+                                            <p class="m-0">Secondary</p>
+                                            <p class="text-white-50 small m-0">#858796</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <!--TODO: Overlay Button still get error - PLEASE COMMMENT to FIX LATER -->
-    <!-- <html>
+                <!-- //!=====================//device section//=====================!// -->
+                <div id="sectionDevices">
+                    <!-- Button trigger modal -->
+                    <button style="margin-bottom: 20px;" id="btnAdd" type="button"
+                        class="btn btn-block btn-outline-success" data-toggle="modal" data-target="#modalNewDevices">
+                        <img src="images/icons8-plus.svg" width="30" height="30" alt=""> Devices
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" data-easein="flipYIn" id="modalNewDevices" tabindex="-1" role="dialog"
+                        aria-labelledby="mdTitleNewDevices" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-scrollable modal" role="document">
+                            <form action="/home/newDevices" method="POST" id="formDevice" class="modal-content">
+                                <div>
+                                    <h1 class="modal-title" id="mdTitleNewDevices"><i>New Device Infomation</i></h1>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="container-fluid">
+                                        <fieldset class="scheduler-border">
+                                            <legend class="scheduler-border">Details</legend>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Device Name</span>
+                                                </div>
+                                                <input required class="form-control" id="name" type="text" name="name"
+                                                    aria-label="Username" aria-describedby="addon-wrapping">
+                                            </div>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Location</span>
+                                                </div>
+                                                <input class="form-control" id="loc" type="text" name="loc">
+                                            </div>
+                                        </fieldset>
 
-    <head>rr
+                                        <fieldset class="scheduler-border">
+                                            <legend class="scheduler-border">Firmware Configuration</legend>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">SSID</span>
+                                                </div>
+                                                <select required class="custom-select" id="inputGroupSelectSSID">
+                                                    <option selected>Choose...</option>
+                                                    <option>Other</option>
+                                                </select>
+                                                <!-- OR -->
+                                                <input type="text" class="form-control d-none"
+                                                    id="showhideInputTextSSID" placeholder="Manual SSID">
+                                            </div>
+                                            <div id="show_hide_password"
+                                                class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Password</span>
+                                                </div>
+                                                <input class="form-control" id="psk" type="password" name="psk">
+                                                <div class="input-group-addon">
+                                                    <a><i class="fa fa-eye-slash" aria-hidden="true"></i></a>
+                                                </div>
+                                            </div>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Port</span>
+                                                </div>
+                                                <select name="port" class="custom-select" id="inputGroupSelectPORT">
+                                                </select>
+                                            </div>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Board</span>
+                                                </div>
+                                                <select name="board" class="custom-select" id="inputGroupSelecBOARD">
+                                                    <option>WeMos D1 R1</option>
+                                                    <option>NodeMCU v1.0</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Baudrate</span>
+                                                </div>
+                                                <select name="baud" class="custom-select" id="inputGroupSelectBAUD">
+                                                    <option>115200</option>
+                                                    <option>9600</option>
+                                                </select>
+                                            </div>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <button type="button" class="btn btn-block btn-outline-primary"
+                                                    id="btnReSSID">Refresh</button>
+                                            </div>
+                                            <div class="progress row">
+                                                <div id="progressCompiler"
+                                                    class="progress-bar progress-bar-striped bg-danger progress-bar-animated"
+                                                    role="progressbar" aria-valuenow="15" aria-valuemin="0"
+                                                    aria-valuemax="100" style="width: 0%"></div>
+                                            </div>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <p id="compilerLog"></p>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save and Upload to ESP</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!--TODO: Overlay Button still get error - PLEASE COMMMENT to FIX LATER -->
+                <!-- <html>
+    <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -206,94 +444,109 @@
 
     </html> -->
 
-    <div id="lstDevices">
-        <h1><i>Available Devices</i></h1>
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Configure</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Locat</th>
-                    <th scope="col">Switch</th>
-                    <th scope="col"></th>
-                </tr>
-            </thead>
-            <tbody>
-                <% count = 0 %>
-                <% snap.forEach((child) => { %>
-                <tr>
-                    <th scope="row"><%= ++count%></th>
 
-                    <td id="btnConfigure<%-count%>">
-                        <button type="button" class="btn btn-info" data-toggle="modal"
-                            data-target="#ConfigureModalScrollable<%-count%>">
-                            <i class="fas fa-sliders-h"></i>
-                        </button>
 
-                        <div class="modal fade" id="ConfigureModalScrollable<%-count%>" tabindex="-1" role="dialog"
-                            aria-labelledby="exampleModalLabel<%-count%>" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLabel<%-count%>">
-                                                <%= child.key %> Setting
-                                            </h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="md-form md-outline">
-                                                <label for="default-picker">2 line sáng đồng thời</label>
-                                                <input required name="startTime" type="time" id="startTime<%-count%>"
-                                                    class="form-control" placeholder="Select time"
-                                                    value=<%= child.val()['startTime'] %>>
+                <div id="lstDevices">
+                    <h1><i>Available Devices</i></h1>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Configure</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Locat</th>
+                                <th scope="col">Switch</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% count = 0 %>
+                            <% snap.forEach((child) => { %>
+                            <tr>
+                                <th scope="row"><%= ++count%></th>
+
+                                <td id="btnConfigure<%-count%>">
+                                    <button type="button" class="btn btn-info" data-toggle="modal"
+                                        data-target="#ConfigureModalScrollable<%-count%>">
+                                        <i class="fas fa-sliders-h"></i>
+                                    </button>
+
+                                    <div class="modal fade" id="ConfigureModalScrollable<%-count%>" tabindex="-1"
+                                        role="dialog" aria-labelledby="exampleModalLabel<%-count%>" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="exampleModalLabel<%-count%>">
+                                                            <%= child.key %> Setting
+                                                        </h5>
+                                                        <button type="button" class="close" data-dismiss="modal"
+                                                            aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="md-form md-outline">
+                                                            <label for="default-picker">2 line sáng đồng thời</label>
+                                                            <input required name="startTime" type="time"
+                                                                id="startTime<%-count%>" class="form-control"
+                                                                placeholder="Select time"
+                                                                value=<%= child.val()['startTime'] %>>
+                                                        </div>
+                                                        <div class="md-form md-outline">
+                                                            <label for="default-picker">1 line sáng (xen kẽ)</label>
+                                                            <input required name="midTime" type="time"
+                                                                id="midTime<%-count%>" class="form-control"
+                                                                placeholder="Select time"
+                                                                value=<%= child.val()['midTime'] %>>
+                                                        </div>
+                                                        <div class="md-form md-outline">
+                                                            <label for="default-picker">2 line TẮT</label>
+                                                            <input required name="endTime" type="time"
+                                                                id="endTime<%-count%>" class="form-control"
+                                                                placeholder="Select time"
+                                                                value=<%= child.val()['endTime'] %>>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-dismiss="modal">Close</button>
+                                                        <button id="btnTimeConfirm<%-count%>" type="button"
+                                                            class="btn btn-primary">Save
+                                                            changes</button>
+                                                    </div>
+                                                </form>
                                             </div>
-                                            <div class="md-form md-outline">
-                                                <label for="default-picker">1 line sáng (xen kẽ)</label>
-                                                <input required name="midTime" type="time" id="midTime<%-count%>"
-                                                    class="form-control" placeholder="Select time"
-                                                    value=<%= child.val()['midTime'] %>>
-                                            </div>
-                                            <div class="md-form md-outline">
-                                                <label for="default-picker">2 line TẮT</label>
-                                                <input required name="endTime" type="time" id="endTime<%-count%>"
-                                                    class="form-control" placeholder="Select time"
-                                                    value=<%= child.val()['endTime'] %>>
-                                            </div>
                                         </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-dismiss="modal">Close</button>
-                                            <button id="btnTimeConfirm<%-count%>" type="button"
-                                                class="btn btn-primary">Save
-                                                changes</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class=" dvName"><%= child.key %></td>
-                    <td><img src="images/icons8-wi-fi_connected.svg" width="30" height="30" alt=""></td>
-                    <td><%= child.val()['loc'] %></td>
-                    <td>
-                        <div class="custom-control custom-switch noselect">
-                            <input type="checkbox" class="custom-control-input" id="customSwitch<%-count%>">
-                            <label class="custom-control-label" for="customSwitch<%-count%>"></label>
-                        </div>
-                    </td>
-                    <td id="btnRemoveDevices<%-count%>"><button type="button" class="btn btn-danger"><i
-                                class="fas fa-trash-alt"></i></button></td>
-                </tr>
-                <% }) %>
-            </tbody>
-        </table>
-    </div class="center-block">
-    <img id="cap" src="" alt="">
+                                    </div>
+                                </td>
+                                <td class=" dvName"><%= child.key %></td>
+                                <td><img src="images/icons8-wi-fi_connected.svg" width="30" height="30" alt=""></td>
+                                <td><%= child.val()['loc'] %></td>
+                                <td>
+                                    <div class="custom-control custom-switch noselect">
+                                        <input type="checkbox" class="custom-control-input" id="customSwitch<%-count%>">
+                                        <label class="custom-control-label" for="customSwitch<%-count%>"></label>
+                                    </div>
+                                </td>
+                                <td id="btnRemoveDevices<%-count%>"><button type="button" class="btn btn-danger"><i
+                                            class="fas fa-trash-alt"></i></button></td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+                <img id="cap" src="" alt="">
+            </div>
+            <footer class="bg-white sticky-footer">
+                <div class="container my-auto">
+                    <div class="text-center my-auto copyright"><span>Copyright © Spiderock</span></div>
+                </div>
+            </footer>
+        </div>
+        <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    </div>
 </body>
 
 </html>
