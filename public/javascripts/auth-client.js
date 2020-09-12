@@ -113,7 +113,8 @@ $("#loginForm").submit((event) => {
         icon: "error",
         allowOutsideClick: false
       }).then(result => {
-        if (result.value) {
+        // use regexp here
+        if (result.value && (error.code.toString().match(/user/g) != null)) {
           Swal.fire({
             icon: 'question',
             confirmButtonText: 'Đăng ký tài khoản mới'

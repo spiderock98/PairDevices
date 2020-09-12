@@ -1,12 +1,12 @@
-firebase.initializeApp({
-  apiKey: "AIzaSyAOJyhBMaqhJrTGX3XO7I2WF3kqgElOEM4",
-  authDomain: "pairdevices-e7bf9.firebaseapp.com",
-  databaseURL: "https://pairdevices-e7bf9.firebaseio.com",
-  projectId: "pairdevices-e7bf9",
-  storageBucket: "pairdevices-e7bf9.appspot.com",
-  messagingSenderId: "979300938513",
-  appId: "1:979300938513:web:45ee0e73b4bbfc953192b0",
-});
+// firebase.initializeApp({
+//   apiKey: "AIzaSyAOJyhBMaqhJrTGX3XO7I2WF3kqgElOEM4",
+//   authDomain: "pairdevices-e7bf9.firebaseapp.com",
+//   databaseURL: "https://pairdevices-e7bf9.firebaseio.com",
+//   projectId: "pairdevices-e7bf9",
+//   storageBucket: "pairdevices-e7bf9.appspot.com",
+//   messagingSenderId: "979300938513",
+//   appId: "1:979300938513:web:45ee0e73b4bbfc953192b0",
+// });
 const socket = io();
 
 //!================//MapInit onload//================!//
@@ -58,6 +58,7 @@ ws.onmessage = (payload) => {
   imgFrame.src = urlObj;
 };
 
+//TODO: fix this Deprecated func()
 $(document).ready(() => {
   socket.emit("regBrowser");
 });
@@ -99,6 +100,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
     }
   });
 
+  //TODO: fix this Deprecated func()
   $(`#btnRemoveDevices${i + 1}`).click(() => {
     Swal.fire({
       title: "Are you sure?",

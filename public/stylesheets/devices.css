@@ -1,0 +1,10 @@
+body{
+    font-family: 'Muli', sans-serif;
+    /* background: url("https://www.toptal.com/designers/subtlepatterns/patterns/geometry2.png"); */
+  }
+
+/*==================== smooth scroll ====================*/
+html {
+    scroll-behavior: smooth;
+  }
+

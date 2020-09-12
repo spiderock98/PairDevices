@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devices</title>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+    <script defer src='https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.2/velocity.min.js'></script>
+    <script defer src='https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.2/velocity.ui.min.js'></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.js"></script>
+
+    <script defer src="javascripts/UI/openModal.js"></script>
+    <script defer src="javascripts/devices-client.js"></script>
+    <script defer src="javascripts/UI/bs-init.js"></script>
+    <script defer src="javascripts/UI/theme.js"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+    <link rel="stylesheet" href="stylesheets/devices.css">
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+</head>
+
+<body id="page-tops">
+    <div id="wrapper">
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div id="sectionDevices">
+
+                    <nav class="fixed-top navbar navbar-light navbar-expand bg-white shadow mb-4 topbar static-top">
+                        <div class="container-fluid">
+                            <!-- <a class="navbar-brand" href="#">Brand</a> -->
+                            <a href="">
+                                <img width="250" height="45" src="images/banner.png" alt="banner">
+                            </a>
+                            <ul class="nav navbar-nav text-light" id="accordionSidebar">
+                                <li class="nav-item"><a class="nav-link" href="/"><i
+                                            class="fas fa-tachometer-alt"></i><span>&nbsp;Dashboard</span></a></li>
+                                <li class="nav-item"><a class="nav-link" href="#"><i
+                                            class="fas fa-user"></i><span>&nbsp;Profile</span></a></li>
+                                <li class="nav-item"><a class="nav-link" href="#"><i
+                                            class="fas fa-table"></i><span>&nbsp;Devices</span></a></li>
+                                <li class="nav-item">
+                                    <button id="btnOut" class="nav-link" style="border: none; background-color: #fff;">
+                                        <i class="far fa-user-circle"></i>
+                                        <span>&nbsp;Logout</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+
+
+                    <!-- Button trigger modal -->
+                    <button style="margin-bottom: 20px;" id="btnAdd" type="button"
+                        class="btn btn-block btn-outline-success" data-toggle="modal" data-target="#modalNewDevices">
+                        <img src="images/icons8-plus.svg" width="30" height="30" alt=""> Devices
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" data-easein="flipYIn" id="modalNewDevices" tabindex="-1" role="dialog"
+                        aria-labelledby="mdTitleNewDevices" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-scrollable modal" role="document">
+                            <form action="/home/newDevices" method="POST" id="formDevice" class="modal-content">
+                                <div>
+                                    <h1 class="modal-title" id="mdTitleNewDevices"><i>New Device Infomation</i></h1>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="container-fluid">
+                                        <fieldset class="scheduler-border">
+                                            <legend class="scheduler-border">Details</legend>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Device Name</span>
+                                                </div>
+                                                <input required class="form-control" id="name" type="text" name="name"
+                                                    aria-label="Username" aria-describedby="addon-wrapping">
+                                            </div>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Location</span>
+                                                </div>
+                                                <input class="form-control" id="loc" type="text" name="loc">
+                                            </div>
+                                        </fieldset>
+
+                                        <fieldset class="scheduler-border">
+                                            <legend class="scheduler-border">Firmware Configuration</legend>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">SSID</span>
+                                                </div>
+                                                <select required class="custom-select" id="inputGroupSelectSSID">
+                                                    <option selected>Choose...</option>
+                                                    <option>Other</option>
+                                                </select>
+                                                <!-- OR -->
+                                                <input type="text" class="form-control d-none"
+                                                    id="showhideInputTextSSID" placeholder="Manual SSID">
+                                            </div>
+                                            <div id="show_hide_password"
+                                                class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Password</span>
+                                                </div>
+                                                <input class="form-control" id="psk" type="password" name="psk">
+                                                <div class="input-group-addon">
+                                                    <a><i class="fa fa-eye-slash" aria-hidden="true"></i></a>
+                                                </div>
+                                            </div>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Port</span>
+                                                </div>
+                                                <select name="port" class="custom-select" id="inputGroupSelectPORT">
+                                                </select>
+                                            </div>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Board</span>
+                                                </div>
+                                                <select name="board" class="custom-select" id="inputGroupSelecBOARD">
+                                                    <option>WeMos D1 R1</option>
+                                                    <option>NodeMCU v1.0</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="row align-items-center input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Baudrate</span>
+                                                </div>
+                                                <select name="baud" class="custom-select" id="inputGroupSelectBAUD">
+                                                    <option>115200</option>
+                                                    <option>9600</option>
+                                                </select>
+                                            </div>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <button type="button" class="btn btn-block btn-outline-primary"
+                                                    id="btnReSSID">Refresh</button>
+                                            </div>
+                                            <div class="progress row">
+                                                <div id="progressCompiler"
+                                                    class="progress-bar progress-bar-striped bg-danger progress-bar-animated"
+                                                    role="progressbar" aria-valuenow="15" aria-valuemin="0"
+                                                    aria-valuemax="100" style="width: 0%"></div>
+                                            </div>
+                                            <div class="row align-items-center input-group mb-3">
+                                                <p id="compilerLog"></p>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save and Upload to ESP</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!--TODO: Overlay Button still get error - PLEASE COMMMENT to FIX LATER -->
+                <!-- <html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="prefixfree.min.js"></script>
+<link href="reset.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+</head>
+
+<body>
+<div id="pool">
+<div class="button-wrapper">
+<div class="layer"></div>
+<button class="main-button fa fa-plus">
+    <div class="ripple"></div>
+</button>
+</div>
+
+<div class="layered-content">
+<button class="close-button close-button1 fa fa-times"></button>
+<div class="content">
+    <p>Risum Teneatis</p>
+</div>
+</div>
+</div>
+</body>
+
+</html> -->
+
+
+
+                <div id="lstDevices">
+                    <h1><i>Available Devices</i></h1>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Configure</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Locat</th>
+                                <th scope="col">Switch</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% count = 0 %>
+                            <% snap.forEach((child) => { %>
+                            <tr>
+                                <th scope="row"><%= ++count%></th>
+
+                                <td id="btnConfigure<%-count%>">
+                                    <button type="button" class="btn btn-info" data-toggle="modal"
+                                        data-target="#ConfigureModalScrollable<%-count%>">
+                                        <i class="fas fa-sliders-h"></i>
+                                    </button>
+
+                                    <div class="modal fade" id="ConfigureModalScrollable<%-count%>" tabindex="-1"
+                                        role="dialog" aria-labelledby="exampleModalLabel<%-count%>" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="exampleModalLabel<%-count%>">
+                                                            <%= child.key %> Setting
+                                                        </h5>
+                                                        <button type="button" class="close" data-dismiss="modal"
+                                                            aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="md-form md-outline">
+                                                            <label for="default-picker">2 line sáng đồng thời</label>
+                                                            <input required name="startTime" type="time"
+                                                                id="startTime<%-count%>" class="form-control"
+                                                                placeholder="Select time"
+                                                                value=<%= child.val()['startTime'] %>>
+                                                        </div>
+                                                        <div class="md-form md-outline">
+                                                            <label for="default-picker">1 line sáng (xen kẽ)</label>
+                                                            <input required name="midTime" type="time"
+                                                                id="midTime<%-count%>" class="form-control"
+                                                                placeholder="Select time"
+                                                                value=<%= child.val()['midTime'] %>>
+                                                        </div>
+                                                        <div class="md-form md-outline">
+                                                            <label for="default-picker">2 line TẮT</label>
+                                                            <input required name="endTime" type="time"
+                                                                id="endTime<%-count%>" class="form-control"
+                                                                placeholder="Select time"
+                                                                value=<%= child.val()['endTime'] %>>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-dismiss="modal">Close</button>
+                                                        <button id="btnTimeConfirm<%-count%>" type="button"
+                                                            class="btn btn-primary">Save
+                                                            changes</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class=" dvName"><%= child.key %></td>
+                                <td><img src="images/icons8-wi-fi_connected.svg" width="30" height="30" alt=""></td>
+                                <td><%= child.val()['loc'] %></td>
+                                <td>
+                                    <div class="custom-control custom-switch noselect">
+                                        <input type="checkbox" class="custom-control-input" id="customSwitch<%-count%>">
+                                        <label class="custom-control-label" for="customSwitch<%-count%>"></label>
+                                    </div>
+                                </td>
+                                <td id="btnRemoveDevices<%-count%>"><button type="button" class="btn btn-danger"><i
+                                            class="fas fa-trash-alt"></i></button></td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <footer class="bg-white sticky-footer">
+                <div class="container my-auto">
+                    <div class="text-center my-auto copyright"><span>Copyright © Spiderock</span></div>
+                </div>
+            </footer>
+        </div>
+        <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+
+    </div>
+</body>
+
+</html>
