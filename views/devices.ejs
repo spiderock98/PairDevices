@@ -12,8 +12,8 @@
     <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
         integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
         crossorigin="anonymous"></script>
-    <script defer src='https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.2/velocity.min.js'></script>
-    <script defer src='https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.2/velocity.ui.min.js'></script>
+    <script defer src='https://cdnjs.cloudflare.com/ajax/libs/velocity/1.5.2/velocity.min.js'></script>
+    <script defer src='https://cdnjs.cloudflare.com/ajax/libs/velocity/1.5.2/velocity.ui.min.js'></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.js"></script>
 
     <script defer src="javascripts/UI/openModal.js"></script>
@@ -42,7 +42,7 @@
                             <a href="">
                                 <img width="250" height="45" src="images/banner.png" alt="banner">
                             </a>
-                            <ul class="nav navbar-nav text-light" id="accordionSidebar">
+                            <ul class="nav nav-pills navbar-nav text-light" id="accordionSidebar">
                                 <li class="nav-item"><a class="nav-link" href="/"><i
                                             class="fas fa-tachometer-alt"></i><span>&nbsp;Dashboard</span></a></li>
                                 <li class="nav-item"><a class="nav-link" href="#"><i
@@ -61,17 +61,19 @@
 
 
                     <!-- Button trigger modal -->
-                    <button style="margin-bottom: 20px;" id="btnAdd" type="button"
-                        class="btn btn-block btn-outline-success" data-toggle="modal" data-target="#modalNewDevices">
-                        <img src="images/icons8-plus.svg" width="30" height="30" alt=""> Devices
-                    </button>
+                    <!-- <button style="margin-top: 90px;" type="button" class="btn btn-block btn-outline-success"
+                        data-toggle="modal" data-target="#modalNewDevices">
+                        <img src="images/icons8-plus.svg" width="30" height="30" alt=""> New Location (ESP8266)
+                    </button> -->
                     <!-- Modal -->
                     <div class="modal fade" data-easein="flipYIn" id="modalNewDevices" tabindex="-1" role="dialog"
                         aria-labelledby="mdTitleNewDevices" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-scrollable modal" role="document">
                             <form action="/home/newDevices" method="POST" id="formDevice" class="modal-content">
                                 <div>
-                                    <h1 class="modal-title" id="mdTitleNewDevices"><i>New Device Infomation</i></h1>
+                                    <h1 class="modal-title" id="mdTitleNewDevices"><i
+                                            class="badge badge-pill badge-info">Location
+                                            Device Infomation</i></h1>
                                 </div>
                                 <div class="modal-body">
                                     <div class="container-fluid">
@@ -202,11 +204,12 @@
 
 
 
-                <div id="lstDevices">
-                    <h1><i>Available Devices</i></h1>
+                <div id="lstDevices" style="margin-top: 90px;">
+                    <h1 style="text-align: center;"><i class="badge badge-pill badge-danger">All Available Devices</i>
+                    </h1>
                     <table class="table table-hover">
                         <thead>
-                            <tr>
+                            <tr class="table-info">
                                 <th scope="col">#</th>
                                 <th scope="col">Configure</th>
                                 <th scope="col">Name</th>
@@ -244,7 +247,8 @@
                                                     </div>
                                                     <div class="modal-body">
                                                         <div class="md-form md-outline">
-                                                            <label for="default-picker">2 line sáng đồng thời</label>
+                                                            <label for="default-picker">2 line sáng đồng
+                                                                thời</label>
                                                             <input required name="startTime" type="time"
                                                                 id="startTime<%-count%>" class="form-control"
                                                                 placeholder="Select time"
@@ -300,7 +304,23 @@
                 </div>
             </footer>
         </div>
-        <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+        <!-- <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a> -->
+
+        <!-- //!=====================/float button/=====================!// -->
+        <a href="#" class="float" id="menu-share">
+            <i class="fas fa-plus my-float"></i>
+        </a>
+        <ul id="floatBtn">
+            <li><a href="javascript:floatNewLocat();">
+                    <i class="fas fa-map-marked-alt my-float"></i>
+                </a></li>
+            <li><a href="javascript:floatNewGarden();">
+                    <i class="fab fa-pagelines my-float"></i>
+                </a></li>
+            <li><a href="#">
+                    <i class="fa fa-twitter my-float"></i>
+                </a></li>
+        </ul>
 
     </div>
 </body>

@@ -66,7 +66,7 @@ io.on("connection", (socket) => {
   socket.on("controller", (data) => {
     admin
       .database()
-      .ref(`${data.uid}/DeviceNodes/${data.physicalName}`)
+      .ref(`${data.uid}/LocationNodes/${data.physicalName}`)
       .update({
         state: `${data.state}`,
       });
@@ -78,7 +78,7 @@ io.on("connection", (socket) => {
       socket.to(data.uid).emit(data.physicalName, `${data.state}`);
       admin
         .database()
-        .ref(`${data.uid}/DeviceNodes/${data.physicalName}`)
+        .ref(`${data.uid}/LocationNodes/${data.physicalName}`)
         .update({
           state: `${data.state}`,
         });

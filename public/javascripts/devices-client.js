@@ -1,6 +1,6 @@
 const socket = io();
 
-//!================//VanillaWebsocket//================!//
+//!================/VanillaWebsocket/================!//
 const WS_URL = "ws:///192.168.1.3:81";
 const ws = new WebSocket(WS_URL);
 
@@ -36,7 +36,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
         }
     });
 
-    $(`#customSwitch${i + 1}`).change(() => {
+    $(`#customSwitch${i + 1}`).on("change", () => {
         if (arrState[i] == "off") {
             arrState[i] = "on";
             socket.emit("socketType", {
@@ -58,8 +58,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
     });
 
 
-    //TODO: fix this Deprecated func()
-    $(`#btnRemoveDevices${i + 1}`).click(() => {
+    $(`#btnRemoveDevices${i + 1}`).on("click", () => {
         Swal.fire({
             title: "Are you sure?",
             text: "You won't be able to revert this!",
@@ -82,19 +81,19 @@ for (let i = 0; i < objDeviceName.length; i++) {
                             "Deleted!",
                             `Your ${deviceName[0].innerHTML} has been deleted.`,
                             "success"
-                        ).then(() => (location.href = "/"));
+                        ).then(() => (location.href = "/devices"));
                     },
                 });
             }
         });
     });
 
-    $(`#btnConfigure${i + 1}`).click(() => {
+    $(`#btnConfigure${i + 1}`).on("click", () => {
         deviceName = $(`#btnRemoveDevices${i + 1}`)
             .siblings()
             .eq(2);
 
-        $(`#btnTimeConfirm${i + 1}`).click(() => {
+        $(`#btnTimeConfirm${i + 1}`).on("click", () => {
             // console.log('click');
 
             let objTimeConfig = {
@@ -136,7 +135,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
     });
 }
 
-$("#btnOut").click(() => {
+$("#btnOut").on("click", () => {
     location.href = "/sessionLogout"; // to index-server
 });
 
@@ -152,7 +151,7 @@ $("#show_hide_password a").on("click", () => {
     }
 });
 
-$("#inputGroupSelectSSID").change(() => {
+$("#inputGroupSelectSSID").on("change", () => {
     let ssid = document.getElementById("inputGroupSelectSSID").value;
     if (ssid == "Other") {
         $("#showhideInputTextSSID").removeClass("d-none");
@@ -164,3 +163,11 @@ $("#inputGroupSelectSSID").change(() => {
         $("#inputGroupSelectSSID").attr("name", "ssid");
     }
 });
+
+//!================/Float button/================!//
+function floatNewGarden() {
+    ;
+}
+function floatNewLocat() {
+    $("#modalNewDevices").modal("toggle")
+}

@@ -7,7 +7,7 @@ const admin = require('firebase-admin');
 
 function getSnapshotCurrentDevice(uid) {
     return new Promise(resolve => {
-        admin.database().ref(`${uid}/DeviceNodes`).once('value', snap => {
+        admin.database().ref(`${uid}/LocationNodes`).once('value', snap => {
             resolve(snap)
         })
     })

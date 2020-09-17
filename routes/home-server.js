@@ -19,7 +19,7 @@ class FirebaseDevices {
 
         this.objInfo['network'] = { [this.ssid]: this.psk };
 
-        this.objInfo['DeviceNodes'] = { [this.name]: { loc: this.loc, state: 'off' } };
+        this.objInfo['LocationNodes'] = { [this.name]: { loc: this.loc, state: 'off' } };
     }
     pushNewDevice() {
         admin.database().ref(this.uid).set(this.objInfo)
@@ -35,28 +35,15 @@ class FirebaseDevices {
         })
     }
     updateMoreNode() {
-        admin.database().ref(`${this.uid}/DeviceNodes/${this.name}`).set({ loc: this.loc, state: 'off' })
+        admin.database().ref(`${this.uid}/LocationNodes/${this.name}`).set({ loc: this.loc, state: 'off' })
     }
 
     get objDeviceInfo() { return this.objInfo; }
 }
 
-// setTimeout(() => {
-//     ref = admin.database().ref('ZpG8DOQ6McRQHwkG1mTBH60CuX12/DeviceNodes');
-//     ref.once('value', snap => {
-//         console.log(snap.val());
-
-//         snap.forEach(child => {
-//             console.log(child.val());
-//             console.log(child.key);
-
-//         })
-//     })
-// }, 500);
-
 function getSnapshotCurrentDevice(uid) {
     return new Promise(resolve => {
-        admin.database().ref(`${uid}/DeviceNodes`).once('value', snap => {
+        admin.database().ref(`${uid}/LocationNodes`).once('value', snap => {
             resolve(snap)
         })
     })
@@ -82,7 +69,7 @@ router.post('/configTime', (req, res) => {
     let cookie = req.cookies.session || ""
     admin.auth().verifySessionCookie(cookie, true)
         .then((decodedClaims) => {
-            admin.database().ref(`${decodedClaims.uid}/DeviceNodes/${req.body.deviceName}`).update({
+            admin.database().ref(`${decodedClaims.uid}/LocationNodes/${req.body.deviceName}`).update({
                 startTime: `${req.body.startTime}`,
                 midTime: `${req.body.midTime}`,
                 endTime: `${req.body.endTime}`
@@ -96,7 +83,7 @@ router.post('/removeDevices', (req, res) => {
     admin.auth().verifySessionCookie(cookie, true)
         .then(decodedClaims => {
             let uid = decodedClaims.uid
-            admin.database().ref(`${uid}/DeviceNodes/${req.body.name}`).remove(err => {
+            admin.database().ref(`${uid}/LocationNodes/${req.body.name}`).remove(err => {
                 if (err) console.log("[INFO] ", err)
                 else res.end();
             })
