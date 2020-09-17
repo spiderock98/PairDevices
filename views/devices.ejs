@@ -21,6 +21,12 @@
     <script defer src="javascripts/UI/bs-init.js"></script>
     <script defer src="javascripts/UI/theme.js"></script>
 
+    <script src="javascripts/UI/mapBypass.js"></script>
+    <script defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7pWv_ReH_hkeTgscLBJFkJ6eXVQCkoJs&callback=initAddMap"
+        type="text/javascript">
+        </script>
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
         integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
@@ -59,16 +65,10 @@
                         </div>
                     </nav>
 
-
-                    <!-- Button trigger modal -->
-                    <!-- <button style="margin-top: 90px;" type="button" class="btn btn-block btn-outline-success"
-                        data-toggle="modal" data-target="#modalNewDevices">
-                        <img src="images/icons8-plus.svg" width="30" height="30" alt=""> New Location (ESP8266)
-                    </button> -->
-                    <!-- Modal -->
-                    <div class="modal fade" data-easein="flipYIn" id="modalNewDevices" tabindex="-1" role="dialog"
-                        aria-labelledby="mdTitleNewDevices" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-scrollable modal" role="document">
+                    <!--//!===================/MODAL/===================!// -->
+                    <div class="modal fade" data-backdrop="static" data-easein="flipYIn" id="modalNewDevices"
+                        tabindex="-1" role="dialog" aria-labelledby="mdTitleNewDevices" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
                             <form action="/home/newDevices" method="POST" id="formDevice" class="modal-content">
                                 <div>
                                     <h1 class="modal-title" id="mdTitleNewDevices"><i
@@ -92,6 +92,8 @@
                                                 </div>
                                                 <input class="form-control" id="loc" type="text" name="loc">
                                             </div>
+                                            <div class="row" id="addMap" style="height:400px; "></div>
+
                                         </fieldset>
 
                                         <fieldset class="scheduler-border">

@@ -171,3 +171,42 @@ function floatNewGarden() {
 function floatNewLocat() {
     $("#modalNewDevices").modal("toggle")
 }
+
+//!================//MapInit onload//================!//
+var addMap;
+function initAddMap() {
+    addMap = new google.maps.Map(document.getElementById("addMap"), {
+        center: new google.maps.LatLng(10.769444, 106.681944),
+        zoom: 9,
+        fullscreenControl: false,
+        keyboardShortcuts: false,
+        mapTypeControl: false,
+        panControl: false,
+        rotateControl: false,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: false,
+    });
+
+    let markersArray = new Array();
+    let objConfirmMap = new Object()
+
+    google.maps.event.addListener(addMap, "click", function (event) {
+        // delete others overlays
+        if (markersArray) {
+            for (i in markersArray) {
+                markersArray[i].setMap(null);
+            }
+            markersArray.length = 0;
+        }
+        const marker = new google.maps.Marker({
+            position: event.latLng,
+            map: addMap
+        });
+        markersArray.push(marker);
+
+        // stage change to confirm location
+        objConfirmMap["lat"] = event.latLng.lat()
+        objConfirmMap["lng"] = event.latLng.lng()
+    });
+}
