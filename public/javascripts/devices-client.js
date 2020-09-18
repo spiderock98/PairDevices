@@ -73,7 +73,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
                     .siblings()
                     .eq(2);
                 $.ajax({
-                    url: "/home/removeDevices",
+                    url: "/devices/removeDevices",
                     method: "POST",
                     data: { name: deviceName[0].innerHTML },
                     success: () => {
@@ -172,8 +172,12 @@ function floatNewLocat() {
     $("#modalNewDevices").modal("toggle")
 }
 
-//!================//MapInit onload//================!//
-var addMap;
+//!================/MapInit onload/================!//
+let addMap;
+let service;
+let infowindow;
+let autocomplete;
+
 function initAddMap() {
     addMap = new google.maps.Map(document.getElementById("addMap"), {
         center: new google.maps.LatLng(10.769444, 106.681944),
@@ -188,9 +192,8 @@ function initAddMap() {
         zoomControl: false,
     });
 
+    //!================/Listen click marker event/================!//
     let markersArray = new Array();
-    let objConfirmMap = new Object()
-
     google.maps.event.addListener(addMap, "click", function (event) {
         // delete others overlays
         if (markersArray) {
@@ -201,12 +204,13 @@ function initAddMap() {
         }
         const marker = new google.maps.Marker({
             position: event.latLng,
-            map: addMap
+            map: addMap,
+            animation: google.maps.Animation.BOUNCE
         });
         markersArray.push(marker);
 
-        // stage change to confirm location
-        objConfirmMap["lat"] = event.latLng.lat()
-        objConfirmMap["lng"] = event.latLng.lng()
+        // commit change to confirm location
+        $("#hidLatCoor").text(event.latLng.lat());
+        $("#hidLngCoor").text(event.latLng.lng());
     });
 }

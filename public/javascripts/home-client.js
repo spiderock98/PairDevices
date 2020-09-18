@@ -100,8 +100,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
     }
   });
 
-  //TODO: fix this Deprecated func()
-  $(`#btnRemoveDevices${i + 1}`).click(() => {
+  $(`#btnRemoveDevices${i + 1}`).on('click', () => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -116,7 +115,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
           .siblings()
           .eq(2);
         $.ajax({
-          url: "/home/removeDevices",
+          url: "/devices/removeDevices",
           method: "POST",
           data: { name: deviceName[0].innerHTML },
           success: () => {
@@ -178,7 +177,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
   });
 }
 
-$("#btnOut").click(() => {
+$("#btnOut").on('click', () => {
   location.href = "/sessionLogout"; // to index-server
 });
 
@@ -252,11 +251,11 @@ $("#inputGroupSelectSSID").change(() => {
 // $('#formDevice').submit((event) => {
 //     event.preventDefault()
 //     $.ajax({
-//         url: '/home/newDevices',
+//         url: '/devices/newDevices',
 //         method: 'POST',
 //         data: {
 //             name: $('#formDevice').find("input[name='name']").val(),
-//             loc: $('#formDevice').find("input[name='loc']").val(),
+//             locat: $('#formDevice').find("input[name='locat']").val(),
 //             //TODO: ssid is <input> or <select>
 //             ssid: $('#formDevice').find("input[name='ssid']").val(),
 //             psk: $('#formDevice').find("input[name='psk']").val(),

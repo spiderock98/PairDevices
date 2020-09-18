@@ -69,7 +69,7 @@
                     <div class="modal fade" data-backdrop="static" data-easein="flipYIn" id="modalNewDevices"
                         tabindex="-1" role="dialog" aria-labelledby="mdTitleNewDevices" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
-                            <form action="/home/newDevices" method="POST" id="formDevice" class="modal-content">
+                            <form action="/devices/newDevices" method="POST" id="formDevice" class="modal-content">
                                 <div>
                                     <h1 class="modal-title" id="mdTitleNewDevices"><i
                                             class="badge badge-pill badge-info">Location
@@ -90,7 +90,7 @@
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Location</span>
                                                 </div>
-                                                <input class="form-control" id="loc" type="text" name="loc">
+                                                <input class="form-control" type="text" name="locat">
                                             </div>
                                             <div class="row" id="addMap" style="height:400px; "></div>
 
@@ -148,7 +148,7 @@
                                             </div>
                                             <div class="row align-items-center input-group mb-3">
                                                 <button type="button" class="btn btn-block btn-outline-primary"
-                                                    id="btnReSSID">Refresh</button>
+                                                    id="btnRefreshSSID">Refresh</button>
                                             </div>
                                             <div class="progress row">
                                                 <div id="progressCompiler"
@@ -285,7 +285,7 @@
                                 </td>
                                 <td class=" dvName"><%= child.key %></td>
                                 <td><img src="images/icons8-wi-fi_connected.svg" width="30" height="30" alt=""></td>
-                                <td><%= child.val()['loc'] %></td>
+                                <td><%= child.val()['locat'] %></td>
                                 <td>
                                     <div class="custom-control custom-switch noselect">
                                         <input type="checkbox" class="custom-control-input" id="customSwitch<%-count%>">
@@ -325,6 +325,10 @@
         </ul>
 
     </div>
+
+    <!-- //!======/hidden element <=> TRICKY to pass data to electronjs app/=======!// -->
+    <p id="hidLatCoor" style="display: none;"></p>
+    <p id="hidLngCoor" style="display: none;"></p>
 </body>
 
 </html>
