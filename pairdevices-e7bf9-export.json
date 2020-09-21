@@ -1,84 +1,14 @@
 {
-  "TfpPr1Qw1iUlFOsOKWdkgvzRb1l2": {
-    "LocationNodes": {
-      "2e9": {
-        "endTime": "12:07",
-        "loc": "2e9",
-        "midTime": "10:07",
-        "startTime": "20:07",
-        "state": "off"
-      },
-      "Pumper": {
-        "endTime": "06:02",
-        "loc": "graage",
-        "midTime": "10:04",
-        "startTime": "06:03",
-        "state": "on"
-      },
-      "demo2": {
-        "endTime": "11:10",
-        "loc": "asdasd",
-        "midTime": "00:08",
-        "startTime": "10:07",
-        "state": "off"
-      },
-      "fannnnnn": {
-        "loc": "asdasd",
-        "state": "off"
-      },
-      "fanny": {
-        "endTime": "06:01",
-        "loc": "table",
-        "midTime": "22:01",
-        "startTime": "18:01",
-        "state": "off"
+  "bApb0Ypwg5YszGanWOBKre39zlg1" : {
+    "LocationNodes" : {
+      "home " : {
+        "locat" : {
+          "lat" : "11.016155856306641",
+          "lng" : "106.78210839884841",
+          "place" : "mie"
+        },
+        "state" : "on"
       }
-    },
-    "network": {
-      "VIETTEL": "Sherlock21vtag"
-    }
-  },
-  "bApb0Ypwg5YszGanWOBKre39zlg1": {
-    "LocationNodes": {
-      "1": {
-        "state": "on"
-      },
-      "2": {
-        "state": "on"
-      },
-      "3": {
-        "state": "on"
-      },
-      "4": {
-        "state": "on"
-      },
-      "5": {
-        "state": "on"
-      },
-      "DHT11": {
-        "humid": "Elexa",
-        "now": 1593572069118,
-        "temp": "Lab"
-      },
-      "Gas": {
-        "now": 2593424710792,
-        "value": "70"
-      },
-      "Power": {
-        "now": 1593424710742,
-        "value": 50
-      }
-    }
-  },
-  "dvoZssM1tHX8llvQvcbEcWfokeX2": {
-    "LocationNodes": {
-      "pumper": {
-        "loc": "yard",
-        "state": "off"
-      }
-    },
-    "network": {
-      "VIETTEL": "Sherlock21vtag"
     }
   }
 }

@@ -227,6 +227,7 @@
                             <tr>
                                 <th scope="row"><%= ++count%></th>
 
+                                <!-- !=====/Config Garden ESP/=====! -->
                                 <td id="btnConfigure<%-count%>">
                                     <button type="button" class="btn btn-info" data-toggle="modal"
                                         data-target="#ConfigureModalScrollable<%-count%>">
@@ -283,9 +284,10 @@
                                         </div>
                                     </div>
                                 </td>
+
                                 <td class=" dvName"><%= child.key %></td>
                                 <td><img src="images/icons8-wi-fi_connected.svg" width="30" height="30" alt=""></td>
-                                <td><%= child.val()['locat'] %></td>
+                                <td><%= child.val().locat.place %></td>
                                 <td>
                                     <div class="custom-control custom-switch noselect">
                                         <input type="checkbox" class="custom-control-input" id="customSwitch<%-count%>">

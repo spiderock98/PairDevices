@@ -194,7 +194,12 @@ function initAddMap() {
 
     //!================/Listen click marker event/================!//
     let markersArray = new Array();
+    let tmpTitle = "";
+
     google.maps.event.addListener(addMap, "click", function (event) {
+        var infowindow = new google.maps.InfoWindow({
+            content: "contentString"
+        });
         // delete others overlays
         if (markersArray) {
             for (i in markersArray) {
@@ -205,12 +210,25 @@ function initAddMap() {
         const marker = new google.maps.Marker({
             position: event.latLng,
             map: addMap,
-            animation: google.maps.Animation.BOUNCE
+            animation: google.maps.Animation.BOUNCE,
         });
         markersArray.push(marker);
 
-        // commit change to confirm location
+        //!============/Return something onClick/============!//
         $("#hidLatCoor").text(event.latLng.lat());
         $("#hidLngCoor").text(event.latLng.lng());
+
+        setTimeout(() => {
+            const locatTitle = $('div .title').text();
+            const locatAdrr = $('div .address-line .full-width').text();
+
+            if (tmpTitle != locatTitle) {
+                tmpTitle = locatTitle;
+                $("#formDevice").find("input[name='locat']").val(locatTitle);
+            }
+            else {
+                $("#formDevice").find("input[name='locat']").val("");
+            }
+        }, 10);
     });
 }
