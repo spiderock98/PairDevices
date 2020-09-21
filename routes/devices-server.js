@@ -31,7 +31,7 @@ class FirebaseDevices {
     }
     pushNewDevice() {
         admin.database().ref(this.uid).set(this.objInfo)
-            .catch(err => console.log('[INFO] ', err))
+            .catch(err => console.error(err))
     }
     isExistUID() {
         return new Promise(resolve => {
@@ -71,7 +71,7 @@ router.post('/removeDevices', (req, res) => {
         .then(decodedClaims => {
             let uid = decodedClaims.uid
             admin.database().ref(`${uid}/LocationNodes/${req.body.name}`).remove(err => {
-                if (err) console.log("[INFO] ", err)
+                if (err) console.error(err)
                 else res.end();
             })
         })

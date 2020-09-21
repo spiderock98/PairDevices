@@ -42,28 +42,7 @@
             <div id="content">
                 <div id="sectionDevices">
 
-                    <nav class="fixed-top navbar navbar-light navbar-expand bg-white shadow mb-4 topbar static-top">
-                        <div class="container-fluid">
-                            <!-- <a class="navbar-brand" href="#">Brand</a> -->
-                            <a href="">
-                                <img width="250" height="45" src="images/banner.png" alt="banner">
-                            </a>
-                            <ul class="nav nav-pills navbar-nav text-light" id="accordionSidebar">
-                                <li class="nav-item"><a class="nav-link" href="/"><i
-                                            class="fas fa-tachometer-alt"></i><span>&nbsp;Dashboard</span></a></li>
-                                <li class="nav-item"><a class="nav-link" href="#"><i
-                                            class="fas fa-user"></i><span>&nbsp;Profile</span></a></li>
-                                <li class="nav-item"><a class="nav-link" href="#"><i
-                                            class="fas fa-table"></i><span>&nbsp;Devices</span></a></li>
-                                <li class="nav-item">
-                                    <button id="btnOut" class="nav-link" style="border: none; background-color: #fff;">
-                                        <i class="far fa-user-circle"></i>
-                                        <span>&nbsp;Logout</span>
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                    </nav>
+                    <%- include('common/header')%>
 
                     <!--//!===================/MODAL/===================!// -->
                     <div class="modal fade" data-backdrop="static" data-easein="flipYIn" id="modalNewDevices"
@@ -132,8 +111,8 @@
                                                     <span class="input-group-text">Board</span>
                                                 </div>
                                                 <select name="board" class="custom-select" id="inputGroupSelecBOARD">
-                                                    <option>WeMos D1 R1</option>
                                                     <option>NodeMCU v1.0</option>
+                                                    <option>WeMos D1 R1</option>
                                                 </select>
                                             </div>
 
@@ -302,11 +281,7 @@
                     </table>
                 </div>
             </div>
-            <footer class="bg-white sticky-footer">
-                <div class="container my-auto">
-                    <div class="text-center my-auto copyright"><span>Copyright © Spiderock</span></div>
-                </div>
-            </footer>
+            <%- include('common/footer')%>
         </div>
         <!-- <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a> -->
 
