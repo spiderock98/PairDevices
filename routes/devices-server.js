@@ -43,7 +43,7 @@ class FirebaseDevices {
         })
     }
     updateMoreNode() {
-        admin.database().ref(`${this.uid}/LocationNodes/${this.name}`).set({ locat: this.locat, state: 'off' })
+        admin.database().ref(`${this.uid}/LocationNodes/${this.name}`).set({ locat: { place: this.locat, lat: this.latCoor, lng: this.lngCoor }, state: 'off' })
     }
 
     get objDeviceInfo() { return this.objInfo; }

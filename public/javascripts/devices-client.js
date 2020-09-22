@@ -197,9 +197,6 @@ function initAddMap() {
     let tmpTitle = "";
 
     google.maps.event.addListener(addMap, "click", function (event) {
-        var infowindow = new google.maps.InfoWindow({
-            content: "contentString"
-        });
         // delete others overlays
         if (markersArray) {
             for (i in markersArray) {

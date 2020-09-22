@@ -58,8 +58,8 @@ ws.onmessage = (payload) => {
   imgFrame.src = urlObj;
 };
 
-//TODO: fix this Deprecated func()
-$(document).ready(() => {
+//!=======/when page load finish/=======!//
+$(() => {
   socket.emit("regBrowser");
 });
 
@@ -79,7 +79,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
     }
   });
 
-  $(`#customSwitch${i + 1}`).change(() => {
+  $(`#customSwitch${i + 1}`).on('change', () => {
     if (arrState[i] == "off") {
       arrState[i] = "on";
       socket.emit("socketType", {
@@ -130,12 +130,12 @@ for (let i = 0; i < objDeviceName.length; i++) {
     });
   });
 
-  $(`#btnConfigure${i + 1}`).click(() => {
+  $(`#btnConfigure${i + 1}`).on('click', () => {
     deviceName = $(`#btnRemoveDevices${i + 1}`)
       .siblings()
       .eq(2);
 
-    $(`#btnTimeConfirm${i + 1}`).click(() => {
+    $(`#btnTimeConfirm${i + 1}`).on('click', () => {
       // console.log('click');
 
       let objTimeConfig = {
@@ -193,7 +193,7 @@ $("#show_hide_password a").on("click", () => {
   }
 });
 
-$("#inputGroupSelectSSID").change(() => {
+$("#inputGroupSelectSSID").on('change', () => {
   let ssid = document.getElementById("inputGroupSelectSSID").value;
   if (ssid == "Other") {
     $("#showhideInputTextSSID").removeClass("d-none");

@@ -1,15 +1,28 @@
+<link rel="stylesheet" href="stylesheets/loader.css">
+<script defer src="javascripts/UI/loader.js"></script>
+
 <nav class="fixed-top navbar navbar-light navbar-expand bg-white shadow mb-4 topbar static-top">
     <div class="container-fluid">
+
+        <!-- Start Page Loading -->
+        <div id="loader-wrapper">
+            <div id="loader"></div>
+            <div class="loader-section section-left"></div>
+            <div class="loader-section section-right"></div>
+        </div>
+        <!-- End Page Loading -->
+
+
         <!-- <a class="navbar-brand" href="#">Brand</a> -->
         <a href="">
             <img width="250" height="45" src="images/banner.png" alt="banner">
         </a>
         <ul class="nav navbar-nav text-light" id="accordionSidebar">
-            <li class="nav-item"><a class="nav-link" href="/"><i
+            <li class="nav-item"><a onclick="ajStart()" class="nav-link" href="/"><i
                         class="fas fa-chart-line"></i><span>&nbsp;Dashboard</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="/devices"><i
+            <li class="nav-item"><a onclick="ajStart()" class="nav-link" href="/devices"><i
                         class="fas fa-microchip"></i><span>&nbsp;Devices</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="#"><i
+            <li class="nav-item"><a onclick="ajStart()" class="nav-link" href="#"><i
                         class="fas fa-user-circle"></i><span>&nbsp;Profile</span></a></li>
             <li class="nav-item">
                 <button id="btnOut" class="nav-link" style="border: none; background-color: #fff;">

@@ -16,7 +16,7 @@ firebase.initializeApp({
 
 //!================//automatically send ajax when onAuthStateChanged(user)//================!//
 firebase.auth().signOut(); //!!!! IMPORTANT
-firebase.auth().onAuthStateChanged((user) => {
+firebase.auth().onAuthStateChanged(user => {
   if (user) {
     Swal.showLoading();
     user
@@ -45,7 +45,7 @@ firebase.auth().onAuthStateChanged((user) => {
   }
 });
 
-$("#authGoogle").click(() => {
+$("#authGoogle").on('click', () => {
   firebase
     .auth()
     .signInWithRedirect(new firebase.auth.GoogleAuthProvider())
@@ -54,7 +54,7 @@ $("#authGoogle").click(() => {
     })
     .catch((err) => console.error(err));
 });
-$("#authFacebook").click(() => {
+$("#authFacebook").on('click', () => {
   firebase
     .auth()
     .signInWithRedirect(new firebase.auth.FacebookAuthProvider())
@@ -93,7 +93,7 @@ firebase
     })
   });
 
-$("#loginForm").submit((event) => {
+$("#loginForm").on('submit', event => {
   event.preventDefault();
   Swal.showLoading();
 
@@ -103,18 +103,19 @@ $("#loginForm").submit((event) => {
   // As httpOnly cookies are to be used, do not persist any state client side.
   // firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
 
-  //!=============//signInWithEmailAndPassword(id, psk) on client-side//==============!//
+  //!=============/signInWithEmailAndPassword(id, psk) on client-side/==============!//
+  //!=============/wrong id => suggest register/==============!//
   firebase
     .auth()
     .signInWithEmailAndPassword(id, psk)
-    .catch((error) => {
+    .catch(err => {
       Swal.fire({
-        title: error,
+        title: err,
         icon: "error",
         allowOutsideClick: false
       }).then(result => {
         // use regexp here
-        if (result.value && (error.code.toString().match(/user/g) != null)) {
+        if (result.value && (err.code.toString().match(/user/g) != null)) {
           Swal.fire({
             icon: 'question',
             confirmButtonText: 'Đăng ký tài khoản mới'
@@ -178,7 +179,7 @@ $("#loginForm").submit((event) => {
                           break;
 
                         default:
-                          location.href = "/home"
+                          location.href = "/auth"
                           break;
                       }
                     }
