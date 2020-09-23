@@ -83,7 +83,7 @@ void setup()
   Serial.print(WiFi.localIP());
   Serial.println("' to connect");
 
-  webSocket.begin("192.168.1.3", 81, "/"); // server address, port and URL
+  webSocket.begin("192.168.1.4", 81, "/"); // server address, port and URL
 
   // webSocket.setReconnectInterval(5000); // try ever 5000 again if connection has failed
 }

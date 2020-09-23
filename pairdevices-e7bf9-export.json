@@ -1,14 +1,98 @@
 {
-  "bApb0Ypwg5YszGanWOBKre39zlg1" : {
-    "LocationNodes" : {
-      "home " : {
-        "locat" : {
-          "lat" : "11.016155856306641",
-          "lng" : "106.78210839884841",
-          "place" : "mie"
-        },
-        "state" : "on"
+  "Devices" : {
+    "userid-1" : {
+      "gardenid-1" : {
+        "deviceid-1" : {
+          "DeviceId" : "deviceid-1"
+        }
+      },
+      "gardenid-2" : {
+        "deviceid-1" : {
+          "DeviceId" : "deviceid-1"
+        }
       }
+    },
+    "userid-123" : {
+      "gardenid-123" : {
+        "deviceid-1" : {
+          "DeviceId" : "deviceid-1"
+        },
+        "deviceid-123" : {
+          "DeviceId" : "deviceid-123",
+          "Motor" : {
+            "NhoGiot" : "online",
+            "PhunSuong" : "online"
+          },
+          "Name" : "Potato",
+          "Sensor" : {
+            "DHT" : {
+              "Humid" : 60,
+              "Temp" : 30
+            },
+            "WaterLevel" : 4
+          }
+        },
+        "deviceid-2" : {
+          "DeviceId" : "deviceid-2"
+        }
+      }
+    },
+    "userid-2" : {
+      "gardenid-1" : {
+        "deviceid-1" : {
+          "DeviceId" : "deviceid-1"
+        }
+      },
+      "gardenid-2" : {
+        "deviceid-1" : {
+          "DeviceId" : "deviceid-1"
+        }
+      }
+    }
+  },
+  "Gardens" : {
+    "userid-1" : {
+      "gardenid-1" : {
+        "GardenId" : "gardenid-1"
+      },
+      "gardenid-2" : {
+        "GardenId" : "gardenid-2"
+      }
+    },
+    "userid-123" : {
+      "gardenid-1" : {
+        "GardenId" : "gardenid-1"
+      },
+      "gardenid-123" : {
+        "Address" : "Ha Noi",
+        "GardenId" : "gardenid-123",
+        "Location" : {
+          "Lat" : "10.234.5343",
+          "Long" : "4536.4234.78",
+          "Place" : "Khu cong nghe cao"
+        },
+        "MAC" : "A1:B2:C3",
+        "Name" : "Vuon 1"
+      },
+      "gardenid-2" : {
+        "GardenId" : "gardenid-2"
+      }
+    }
+  },
+  "Users" : {
+    "userid-1" : {
+      "UserId" : "userid-1"
+    },
+    "userid-123" : {
+      "Address" : "Q7, TPHCM",
+      "Age" : 21,
+      "Email" : "suong@gmail.com",
+      "ImageAvatar" : "https://...",
+      "Name" : "Suong",
+      "UserId" : "userid-123"
+    },
+    "userid-2" : {
+      "UserId" : "userid-2"
     }
   }
 }
