@@ -22,6 +22,8 @@ firebase.auth().onAuthStateChanged(user => {
     user
       .getIdToken()
       .then((idToken) => {
+        //!======/send ajax login request to server/=====!//
+        console.log(idToken);
         $.ajax({
           url: "/auth",
           method: "POST",

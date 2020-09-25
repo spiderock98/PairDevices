@@ -250,3 +250,4 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/node,python,windows,visualstudiocode
 pairdevices-e7bf9-firebase-adminsdk-tvzye-107bb73eb8.json
+package-lock.json
