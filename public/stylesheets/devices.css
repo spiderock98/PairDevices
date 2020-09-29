@@ -1,12 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
 body{
     font-family: 'Muli', sans-serif;
-    /* background: url("https://www.toptal.com/designers/subtlepatterns/patterns/geometry2.png"); */
-  }
+    background: url("https://www.toptal.com/designers/subtlepatterns/patterns/geometry2.png");
+}
+
+.badge{
+  font-family: 'Pacifico', cursive;
+}
 
 /*!====================/smooth scroll/====================!*/
 html {
-    scroll-behavior: smooth;
-  }
+  scroll-behavior: smooth;
+}
 
 /*!====================/legend border/====================!*/
 fieldset.scheduler-border {
@@ -43,7 +49,7 @@ legend.scheduler-border {
 	height:60px;
 	bottom:40px;
 	right:40px;
-	background-color: rgb(127, 206, 9);
+	background-color: rgb(228, 213, 0);
 	color:#FFF;
 	border-radius:50px;
 	text-align:center;
@@ -66,7 +72,7 @@ ul#floatBtn li{
 }
 
 ul#floatBtn li a{
-	background-color:rgb(127, 206, 9);
+	background-color:rgb(228, 213, 0);
 	color:#FFF;
 	border-radius:50px;
 	text-align:center;

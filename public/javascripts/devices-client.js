@@ -165,11 +165,13 @@ $("#inputGroupSelectSSID").on("change", () => {
 });
 
 //!================/Float button/================!//
-function floatNewGarden() {
-    ;
+function floatBtnNewDevice() {
+    //? views/devices/modalNewDevice.ejs
+    $("#modalNewDevice").modal("toggle")
 }
-function floatNewLocat() {
-    $("#modalNewDevices").modal("toggle")
+function floatBtnNewGarden() {
+    //? views/devices/modalNewGarden.ejs
+    $("#modalNewGarden").modal("toggle")
 }
 
 //!================/MapInit onload/================!//
@@ -221,10 +223,10 @@ function initAddMap() {
 
             if (tmpTitle != locatTitle) {
                 tmpTitle = locatTitle;
-                $("#formDevice").find("input[name='locat']").val(locatTitle);
+                $("#formGarden").find("input[name='locat']").val(locatTitle);
             }
             else {
-                $("#formDevice").find("input[name='locat']").val("");
+                $("#formGarden").find("input[name='locat']").val("");
             }
         }, 10);
     });

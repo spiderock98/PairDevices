@@ -11,7 +11,7 @@ livereload.watch(path.join(__dirname, 'public'));
 livereload.watch(path.join(__dirname, 'views'));
 
 app.set("port", process.env.PORT || 8880)
-app.set("views", path.join(__dirname, "views"));
+app.set("views", [path.join(__dirname, "views"), path.join(__dirname, "views", "devices")]);
 app.set("view engine", "ejs");
 app.use(logger("dev"));
 app.use(express.json());
@@ -27,7 +27,7 @@ app.use((req, res, next) => {
 app.use("/", require("./routes/index-server"));
 app.use("/home", require("./routes/home-server"));
 app.use("/auth", require("./routes/auth-server"));
-app.use("/devices", require("./routes/devices-server"));
+app.use("/devices", require("./routes/devices-server").router);
 //!====================//Firebase admin sdk config//====================!//
 const admin = require("firebase-admin");
 admin.initializeApp({
@@ -36,14 +36,15 @@ admin.initializeApp({
   ),
   databaseURL: "https://pairdevices-e7bf9.firebaseio.com",
 });
-//!====================//SocketIO middeware//====================!//
+//!====================/ SocketIO Middeware /====================!//
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
 server.listen(app.get("port"), () => {
   console.log(`Server started at: http://localhost:${app.get('port')}`);
 });
-// Reload code here
-// reload(app)
+//?========/ load consumer.js and pass it the socket.io object /========?//
+require('./routes/devices-server.js').start(io);
+
 
 io.on("connection", (socket) => {
   // from browser: onLoad() to put browser in to owm room
@@ -52,15 +53,15 @@ io.on("connection", (socket) => {
     console.log("[INFO] reg browser successful");
   });
   // from esp8266: register new node to server
-  socket.on("regEsp", (data) => {
-    // add some stuff
-    data["account"] = "";
-    data["connected"] = false;
-    data["socketType"] = "NodeMCU";
+  // socket.on("regEsp", (data) => {
+  //   // add some stuff
+  //   data["account"] = "";
+  //   data["connected"] = false;
+  //   data["socketType"] = "NodeMCU";
 
-    socket.join(data.UID); // put node socket into room
-    console.log("[INFO] reg ESP8266 successfully");
-  });
+  //   socket.join(data.UID); // put node socket into room
+  //   console.log("[INFO] reg ESP8266 successfully");
+  // });
 
   // from esp8266: sync virtual button state with physical button state
   socket.on("controller", (data) => {

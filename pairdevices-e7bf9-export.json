@@ -1,5 +1,29 @@
 {
   "Devices" : {
+    "bApb0Ypwg5YszGanWOBKre39zlg1" : {
+      "89fc1786-8104-4406-9149-3ec9bf89f034" : {
+        "926c9b4e-2082-4ba7-a84e-a207534e87ea" : {
+          "controller" : {
+            "kD" : 3,
+            "kI" : 2,
+            "kP" : 1
+          },
+          "dcMotor" : {
+            "NhoGiot" : 1,
+            "PhunSuong" : 1
+          },
+          "deviceId" : "926c9b4e-2082-4ba7-a84e-a207534e87ea",
+          "deviceName" : "Rainbow",
+          "sensor" : {
+            "DHT" : {
+              "humid" : 60,
+              "temp" : 30
+            },
+            "WaterLevel" : 4
+          }
+        }
+      }
+    },
     "userid-1" : {
       "gardenid-1" : {
         "deviceid-1" : {
@@ -20,8 +44,8 @@
         "deviceid-123" : {
           "DeviceId" : "deviceid-123",
           "Motor" : {
-            "NhoGiot" : "online",
-            "PhunSuong" : "online"
+            "NhoGiot" : 1,
+            "PhunSuong" : 0
           },
           "Name" : "Potato",
           "Sensor" : {
@@ -51,6 +75,18 @@
     }
   },
   "Gardens" : {
+    "bApb0Ypwg5YszGanWOBKre39zlg1" : {
+      "5bc39ae5-0187-48ca-b91d-69595cd74217" : {
+        "gardenId" : "5bc39ae5-0187-48ca-b91d-69595cd74217",
+        "gardenName" : "Vuon Sau Rieng",
+        "location" : {
+          "latCoor" : "1.2.3.4",
+          "lngCoor" : "5.6.7.8",
+          "place" : "Lam Dong"
+        },
+        "macAddr" : "4D:5E:6F"
+      }
+    },
     "userid-1" : {
       "gardenid-1" : {
         "GardenId" : "gardenid-1"
@@ -64,7 +100,6 @@
         "GardenId" : "gardenid-1"
       },
       "gardenid-123" : {
-        "Address" : "Ha Noi",
         "GardenId" : "gardenid-123",
         "Location" : {
           "Lat" : "10.234.5343",
@@ -80,6 +115,14 @@
     }
   },
   "Users" : {
+    "bApb0Ypwg5YszGanWOBKre39zlg1" : {
+      "address" : "38B Go Cat",
+      "age" : "22",
+      "email" : "admin@google.com",
+      "imgAvatar" : "",
+      "name" : "john wick",
+      "userId" : "bApb0Ypwg5YszGanWOBKre39zlg1"
+    },
     "userid-1" : {
       "UserId" : "userid-1"
     },

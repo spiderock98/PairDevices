@@ -235,7 +235,7 @@ $("#inputGroupSelectSSID").on('change', () => {
 //   console.log(data.target.value)
 // })
 
-// $('#formDevice').submit((event) => {
+// $('#formGarden').submit((event) => {
 //     event.preventDefault()
 //     Swal.mixin({
 //         toast: true,
@@ -248,19 +248,19 @@ $("#inputGroupSelectSSID").on('change', () => {
 //         title: 'Import New Device Successfully'
 //     })
 // })
-// $('#formDevice').submit((event) => {
+// $('#formGarden').submit((event) => {
 //     event.preventDefault()
 //     $.ajax({
 //         url: '/devices/newDevices',
 //         method: 'POST',
 //         data: {
-//             name: $('#formDevice').find("input[name='name']").val(),
-//             locat: $('#formDevice').find("input[name='locat']").val(),
+//             name: $('#formGarden').find("input[name='name']").val(),
+//             locat: $('#formGarden').find("input[name='locat']").val(),
 //             //TODO: ssid is <input> or <select>
-//             ssid: $('#formDevice').find("input[name='ssid']").val(),
-//             psk: $('#formDevice').find("input[name='psk']").val(),
-//             baud: $('#formDevice').find("select[name='baud']").val(),
-//             port: $('#formDevice').find("select[name='port']").val(),
+//             ssid: $('#formGarden').find("input[name='ssid']").val(),
+//             psk: $('#formGarden').find("input[name='psk']").val(),
+//             baud: $('#formGarden').find("select[name='baud']").val(),
+//             port: $('#formGarden').find("select[name='port']").val(),
 //         },
 //         success: (data, stt) => {
 //             //TODO: b/c XHR so it cannot take res.download here

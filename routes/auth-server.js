@@ -38,9 +38,9 @@ router.post('/getCurrentUID', (req, res) => {
   let cookie = req.cookies.session || "";
   admin.auth().verifySessionCookie(cookie, true)
     .then((decodedClaims) => {
-      res.end(decodedClaims.uid)
+      res.end(decodedClaims.uid);
     })
-    .catch(err => console.log(err))
+    .catch(err => console.error(err))
 })
 
 router.post('/register', (req, res) => {
