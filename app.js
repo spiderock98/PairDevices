@@ -86,7 +86,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  let arrTimeConfig = new Object();
+  let arrTimeConfig = {};
   socket.on("timeConfig", (data) => {
     let index = 0;
     Object.values(data.timeObj).forEach((element) => {

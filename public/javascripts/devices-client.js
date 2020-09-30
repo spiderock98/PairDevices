@@ -22,7 +22,7 @@ getCurrentUID().then((uid) => {
 
 objDeviceName = $("td.dvName"); // list all items
 // TODO: get database state
-let arrState = new Array();
+let arrState = [];
 for (let i = 0; i < objDeviceName.length; i++) {
     const element = objDeviceName[i];
 
@@ -195,7 +195,7 @@ function initAddMap() {
     });
 
     //!================/Listen click marker event/================!//
-    let markersArray = new Array();
+    let markersArray = [];
     let tmpTitle = "";
 
     google.maps.event.addListener(addMap, "click", function (event) {

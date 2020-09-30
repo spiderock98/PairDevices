@@ -44,10 +44,11 @@ router.post('/getCurrentUID', (req, res) => {
 })
 
 router.post('/register', (req, res) => {
+  const { email, password, displayName } = req.body;
   admin.auth().createUser({
-    email: req.body.email,
-    password: req.body.password,
-    displayName: req.body.displayName,
+    email: email,
+    password: password,
+    displayName: displayName,
     emailVerified: false,
     disabled: false
   })

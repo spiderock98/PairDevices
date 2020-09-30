@@ -65,7 +65,7 @@ $(() => {
 
 objDeviceName = $("td.dvName"); // list all items
 // TODO: get database state
-let arrState = new Array();
+let arrState = [];
 for (let i = 0; i < objDeviceName.length; i++) {
   const element = objDeviceName[i];
 

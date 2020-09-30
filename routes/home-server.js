@@ -31,13 +31,14 @@ router.get('/', (req, res) => {
 });
 
 router.post('/configTime', (req, res) => {
-    let cookie = req.cookies.session || ""
+    const cookie = req.cookies.session || ""
+    const { deviceName, startTime, midTime, endTime } = req.body;
     admin.auth().verifySessionCookie(cookie, true)
         .then((decodedClaims) => {
-            admin.database().ref(`${decodedClaims.uid}/LocationNodes/${req.body.deviceName}`).update({
-                startTime: `${req.body.startTime}`,
-                midTime: `${req.body.midTime}`,
-                endTime: `${req.body.endTime}`
+            admin.database().ref(`${decodedClaims.uid}/LocationNodes/${deviceName}`).update({
+                startTime: `${startTime}`,
+                midTime: `${midTime}`,
+                endTime: `${reqendTime}`
             })
             res.end();
         })
