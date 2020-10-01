@@ -38,13 +38,16 @@ function tick() {
             inversionAttempts: "dontInvert",
         });
         if (code) {
+            //? retangle qrcode
             drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
             drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
             drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
             drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+
             outputMessage.hidden = true;
             outputData.parentElement.hidden = false;
             outputData.innerText = code.data;
+            return;
         } else {
             outputMessage.hidden = false;
             outputData.parentElement.hidden = true;
