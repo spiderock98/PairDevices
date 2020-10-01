@@ -27,7 +27,7 @@ function initMap() {
 }
 
 //!================//VanillaWebsocket//================!//
-const WS_URL = "ws:///192.168.1.3:81";
+const WS_URL = "ws:///192.168.1.2:81";
 const ws = new WebSocket(WS_URL);
 
 function getCurrentUID() {
@@ -45,7 +45,7 @@ let myCurrentUID;
 getCurrentUID().then((uid) => {
   myCurrentUID = uid;
 }); // Global Var
-
+//!================/ ESP32-CAM /================!//
 let urlObj;
 let imgFrame = document.getElementById("cap");
 ws.onopen = () => console.log("[INFO] Connected to", WS_URL);

@@ -1,8 +1,8 @@
 const socket = io();
 
-//!================/VanillaWebsocket/================!//
-const WS_URL = "ws:///192.168.1.3:81";
-const ws = new WebSocket(WS_URL);
+// //!================/ VanillaWebsocket /================!//
+// const WS_URL = "ws:///192.168.1.2:81";
+// const ws = new WebSocket(WS_URL);
 
 function getCurrentUID() {
     return new Promise((resolve) => {
