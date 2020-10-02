@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./app"
+    "dev": "nodemon ./app",
+    "start": "node app.js",
+    "socket": "node ESP32-CamAI/Nodejs.CamServer/index.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.5",

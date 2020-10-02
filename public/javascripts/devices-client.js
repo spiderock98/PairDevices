@@ -4,7 +4,7 @@ const socket = io();
 // const WS_URL = "ws:///192.168.1.2:81";
 // const ws = new WebSocket(WS_URL);
 
-function getCurrentUID() {
+const getCurrentUID = () => {
     return new Promise((resolve) => {
         $.ajax({
             url: "/auth/getCurrentUID",
