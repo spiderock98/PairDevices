@@ -324,6 +324,43 @@ const io = (io) => {
     })
 }
 
+//!================/ Vanilla WebSocket for ESP32-CAM /================!//
+const WebSocket = require("ws");
+const wsServer = new WebSocket.Server({ port: 81 });
+wsServer.on("connection", ws => {
+    ws.on("message", msg => {
+        // console.log(msg);
+        const payload = JSON.parse(msg)[0];
+        console.log(payload);
+        switch (payload.EVENT) {
+            case "regESP":
+                console.log('[ESP]', "Hello world from ESP");
+                //? only update <objPendingGarden> if this <payload.UID> not in Firebase && must be in <arrPendingBrowser>
+                FirebaseDevices.staticIsExistGardenId(payload.UID, payload.MAC).then(flagExist => {
+                    if (!flagExist) {
+                        var indexBrowser = arrPendingBrowser.indexOf(payload.UID)
+                        if (indexBrowser > -1) {
+                            console.log('[ESP] are your browser wating for me');
+                            objPendingGarden[payload.MAC] = {
+                                "userId": payload.UID,
+                                "gardenId": payload.MAC, // equal MAC
+                                "macAddr": payload.MAC,
+                                // "indexBrowser": indexBrowser
+                            }
+                        }
+                    }
+                    else {
+                        //TODO: are you sure re-flash this device
+                    }
+                })
+                break;
+
+            default:
+                break;
+        }
+    })
+})
+
 
 
 module.exports = {

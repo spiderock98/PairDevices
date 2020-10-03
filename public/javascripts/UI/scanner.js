@@ -11,7 +11,7 @@ var outputData = document.getElementById("outputData");
 const btnReScan = document.getElementById("btnReScan");
 
 //!================/ VanillaWebsocket /================!//
-const WS_URL = "ws:///192.168.1.2:81";
+const WS_URL = "ws:///192.168.1.4:81";
 const ws = new WebSocket(WS_URL);
 let urlObj;
 ws.onopen = () => console.log("[INFO] Connected to", WS_URL);

@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon ./app",
+    "devApp": "nodemon ./app",
     "start": "node app.js",
-    "socket": "node ESP32-CamAI/Nodejs.CamServer/index.js"
+    "socket": "node ESP32-CamAI/Nodejs.CamServer/index.js",
+    "devSocket": "nodemon ESP32-CamAI/Nodejs.CamServer/index.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.5",
@@ -19,7 +20,8 @@
     "morgan": "~1.10.0",
     "nodemon": "^2.0.4",
     "socket.io": "^2.3.0",
-    "sweetalert2": "^10.3.5"
+    "sweetalert2": "^10.3.5",
+    "ws": "^7.3.1"
   },
   "devDependencies": {
     "livereload": "^0.9.1"

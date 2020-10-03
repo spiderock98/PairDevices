@@ -1,5 +1,28 @@
 const socket = io();
 
+// $(() => {
+//     $("#formGarden").on("submit", async (event) => {
+//         event.preventDefault();
+//         let board = $("#formGarden").find("select[name='board']").val();
+//         let id = 2;
+//         let add = "NodeMCU"
+//         let txtDemo = `baudrate${id == 1 ? "," : ""}${add}`;
+//         switch (board) {
+//             case "NodeMCU ESP8266 v1.0":
+//                 // console.log("nodemcu");
+//                 console.log(txtDemo);
+//                 break;
+
+//             case "AI Thinker ESP32-CAM":
+//                 // console.log("camera");
+//                 break;
+
+//             default:
+//                 break;
+//         }
+//     });
+// })
+
 // //!================/ VanillaWebsocket /================!//
 // const WS_URL = "ws:///192.168.1.2:81";
 // const ws = new WebSocket(WS_URL);
