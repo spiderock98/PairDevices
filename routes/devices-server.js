@@ -239,7 +239,7 @@ router.post('/updateGarden', (req, res) => {
                         }
                     }
                     if (!flagSuccessfully) {
-                        console.error("Time out, Failed to add garden");
+                        console.error("[ERROR] Time out, Failed to add garden");
                     }
 
                     // flush all
@@ -248,7 +248,7 @@ router.post('/updateGarden', (req, res) => {
                     console.log('[objPendingGarden 2]', objPendingGarden);
                     console.log('[arrPendingBrowser 2]', arrPendingBrowser);
 
-                }, 15000);
+                }, 20000);
             }
             else {
                 FirebaseGarden.updateGarden();
@@ -289,17 +289,6 @@ router.post('/updateDevice', (req, res) => {
 const io = (io) => {
     io.on('connection', socket => {
         socket.on('regEsp', (message) => {
-            // console.log('[ESP]', "Hello world from ESP");
-            // var objPendingGarden = {};
-            // objPendingGarden['userId'] = message.UID
-            // objPendingGarden['macAddr'] = message.MAC;
-            // // objPendingGarden['flagAdded'] = false;
-            // objPendingGarden['index'] = arrPendingGarden.length;
-            // FirebaseDevices.staticIsExistGardenId(message.UID, message.MAC).then(flagExist => {
-            //     if (!flagExist) arrPendingGarden.push(objPendingGarden);
-            // })
-
-
             console.log('[ESP]', "Hello world from ESP");
             //? only update <objPendingGarden> if this <message.UID> not in Firebase && must be in <arrPendingBrowser>
             FirebaseDevices.staticIsExistGardenId(message.UID, message.MAC).then(flagExist => {
@@ -327,36 +316,53 @@ const io = (io) => {
 //!================/ Vanilla WebSocket for ESP32-CAM /================!//
 const WebSocket = require("ws");
 const wsServer = new WebSocket.Server({ port: 81 });
+let arrSocket = [];
 wsServer.on("connection", ws => {
+    arrSocket.push(ws);
     ws.on("message", msg => {
-        // console.log(msg);
-        const payload = JSON.parse(msg)[0];
-        console.log(payload);
-        switch (payload.EVENT) {
-            case "regESP":
-                console.log('[ESP]', "Hello world from ESP");
-                //? only update <objPendingGarden> if this <payload.UID> not in Firebase && must be in <arrPendingBrowser>
-                FirebaseDevices.staticIsExistGardenId(payload.UID, payload.MAC).then(flagExist => {
-                    if (!flagExist) {
-                        var indexBrowser = arrPendingBrowser.indexOf(payload.UID)
-                        if (indexBrowser > -1) {
-                            console.log('[ESP] are your browser wating for me');
-                            objPendingGarden[payload.MAC] = {
-                                "userId": payload.UID,
-                                "gardenId": payload.MAC, // equal MAC
-                                "macAddr": payload.MAC,
-                                // "indexBrowser": indexBrowser
+        //? try on sigle-regular event and catch on batch-camera event >> failed on JSON.parse
+        try {
+            const payload = JSON.parse(msg)[0];
+            //? event handler
+            switch (payload.EVENT) {
+                case "regESP":
+                    console.log('[ESP]', "Hello world from ESP");
+                    //? only update <objPendingGarden> if this <payload.UID> not in Firebase && must be in <arrPendingBrowser>
+                    FirebaseDevices.staticIsExistGardenId(payload.UID, payload.MAC).then(flagExist => {
+                        if (!flagExist) {
+                            var indexBrowser = arrPendingBrowser.indexOf(payload.UID)
+                            if (indexBrowser > -1) {
+                                console.log('[ESP] are your browser wating for me');
+                                objPendingGarden[payload.MAC] = {
+                                    "userId": payload.UID,
+                                    "gardenId": payload.MAC, // equal MAC
+                                    "macAddr": payload.MAC,
+                                    // "indexBrowser": indexBrowser
+                                }
                             }
+                            else {
+                                //TODO:
+                            }
+                            ws.send("{'status':'OK','code':'200'}");
                         }
-                    }
-                    else {
-                        //TODO: are you sure re-flash this device
-                    }
-                })
-                break;
+                        else {
+                            //TODO: are you sure re-flash this device
+                        }
+                    })
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
+            }
+        } catch (error) {
+            arrSocket.forEach((ws, i) => {
+                //? The current state of the connection https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
+                if (ws.readyState === ws.OPEN) {
+                    ws.send(msg);
+                } else {
+                    arrSocket.splice(i, 1);
+                }
+            });
         }
     })
 })

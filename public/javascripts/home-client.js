@@ -27,7 +27,7 @@ function initMap() {
 }
 
 //!================//VanillaWebsocket//================!//
-const WS_URL = "ws:///192.168.1.2:81";
+const WS_URL = "ws:///192.168.1.4:81";
 const ws = new WebSocket(WS_URL);
 
 function getCurrentUID() {
