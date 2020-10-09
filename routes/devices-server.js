@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const admin = require('firebase-admin');
 const { v4: uuidv4 } = require('uuid');
+class Emitter extends require('events') { }
 // const { exec } = require('child_process')
 // const fs = require('fs');
 // const path = require('path')
@@ -316,9 +317,12 @@ const io = (io) => {
 //!================/ Vanilla WebSocket for ESP32-CAM /================!//
 const WebSocket = require("ws");
 const wsServer = new WebSocket.Server({ port: 81 });
-let arrSocket = [];
+// let arrSocket = [];
+let objEnCam = {};
 wsServer.on("connection", ws => {
-    arrSocket.push(ws);
+    // arrSocket.push(ws);
+    // init some stuff if ESP submit <handShakeEnCam> event
+    let msgUID, msgMAC;
     ws.on("message", msg => {
         //? try on sigle-regular event and catch on batch-camera event >> failed on JSON.parse
         try {
@@ -326,7 +330,7 @@ wsServer.on("connection", ws => {
             //? event handler
             switch (payload.EVENT) {
                 case "regESP":
-                    console.log('[ESP]', "Hello world from ESP");
+                    // console.log('[ESP]', "Hello world from ESP 1");
                     //? only update <objPendingGarden> if this <payload.UID> not in Firebase && must be in <arrPendingBrowser>
                     FirebaseDevices.staticIsExistGardenId(payload.UID, payload.MAC).then(flagExist => {
                         if (!flagExist) {
@@ -343,26 +347,64 @@ wsServer.on("connection", ws => {
                             else {
                                 //TODO:
                             }
-                            ws.send("{'status':'OK','code':'200'}");
+                            ws.send("{'EVENT':'demo','status':'OK','code':'200'}");
                         }
                         else {
                             //TODO: are you sure re-flash this device
+                            console.log("[INFO] are you sure re-flash this device ? ");
                         }
                     })
+                    break;
+
+                case "espEnCamera":
+                    // init new array
+                    console.log("espEnCamera");
+                    msgUID = payload.UID;
+                    msgMAC = payload.MAC;
+                    objEnCam[payload.MAC] = { "arrCamBrow": [ws], state: 0 };
+                    break;
+
+                case "browserEnCam":
+                    // just exec if <arrCamBrow> got camera ws in there at index 0
+                    if (objEnCam["8C:AA:B5:8C:7F:7C"]["state"] == 0) {
+                        objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 1;
+                        objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
+                        objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserEnCam"}');
+                        console.log(objEnCam);
+                    }
+                    else {
+                        // console.log("[INFO] Camera is not ready !!!");
+                        objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 1;
+                        objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
+                    }
                     break;
 
                 default:
                     break;
             }
         } catch (error) {
-            arrSocket.forEach((ws, i) => {
-                //? The current state of the connection https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
-                if (ws.readyState === ws.OPEN) {
-                    ws.send(msg);
+            // console.log(objMAC);
+            const arrSocket = objEnCam[msgMAC]["arrCamBrow"]
+            arrSocket.forEach((wsItem, i) => {
+                if (wsItem.readyState === wsItem.OPEN) {
+                    wsItem.send(msg);
                 } else {
+                    console.error("[INFO] Socket Error");
                     arrSocket.splice(i, 1);
                 }
             });
+
+
+
+
+            // arrSocket.forEach((ws, i) => {
+            //     //? The current state of the connection https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
+            //     if (ws.readyState === ws.OPEN) {
+            //         ws.send(msg);
+            //     } else {
+            //         arrSocket.splice(i, 1);
+            //     }
+            // });
         }
     })
 })

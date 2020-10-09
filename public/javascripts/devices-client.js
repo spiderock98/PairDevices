@@ -1,7 +1,7 @@
 const socket = io();
 
 // //!================/ VanillaWebsocket /================!//
-// const WS_URL = "ws:///192.168.1.2:81";
+// const WS_URL = "ws:///192.168.1.4:81";
 // const ws = new WebSocket(WS_URL);
 
 const getCurrentUID = () => {
@@ -164,7 +164,7 @@ $("#inputGroupSelectSSID").on("change", () => {
     }
 });
 
-//!================/Float button/================!//
+//!================/ Float button /================!//
 function floatBtnNewDevice() {
     //? views/devices/modalNewDevice.ejs
     $("#modalNewDevice").modal("toggle")
@@ -174,7 +174,7 @@ function floatBtnNewGarden() {
     $("#modalNewGarden").modal("toggle")
 }
 
-//!================/MapInit onload/================!//
+//!================/ MapInit onload /================!//
 let addMap;
 let service;
 let infowindow;
