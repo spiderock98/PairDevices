@@ -320,9 +320,9 @@ const wsServer = new WebSocket.Server({ port: 81 });
 // let arrSocket = [];
 let objEnCam = {};
 wsServer.on("connection", ws => {
-    // arrSocket.push(ws);
     // init some stuff if ESP submit <handShakeEnCam> event
     let msgUID, msgMAC;
+
     ws.on("message", msg => {
         //? try on sigle-regular event and catch on batch-camera event >> failed on JSON.parse
         try {
@@ -364,18 +364,35 @@ wsServer.on("connection", ws => {
                     objEnCam[payload.MAC] = { "arrCamBrow": [ws], state: 0 };
                     break;
 
+                //? TEST CASE:
+                //=1. chưa có cam mà brow vào >> objEnCam chưa được khởi tạo
+                //=2. có cam, current 0 brow, state ON/OFF mà có brow vào
+                //=3. có cam; current 1,2,n brow; state ON/OFF mà có brow khác vào
                 case "browserEnCam":
-                    // just exec if <arrCamBrow> got camera ws in there at index 0
-                    if (objEnCam["8C:AA:B5:8C:7F:7C"]["state"] == 0) {
-                        objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 1;
-                        objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
-                        objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserEnCam"}');
-                        console.log(objEnCam);
-                    }
-                    else {
-                        // console.log("[INFO] Camera is not ready !!!");
-                        objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 1;
-                        objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
+                    console.log("browserEnCam");
+                    if (objEnCam.hasOwnProperty("8C:AA:B5:8C:7F:7C")) {
+                        // just exec if <arrCamBrow> got ONLY camera ws in there at index 0
+                        if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].length == 1) {
+                            if (objEnCam["8C:AA:B5:8C:7F:7C"]["state"] == 0) {
+                                objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 1;
+                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
+                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserEnCam"}');
+                            } else {
+                                console.error("[INFO] Something Wrong !!!");
+                            }
+                        }
+                        else if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].length > 1) {
+                            if (objEnCam["8C:AA:B5:8C:7F:7C"]["state"] == 0) {
+                                objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 1;
+                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
+                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserEnCam"}');
+                            } else {
+                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
+                            }
+                        }
+                    } else {
+                        //TODO: return to brow
+                        console.error("[INFO] Camera is not connect to server or not ready !!!");
                     }
                     break;
 
@@ -383,29 +400,34 @@ wsServer.on("connection", ws => {
                     break;
             }
         } catch (error) {
-            // console.log(objMAC);
+            // console.error("[ERROR]:", error);
             const arrSocket = objEnCam[msgMAC]["arrCamBrow"]
             arrSocket.forEach((wsItem, i) => {
+                // The current state of the connection https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
                 if (wsItem.readyState === wsItem.OPEN) {
                     wsItem.send(msg);
                 } else {
-                    console.error("[INFO] Socket Error");
+                    console.error("[INFO] Socket Error >> POPing Error Socket");
                     arrSocket.splice(i, 1);
+                    // check if only camera in <arrSocket>
+                    if (arrSocket.length == 1) {
+                        objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
+                        objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 0;
+                    }
                 }
             });
-
-
-
-
-            // arrSocket.forEach((ws, i) => {
-            //     //? The current state of the connection https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
-            //     if (ws.readyState === ws.OPEN) {
-            //         ws.send(msg);
-            //     } else {
-            //         arrSocket.splice(i, 1);
-            //     }
-            // });
         }
+    })
+    // ws.on("close", (code) => {
+    //     console.log("[INFO] socket closed code", code);
+    //     const arrSocket = objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"];
+    //     if (arrSocket.length == 1) {
+    //         objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
+    //         objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 0;
+    //     }
+    // })
+    ws.on("error", (err) => {
+        console.err(err);
     })
 })
 

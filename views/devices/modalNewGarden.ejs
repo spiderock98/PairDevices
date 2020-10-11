@@ -1,4 +1,6 @@
-<!--//!===================/Modal New Gardens/===================!// -->
+<!--? include in <home.ejs> ?-->
+
+<!--//!===================/ Modal New Gardens /===================!// -->
 <div class="modal fade" data-backdrop="static" data-easein="flipYIn" id="modalNewGarden" tabindex="-1" role="dialog"
     aria-labelledby="mdTitleNewGarden" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
@@ -103,3 +105,31 @@
         </form>
     </div>
 </div>
+
+<script>
+    $("#show_hide_password a").on("click", () => {
+        if ($("#show_hide_password input").attr("type") == "text") {
+            $("#show_hide_password input").attr("type", "password");
+            $("#show_hide_password i").addClass("fa-eye-slash");
+            $("#show_hide_password i").removeClass("fa-eye");
+        } else if ($("#show_hide_password input").attr("type") == "password") {
+            $("#show_hide_password input").attr("type", "text");
+            $("#show_hide_password i").removeClass("fa-eye-slash");
+            $("#show_hide_password i").addClass("fa-eye");
+        }
+    });
+
+    $("#inputGroupSelectSSID").on('change', () => {
+        let ssid = document.getElementById("inputGroupSelectSSID").value;
+        if (ssid == "Other") {
+            $("#showhideInputTextSSID").removeClass("d-none");
+            $("#showhideInputTextSSID").attr("name", "ssid");
+            $("#inputGroupSelectSSID").removeAttr("name");
+        } else {
+            $("#showhideInputTextSSID").addClass("d-none");
+            $("#showhideInputTextSSID").removeAttr("name");
+            $("#inputGroupSelectSSID").attr("name", "ssid");
+        }
+    });
+
+</script>

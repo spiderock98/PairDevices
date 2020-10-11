@@ -4,6 +4,7 @@ const socket = io();
 // const WS_URL = "ws:///192.168.1.4:81";
 // const ws = new WebSocket(WS_URL);
 
+//!============/ init myCurrentUID as global scope variable  /===========!//
 const getCurrentUID = () => {
     return new Promise((resolve) => {
         $.ajax({
@@ -20,6 +21,8 @@ getCurrentUID().then((uid) => {
     myCurrentUID = uid;
 }); // Global Var
 
+
+//!============/ Others  /===========!//
 objDeviceName = $("td.dvName"); // list all items
 // TODO: get database state
 let arrState = [];
@@ -56,7 +59,6 @@ for (let i = 0; i < objDeviceName.length; i++) {
             // console.log(`OFF ${element.innerHTML}`);
         }
     });
-
 
     $(`#btnRemoveDevices${i + 1}`).on("click", () => {
         Swal.fire({
@@ -132,102 +134,5 @@ for (let i = 0; i < objDeviceName.length; i++) {
                 title: "Updated time successfully",
             });
         });
-    });
-}
-
-$("#btnOut").on("click", () => {
-    location.href = "/sessionLogout"; // to index-server
-});
-
-$("#show_hide_password a").on("click", () => {
-    if ($("#show_hide_password input").attr("type") == "text") {
-        $("#show_hide_password input").attr("type", "password");
-        $("#show_hide_password i").addClass("fa-eye-slash");
-        $("#show_hide_password i").removeClass("fa-eye");
-    } else if ($("#show_hide_password input").attr("type") == "password") {
-        $("#show_hide_password input").attr("type", "text");
-        $("#show_hide_password i").removeClass("fa-eye-slash");
-        $("#show_hide_password i").addClass("fa-eye");
-    }
-});
-
-$("#inputGroupSelectSSID").on("change", () => {
-    let ssid = document.getElementById("inputGroupSelectSSID").value;
-    if (ssid == "Other") {
-        $("#showhideInputTextSSID").removeClass("d-none");
-        $("#showhideInputTextSSID").attr("name", "ssid");
-        $("#inputGroupSelectSSID").removeAttr("name");
-    } else {
-        $("#showhideInputTextSSID").addClass("d-none");
-        $("#showhideInputTextSSID").removeAttr("name");
-        $("#inputGroupSelectSSID").attr("name", "ssid");
-    }
-});
-
-//!================/ Float button /================!//
-function floatBtnNewDevice() {
-    //? views/devices/modalNewDevice.ejs
-    $("#modalNewDevice").modal("toggle")
-}
-function floatBtnNewGarden() {
-    //? views/devices/modalNewGarden.ejs
-    $("#modalNewGarden").modal("toggle")
-}
-
-//!================/ MapInit onload /================!//
-let addMap;
-let service;
-let infowindow;
-let autocomplete;
-
-function initAddMap() {
-    addMap = new google.maps.Map(document.getElementById("addMap"), {
-        center: new google.maps.LatLng(10.769444, 106.681944),
-        zoom: 9,
-        fullscreenControl: false,
-        keyboardShortcuts: false,
-        mapTypeControl: false,
-        panControl: false,
-        rotateControl: false,
-        scaleControl: false,
-        streetViewControl: false,
-        zoomControl: false,
-    });
-
-    //!================/Listen click marker event/================!//
-    let markersArray = [];
-    let tmpTitle = "";
-
-    google.maps.event.addListener(addMap, "click", function (event) {
-        // delete others overlays
-        if (markersArray) {
-            for (i in markersArray) {
-                markersArray[i].setMap(null);
-            }
-            markersArray.length = 0;
-        }
-        const marker = new google.maps.Marker({
-            position: event.latLng,
-            map: addMap,
-            animation: google.maps.Animation.BOUNCE,
-        });
-        markersArray.push(marker);
-
-        //!============/Return something onClick/============!//
-        $("#hidLatCoor").text(event.latLng.lat());
-        $("#hidLngCoor").text(event.latLng.lng());
-
-        setTimeout(() => {
-            const locatTitle = $('div .title').text();
-            const locatAdrr = $('div .address-line .full-width').text();
-
-            if (tmpTitle != locatTitle) {
-                tmpTitle = locatTitle;
-                $("#formGarden").find("input[name='locat']").val(locatTitle);
-            }
-            else {
-                $("#formGarden").find("input[name='locat']").val("");
-            }
-        }, 10);
     });
 }

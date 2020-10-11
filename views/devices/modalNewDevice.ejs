@@ -1,6 +1,6 @@
-<!--? include in <devices.ejs> ?-->
+<!--? include in <home.ejs> ?-->
 
-<!--//!===================/Modal New Device/===================!// -->
+<!--//!===================/ Modal New Device /===================!// -->
 <div class="modal fade" data-backdrop="static" data-easein="whirlIn" id="modalNewDevice" tabindex="-1" role="dialog"
     aria-labelledby="mdTitleNewDevice" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
@@ -27,25 +27,25 @@
                             <input required class="form-control" type="text" name="deviceName" aria-label="deviceName"
                                 aria-describedby="addon-wrapping">
                         </div>
+                        <div class="row align-items-center input-group mb-3">
+                            <div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a
+                                webcam
+                                enabled)</div>
+                            <canvas id="canvas" hidden></canvas>
+                            <div id="output" hidden>
+                                <div id="outputMessage">No QR code detected.</div>
+                                <div hidden><b>Data:</b> <span id="outputData"></span></div>
+                                <button id="btnReScan" hidden>Rescan</button>
+                            </div>
+                        </div>
+                    </fieldset>
                 </div>
-                <div class="row align-items-center input-group mb-3">
-                    <div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a
-                        webcam
-                        enabled)</div>
-                    <canvas id="canvas" hidden></canvas>
-                    <div id="output" hidden>
-                        <div id="outputMessage">No QR code detected.</div>
-                        <div hidden><b>Data:</b> <span id="outputData"></span></div>
-                        <button id="btnReScan" hidden>Rescan</button>
-                    </div>
-                </div>
-                </fieldset>
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                    id="btnCloseDeviceModal">Close</button>
+                <button type="submit" class="btn btn-primary">Save and Upload</button>
+            </div>
+        </form>
     </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnCloseDeviceModal">Close</button>
-        <button type="submit" class="btn btn-primary">Save and Upload</button>
-    </div>
-    </form>
-</div>
 </div>

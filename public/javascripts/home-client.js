@@ -9,10 +9,71 @@
 // });
 const socket = io();
 
-//!================//MapInit onload//================!//
-var myMap;
-function initMap() {
-  myMap = new google.maps.Map(document.getElementById("myMap"), {
+//!================/ MapInit onload /================!//
+function initMultiMap() {
+  initViewMap();
+  initAddMap();
+}
+//?======/ map on add device modal /=======?//
+let addMap;
+let service;
+let infowindow;
+let autocomplete;
+const initAddMap = () => {
+  addMap = new google.maps.Map(document.getElementById("addMap"), {
+    center: new google.maps.LatLng(10.769444, 106.681944),
+    zoom: 9,
+    fullscreenControl: false,
+    keyboardShortcuts: false,
+    mapTypeControl: false,
+    panControl: false,
+    rotateControl: false,
+    scaleControl: false,
+    streetViewControl: false,
+    zoomControl: false,
+  });
+
+  //!================/ Listen click marker event /================!//
+  let markersArray = [];
+  let tmpTitle = "";
+
+  google.maps.event.addListener(addMap, "click", function (event) {
+    // delete others overlays
+    if (markersArray) {
+      for (i in markersArray) {
+        markersArray[i].setMap(null);
+      }
+      markersArray.length = 0;
+    }
+    const marker = new google.maps.Marker({
+      position: event.latLng,
+      map: addMap,
+      animation: google.maps.Animation.BOUNCE,
+    });
+    markersArray.push(marker);
+
+    //!============/Return something onClick/============!//
+    $("#hidLatCoor").text(event.latLng.lat());
+    $("#hidLngCoor").text(event.latLng.lng());
+
+    setTimeout(() => {
+      const locatTitle = $('div .title').text();
+      const locatAdrr = $('div .address-line .full-width').text();
+
+      if (tmpTitle != locatTitle) {
+        tmpTitle = locatTitle;
+        $("#formGarden").find("input[name='locat']").val(locatTitle);
+      }
+      else {
+        $("#formGarden").find("input[name='locat']").val("");
+      }
+    }, 10);
+  });
+}
+//?======/ map on homepage /=======?//
+var viewMap;
+const initViewMap = () => {
+  viewMap = new google.maps.Map(document.getElementById("viewMap"), {
     center: new google.maps.LatLng(10.769444, 106.681944),
     zoom: 9,
     fullscreenControl: false,
@@ -26,10 +87,7 @@ function initMap() {
   });
 }
 
-//!================//VanillaWebsocket//================!//
-const WS_URL = "ws:///192.168.1.4:81";
-const ws = new WebSocket(WS_URL);
-
+//!============/ init myCurrentUID as global scope variable  /===========!//
 function getCurrentUID() {
   return new Promise((resolve) => {
     $.ajax({
@@ -45,7 +103,12 @@ let myCurrentUID;
 getCurrentUID().then((uid) => {
   myCurrentUID = uid;
 }); // Global Var
-//!================/ ESP32-CAM /================!//
+
+//!================/ VanillaWebsocket /================!//
+const WS_URL = "ws:///192.168.1.5:81";
+const ws = new WebSocket(WS_URL);
+
+//!================/ ESP32-CAM on security area field /================!//
 let urlObj;
 let imgFrame = document.getElementById("cap");
 ws.onopen = () => console.log("[INFO] Connected to", WS_URL);
@@ -58,153 +121,106 @@ ws.onmessage = (payload) => {
   imgFrame.src = urlObj;
 };
 
+//!================/ ESP32-CAM on QR SCANNER /================!//
+var video = document.createElement("video");
+var canvasElement = document.getElementById("canvas");
+var canvas = canvasElement.getContext("2d");
+var loadingMessage = document.getElementById("loadingMessage");
+var outputContainer = document.getElementById("output");
+var outputMessage = document.getElementById("outputMessage");
+var outputData = document.getElementById("outputData");
+const btnReScan = document.getElementById("btnReScan");
+
+function drawLine(begin, end, color) {
+  canvas.beginPath();
+  canvas.moveTo(begin.x, begin.y);
+  canvas.lineTo(end.x, end.y);
+  canvas.lineWidth = 4;
+  canvas.strokeStyle = color;
+  canvas.stroke();
+}
+function tick() {
+  loadingMessage.innerText = "⌛ Loading video..."
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    loadingMessage.hidden = true;
+    canvasElement.hidden = false;
+    outputContainer.hidden = false;
+
+    canvasElement.height = video.videoHeight;
+    canvasElement.width = video.videoWidth;
+    //? display video on canvas
+    canvas.drawImage(imgFrame, 0, 0, canvasElement.width, canvasElement.height);
+    var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+    //? try to find QR Image
+    var code = jsQR(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: "dontInvert",
+    });
+    //? ON detect QR Image
+    if (code) {
+      //? retangle qrcode
+      drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+      drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+      drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+      drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+
+      outputMessage.hidden = true;
+      outputData.parentElement.hidden = false;
+      outputData.innerText = code.data;
+
+
+      console.log(code.data);
+      stopStream();
+      btnReScan.hidden = false;
+      const objDeviceInfo = JSON.parse(code.data);
+      console.log(objDeviceInfo);
+      $("#formDevice").find("input[name='deviceId']").val(objDeviceInfo.deviceId);
+      return;
+    } else {
+      outputMessage.hidden = false;
+      outputData.parentElement.hidden = true;
+    }
+  }
+  requestAnimationFrame(tick);
+}
+//? trigger when add new device
+const startStream = () => {
+  ws.send('[{"EVENT":"browserEnCam"}]');
+  btnReScan.hidden = true;
+  // Use facingMode: environment to attemt to get the front camera on phones
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+    .then(Stream => {
+      video.srcObject = Stream;
+      video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+      requestAnimationFrame(tick);
+    });
+}
+const stopStream = () => {
+  video.srcObject.getTracks().forEach(track => track.stop());
+}
+
+$("#btnCloseDeviceModal").on("click", () => {
+  stopStream();
+})
+$("#btnReScan").on("click", () => {
+  startStream();
+})
 //!=======/when page load finish/=======!//
 $(() => {
   socket.emit("regBrowser");
 });
 
-objDeviceName = $("td.dvName"); // list all items
-// TODO: get database state
-let arrState = [];
-for (let i = 0; i < objDeviceName.length; i++) {
-  const element = objDeviceName[i];
 
-  socket.on(`${element.innerHTML}`, (btnState) => {
-    if (btnState == "on") {
-      $(`#customSwitch${i + 1}`).prop("checked", true);
-      arrState[i] = "on";
-    } else if (btnState == "off") {
-      $(`#customSwitch${i + 1}`).prop("checked", false);
-      arrState[i] = "off";
-    }
-  });
+//!============/ Others Script /===========!//
 
-  $(`#customSwitch${i + 1}`).on('change', () => {
-    if (arrState[i] == "off") {
-      arrState[i] = "on";
-      socket.emit("socketType", {
-        uid: myCurrentUID,
-        physicalName: element.innerHTML,
-        platform: "browser",
-        state: "on",
-      });
-    } else {
-      arrState[i] = "off";
-      socket.emit("socketType", {
-        uid: myCurrentUID,
-        physicalName: element.innerHTML,
-        platform: "browser",
-        state: "off",
-      });
-      // console.log(`OFF ${element.innerHTML}`);
-    }
-  });
-
-  $(`#btnRemoveDevices${i + 1}`).on('click', () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.value) {
-        deviceName = $(`#btnRemoveDevices${i + 1}`)
-          .siblings()
-          .eq(2);
-        $.ajax({
-          url: "/devices/removeDevices",
-          method: "POST",
-          data: { name: deviceName[0].innerHTML },
-          success: () => {
-            Swal.fire(
-              "Deleted!",
-              `Your ${deviceName[0].innerHTML} has been deleted.`,
-              "success"
-            ).then(() => (location.href = "/"));
-          },
-        });
-      }
-    });
-  });
-
-  $(`#btnConfigure${i + 1}`).on('click', () => {
-    deviceName = $(`#btnRemoveDevices${i + 1}`)
-      .siblings()
-      .eq(2);
-
-    $(`#btnTimeConfirm${i + 1}`).on('click', () => {
-      // console.log('click');
-
-      let objTimeConfig = {
-        deviceName: deviceName[0].innerHTML,
-        startTime: $(`#startTime${i + 1}`).val(),
-        midTime: $(`#midTime${i + 1}`).val(),
-        endTime: $(`#endTime${i + 1}`).val(),
-      };
-
-      $.ajax({
-        type: "POST",
-        url: "/home/configTime",
-        data: objTimeConfig,
-        success: () => {
-          socket.emit("timeConfig", {
-            uid: myCurrentUID,
-            physicalName: element.innerHTML,
-            platform: "browser",
-            timeObj: {
-              startTime: $(`#startTime${i + 1}`).val(),
-              midTime: $(`#midTime${i + 1}`).val(),
-              endTime: $(`#endTime${i + 1}`).val(),
-            },
-          });
-        },
-      });
-
-      Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-      }).fire({
-        icon: "success",
-        title: "Updated time successfully",
-      });
-    });
-  });
+//!================/ Float button /================!//
+function floatBtnNewDevice() {
+  //? views/devices/modalNewDevice.ejs
+  $("#modalNewDevice").modal("toggle")
 }
-
-$("#btnOut").on('click', () => {
-  location.href = "/sessionLogout"; // to index-server
-});
-
-$("#show_hide_password a").on("click", () => {
-  if ($("#show_hide_password input").attr("type") == "text") {
-    $("#show_hide_password input").attr("type", "password");
-    $("#show_hide_password i").addClass("fa-eye-slash");
-    $("#show_hide_password i").removeClass("fa-eye");
-  } else if ($("#show_hide_password input").attr("type") == "password") {
-    $("#show_hide_password input").attr("type", "text");
-    $("#show_hide_password i").removeClass("fa-eye-slash");
-    $("#show_hide_password i").addClass("fa-eye");
-  }
-});
-
-$("#inputGroupSelectSSID").on('change', () => {
-  let ssid = document.getElementById("inputGroupSelectSSID").value;
-  if (ssid == "Other") {
-    $("#showhideInputTextSSID").removeClass("d-none");
-    $("#showhideInputTextSSID").attr("name", "ssid");
-    $("#inputGroupSelectSSID").removeAttr("name");
-  } else {
-    $("#showhideInputTextSSID").addClass("d-none");
-    $("#showhideInputTextSSID").removeAttr("name");
-    $("#inputGroupSelectSSID").attr("name", "ssid");
-  }
-});
+function floatBtnNewGarden() {
+  //? views/devices/modalNewGarden.ejs
+  $("#modalNewGarden").modal("toggle")
+}
 
 // TODO: <!-- Overlay Button still get error - PLEASE COMMMENT to FIX LATER -->
 // (function () {

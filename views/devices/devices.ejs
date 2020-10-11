@@ -17,18 +17,9 @@
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.js"></script>
 
     <!-- ? https://codepen.io/wisnust10/full/qZaPBY ? -->
-    <script defer src="javascripts/UI/openModal.js"></script>
     <script defer src="javascripts/devices-client.js"></script>
     <script defer src="javascripts/UI/bs-init.js"></script>
     <script defer src="javascripts/UI/theme.js"></script>
-    <script defer src="javascripts/UI/jsQR.js"></script>
-    <script defer src="javascripts/UI/scanner.js"></script>
-
-    <script src="javascripts/UI/mapBypass.js"></script>
-    <script defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7pWv_ReH_hkeTgscLBJFkJ6eXVQCkoJs&callback=initAddMap"
-        type="text/javascript">
-        </script>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
         integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
@@ -46,10 +37,6 @@
                 <div id="sectionDevices">
 
                     <%- include('common/header')%>
-
-                    <%- include('devices/modalNewGarden')%>
-
-                    <%-include ('devices/modalNewDevice') %>
 
                 </div>
 
@@ -116,23 +103,6 @@
 
         </div>
         <!-- <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a> -->
-
-        <!-- //!=====================/float button/=====================!// -->
-        <a href="#" class="float" id="menu-share">
-            <i class="fas fa-plus my-float"></i>
-        </a>
-        <ul id="floatBtn">
-            <li><a href="javascript:floatBtnNewGarden();">
-                    <i class="fas fa-map-marked-alt my-float"></i>
-                </a></li>
-            <!-- <li><a href="javascript:floatBtnNewDevice();startStream();"> -->
-            <li><a href="javascript:floatBtnNewDevice();startStream2();">
-                    <i class="fab fa-pagelines my-float"></i>
-                </a></li>
-            <!-- <li><a href="#">
-                    <i class="fa fa-twitter my-float"></i>
-                </a></li> -->
-        </ul>
 
     </div>
 
