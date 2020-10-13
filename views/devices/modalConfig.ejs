@@ -1,0 +1,62 @@
+<!--? include in <devices.ejs> ?-->
+
+<style>
+    .modal {
+        background: linear-gradient(#03a9f4, #e91ee3) !important
+    }
+</style>
+<% let index = 0; %>
+<% snapGardensInfo.forEach((child) => { %>
+<div class="modal fade" data-backdrop="static" data-easein="whirlIn" id="modalConfig<%-index%>" tabindex="-1"
+    role="dialog" aria-labelledby="mdTitleConfig" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <!-- ? trigger this form in preload.js app ? -->
+        <form id="formConfig<%-index%>" class="modal-content">
+            <div>
+                <h1 class="modal-title" id="mdTitleConfig">
+                    <i class="badge badge-pill badge-info">Config Gardens <%= index %> </i>
+                </h1>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- <fieldset class="scheduler-border"> -->
+                    <!-- <legend class="scheduler-border">Details</legend> -->
+
+                    <div class="row align-items-center input-group mb-3">
+                        <div class="input-group-prepend"> <span class="input-group-text">Device ID</span> </div>
+                        <input disabled required class="form-control" type="text" name="deviceId"
+                            value="<%- child.key %>" aria-label="deviceId" aria-describedby="addon-wrapping">
+                    </div>
+                    <div class="row align-items-center input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Garden Name</span>
+                        </div>
+                        <input required class="form-control" type="text" name="deviceName"
+                            value="<%- child.val().gardenName %>" aria-label="deviceName"
+                            aria-describedby="addon-wrapping">
+                    </div>
+
+                    <!-- </fieldset> -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btnExit" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary btnSave">Save and Upload</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Script in LOOP -->
+<script>
+
+</script>
+
+<% ++index; }) %>
+
+<!-- Script out of LOOP -->
+<script>
+    $(".modal-footer > button.btnExit").on("click", () => {
+        console.log("hehe");
+    })
+</script>

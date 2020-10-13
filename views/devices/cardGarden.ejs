@@ -1,0 +1,53 @@
+<!--? include in <devices.ejs> ?-->
+
+<style>
+    .modal {
+        background: linear-gradient(#03a9f4, #e91ee3) !important
+    }
+</style>
+
+<div class="card-body">
+    <% let index = 0; %>
+    <!--? https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
+    <% snapGardensInfo.forEach((child) => { %>
+
+    <div class="card-detail card" style="--background: brown; --text:white;">
+        <div class="multi-button">
+            <button class="fas fa-plus"></button>
+            <button class="fas fa-cog" id="btnConfig<%-index%>"></button>
+            <button class="fas fa-trash" id="btnRemoveGarden<%-index%>"></button>
+        </div>
+        <div class="card-text card-container">
+            <div class="portada">
+            </div>
+            <div class="title-total">
+                <h1 id="gardenName<%-index%>" class="title"><%= child.val().gardenName %></h1>
+
+                <ul class="desc" style="list-style-type: none;">
+                    <li id="gardenId<%-index%>" class=""><%= child.val().gardenId %></li>
+                    <li class="fas fa-map-marked-alt"> <%= child.val().location.place %></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- <div class="card" style="--background:brown; --text:white;">
+        <div class="multi-button">
+            <button class="fas fa-plus"></button>
+            <button class="fas fa-cog"></button>
+            <button class="fas fa-trash" id="btnRemoveGarden<%-index%>"></button>
+        </div>
+        <div class="card-container">
+            asdasd
+        </div>
+    </div> -->
+
+    <script>
+        $("#btnConfig<%-index%>").on("click", () => {
+            $("#modalConfig<%-index%>").modal("toggle");
+        })
+    </script>
+
+    <% ++index; }) %>
+
+</div>

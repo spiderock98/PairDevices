@@ -147,8 +147,12 @@ a#menu-share:hover > i{
     to {transform: rotate(0deg);}
 }
 
+/*!====================/ modal background /====================!*/
+.modal {
+  background: linear-gradient(#03a9f4, #e91ee3) !important
+}
 
-/*!====================/new idea button replace modal/====================!*/
+/*!====================/ new idea button replace modal /====================!*/
 /*TODO: not done fix duplicate style - PLEASE COMMMENT to FIX LATER*/
 /* button:focus { outline: none; }
 

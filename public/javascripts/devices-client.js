@@ -23,7 +23,8 @@ getCurrentUID().then((uid) => {
 
 
 //!============/ Others  /===========!//
-objDeviceName = $("td.dvName"); // list all items
+//todo: change this var name
+objDeviceName = $("div.card"); // list all card items
 // TODO: get database state
 let arrState = [];
 for (let i = 0; i < objDeviceName.length; i++) {
@@ -60,10 +61,13 @@ for (let i = 0; i < objDeviceName.length; i++) {
         }
     });
 
-    $(`#btnRemoveDevices${i + 1}`).on("click", () => {
+    $(`#btnRemoveGarden${i}`).on("click", () => {
+        const gardenId = $(`#gardenId${i}`).text();
+        const gardenName = $(`#gardenName${i}`).text();
+
         Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to revert this!",
+            title: "Are You Sủre ?",
+            text: `You won't be able to revert this action will remove all DEVICES in this ${gardenName}!`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -71,17 +75,14 @@ for (let i = 0; i < objDeviceName.length; i++) {
             confirmButtonText: "Yes, delete it!",
         }).then((result) => {
             if (result.value) {
-                deviceName = $(`#btnRemoveDevices${i + 1}`)
-                    .siblings()
-                    .eq(2);
                 $.ajax({
-                    url: "/devices/removeDevices",
+                    url: "/devices/removeGarden",
                     method: "POST",
-                    data: { name: deviceName[0].innerHTML },
+                    data: { gardenId: gardenId },
                     success: () => {
                         Swal.fire(
                             "Deleted!",
-                            `Your ${deviceName[0].innerHTML} has been deleted.`,
+                            `Your ${gardenName} has been deleted.`,
                             "success"
                         ).then(() => (location.href = "/devices"));
                     },
@@ -90,49 +91,49 @@ for (let i = 0; i < objDeviceName.length; i++) {
         });
     });
 
-    $(`#btnConfigure${i + 1}`).on("click", () => {
-        deviceName = $(`#btnRemoveDevices${i + 1}`)
-            .siblings()
-            .eq(2);
+    // $(`#btnConfigure${i + 1}`).on("click", () => {
+    //     deviceName = $(`#btnRemoveGarden${i}`)
+    //         .siblings()
+    //         .eq(2);
 
-        $(`#btnTimeConfirm${i + 1}`).on("click", () => {
-            // console.log('click');
+    //     $(`#btnTimeConfirm${i + 1}`).on("click", () => {
+    //         // console.log('click');
 
-            let objTimeConfig = {
-                deviceName: deviceName[0].innerHTML,
-                startTime: $(`#startTime${i + 1}`).val(),
-                midTime: $(`#midTime${i + 1}`).val(),
-                endTime: $(`#endTime${i + 1}`).val(),
-            };
+    //         let objTimeConfig = {
+    //             deviceName: deviceName[0].innerHTML,
+    //             startTime: $(`#startTime${i + 1}`).val(),
+    //             midTime: $(`#midTime${i + 1}`).val(),
+    //             endTime: $(`#endTime${i + 1}`).val(),
+    //         };
 
-            $.ajax({
-                type: "POST",
-                url: "/home/configTime",
-                data: objTimeConfig,
-                success: () => {
-                    socket.emit("timeConfig", {
-                        uid: myCurrentUID,
-                        physicalName: element.innerHTML,
-                        platform: "browser",
-                        timeObj: {
-                            startTime: $(`#startTime${i + 1}`).val(),
-                            midTime: $(`#midTime${i + 1}`).val(),
-                            endTime: $(`#endTime${i + 1}`).val(),
-                        },
-                    });
-                },
-            });
+    //         $.ajax({
+    //             type: "POST",
+    //             url: "/home/configTime",
+    //             data: objTimeConfig,
+    //             success: () => {
+    //                 socket.emit("timeConfig", {
+    //                     uid: myCurrentUID,
+    //                     physicalName: element.innerHTML,
+    //                     platform: "browser",
+    //                     timeObj: {
+    //                         startTime: $(`#startTime${i + 1}`).val(),
+    //                         midTime: $(`#midTime${i + 1}`).val(),
+    //                         endTime: $(`#endTime${i + 1}`).val(),
+    //                     },
+    //                 });
+    //             },
+    //         });
 
-            Swal.mixin({
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-            }).fire({
-                icon: "success",
-                title: "Updated time successfully",
-            });
-        });
-    });
+    //         Swal.mixin({
+    //             toast: true,
+    //             position: "top-end",
+    //             showConfirmButton: false,
+    //             timer: 3000,
+    //             timerProgressBar: true,
+    //         }).fire({
+    //             icon: "success",
+    //             title: "Updated time successfully",
+    //         });
+    //     });
+    // });
 }

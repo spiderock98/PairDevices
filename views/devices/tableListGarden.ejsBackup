@@ -1,0 +1,70 @@
+<% count = 0 %>
+<!--? https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
+<% snapGardensInfo.forEach((child) => { %>
+<tr>
+    <th scope="row"><%= ++count%></th>
+
+    <td id="btnConfigure<%-count%>">
+
+        <!-- !=====/Modal Config Garden ESP32/=====! -->
+        <button type="button" class="btn btn-info" data-toggle="modal"
+            data-target="#ConfigureModalScrollable<%-count%>">
+            <i class="fas fa-sliders-h"></i>
+        </button>
+
+        <div class="modal fade" id="ConfigureModalScrollable<%-count%>" tabindex="-1" role="dialog"
+            aria-labelledby="exampleModalLabel<%-count%>" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel<%-count%>">
+                                <%= child.key %> Setting
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="md-form md-outline">
+                                <label for="default-picker">2 line sáng đồng
+                                    thời</label>
+                                <input required name="startTime" type="time" id="startTime<%-count%>"
+                                    class="form-control" placeholder="Select time"
+                                    value=<%= child.val()['startTime'] %>>
+                            </div>
+                            <div class="md-form md-outline">
+                                <label for="default-picker">1 line sáng (xen kẽ)</label>
+                                <input required name="midTime" type="time" id="midTime<%-count%>" class="form-control"
+                                    placeholder="Select time" value=<%= child.val()['midTime'] %>>
+                            </div>
+                            <div class="md-form md-outline">
+                                <label for="default-picker">2 line TẮT</label>
+                                <input required name="endTime" type="time" id="endTime<%-count%>" class="form-control"
+                                    placeholder="Select time" value=<%= child.val()['endTime'] %>>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button id="btnTimeConfirm<%-count%>" type="button" class="btn btn-primary">Save
+                                changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </td>
+
+    <td class=" dvName"><%= child.key %></td>
+    <td><img src="images/icons8-wi-fi_connected.svg" width="30" height="30" alt=""></td>
+    <td><%= child.val().location.place %></td>
+    <td>
+        <div class="custom-control custom-switch noselect">
+            <input type="checkbox" class="custom-control-input" id="customSwitch<%-count%>">
+            <label class="custom-control-label" for="customSwitch<%-count%>"></label>
+        </div>
+    </td>
+    <td id="btnRemoveGarden<%-count%>"><button type="button" class="btn btn-danger"><i
+                class="fas fa-trash-alt"></i></button></td>
+</tr>
+<% }) %>

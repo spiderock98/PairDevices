@@ -165,15 +165,16 @@ router.get('/', (req, res) => {
         });
 });
 
-router.post('/removeDevices', (req, res) => {
+router.post('/removeGarden', (req, res) => {
     let cookie = req.cookies.session || ""
     admin.auth().verifySessionCookie(cookie, true)
         .then(decodedClaims => {
-            let uid = decodedClaims.uid
-            admin.database().ref(`${uid}/LocationNodes/${req.body.name}`).remove(err => {
-                if (err) console.error(err)
-                else res.end();
-            })
+            res.end();
+            const userId = decodedClaims.uid;
+            const { gardenId } = req.body;
+            console.log(`Gardens/${userId}/${gardenId}`);
+            admin.database().ref(`Gardens/${userId}/${gardenId}`).remove(err => { if (err) console.error(err) });
+            admin.database().ref(`Devices/${userId}/${gardenId}/`).remove(err => { if (err) console.error(err) });
         })
 })
 

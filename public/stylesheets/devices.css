@@ -41,3 +41,193 @@ legend.scheduler-border {
   user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
+
+
+/*!====================/ Card Hover /====================!*/
+.card-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  grid-gap: 5rem;
+  padding: 5rem;
+}
+body .card {
+  --background:#FFFFFF;
+  --text:black;
+  position: relative;
+  /* comment this */
+  height: 15rem;
+  box-shadow: 0 0 2rem -1rem rgba(0, 0, 0, 0.05);
+}
+body .card .multi-button {
+  z-index: 0;
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  border-radius: 100%;
+  width: 0rem;
+  height: 0rem;
+  transform: translate(-50%, -50%);
+  transition: 0.25s cubic-bezier(0.25, 0, 0, 1);
+}
+body .card .multi-button button {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 100%;
+  background: var(--background);
+  color: var(--text);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: 0.25s cubic-bezier(0.25, 0, 0, 1);
+  box-shadow: 0 0 0rem -0.25rem var(--background);
+}
+body .card .multi-button button:hover {
+  background: var(--text);
+  color: var(--background);
+  box-shadow: 0 0 1rem -0.25rem var(--background);
+}
+body .card .multi-button button:first-child:nth-last-child(1):nth-child(1), body .card .multi-button button:first-child:nth-last-child(1) ~ *:nth-child(1) {
+  left: 25%;
+  top: 25%;
+}
+body .card .multi-button button:first-child:nth-last-child(2):nth-child(1), body .card .multi-button button:first-child:nth-last-child(2) ~ *:nth-child(1) {
+  left: 37.5%;
+  top: 18.75%;
+}
+body .card .multi-button button:first-child:nth-last-child(2):nth-child(2), body .card .multi-button button:first-child:nth-last-child(2) ~ *:nth-child(2) {
+  left: 18.75%;
+  top: 37.5%;
+}
+body .card .multi-button button:first-child:nth-last-child(3):nth-child(1), body .card .multi-button button:first-child:nth-last-child(3) ~ *:nth-child(1) {
+  left: 50%;
+  top: 15.625%;
+}
+body .card .multi-button button:first-child:nth-last-child(3):nth-child(2), body .card .multi-button button:first-child:nth-last-child(3) ~ *:nth-child(2) {
+  left: 25%;
+  top: 25%;
+}
+body .card .multi-button button:first-child:nth-last-child(3):nth-child(3), body .card .multi-button button:first-child:nth-last-child(3) ~ *:nth-child(3) {
+  left: 15.625%;
+  top: 50%;
+}
+body .card .multi-button button:first-child:nth-last-child(4):nth-child(1), body .card .multi-button button:first-child:nth-last-child(4) ~ *:nth-child(1) {
+  left: 62.5%;
+  top: 18.75%;
+}
+body .card .multi-button button:first-child:nth-last-child(4):nth-child(2), body .card .multi-button button:first-child:nth-last-child(4) ~ *:nth-child(2) {
+  left: 37.5%;
+  top: 18.75%;
+}
+body .card .multi-button button:first-child:nth-last-child(4):nth-child(3), body .card .multi-button button:first-child:nth-last-child(4) ~ *:nth-child(3) {
+  left: 18.75%;
+  top: 37.5%;
+}
+body .card .multi-button button:first-child:nth-last-child(4):nth-child(4), body .card .multi-button button:first-child:nth-last-child(4) ~ *:nth-child(4) {
+  left: 18.75%;
+  top: 62.5%;
+}
+body .card .card-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 23px;
+  background: var(--background);
+  color: var(--text);
+}
+body .card:hover .multi-button, body .card .multi-button:focus-within {
+  width: 10rem;
+  height: 10rem;
+}
+
+
+/*!====================/ Card Beautify /====================!*/
+@import url("https://fonts.googleapis.com/css?family=Roboto:400,400i,700");
+body {
+  font-family: Roboto, sans-serif;
+  background-image: linear-gradient(to top, #96fbc4 0%, #f9f586 100%);
+}
+
+.card-detail {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0px 14px 80px rgba(34, 35, 58, 0.5);
+  max-width: 400px;
+  display: flex;
+  flex-direction: row;
+  border-radius: 25px;
+  position: relative;
+}
+
+.card-detail h2 {
+  margin: 0;
+  padding: 0 1rem;
+}
+
+.card-detail .title {
+  padding: 1rem;
+  text-align: left;
+  color: green;
+  font-weight: bold;
+  font-size: 22px;
+}
+
+.card-detail .desc {
+  padding: 0.5rem 1rem;
+  font-size: 12px;
+}
+
+.card-detail .actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  padding: 0.5rem 1rem;
+}
+
+.card-detail svg {
+  width: 85px;
+  height: 85px;
+  margin: 0 auto;
+}
+
+.card-text {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+}
+
+.title-total {
+  padding: 2.5em 1.5em 1.5em 1.5em;
+}
+
+path {
+  fill: white;
+}
+
+.img-portada {
+  width: 100%;
+}
+
+.portada {
+  width: 100%;
+  height: 100%;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  background-image: url("https://m.media-amazon.com/images/S/aplus-media/vc/cab6b08a-dd8f-4534-b845-e33489e91240._CR75,0,300,300_PT0_SX300__.jpg");
+  background-position: bottom center;
+  background-size: cover;
+} */
+
+/* .actions button {
+  border: none;
+  background: none;
+  font-size: 24px;
+  color: #8bc34a;
+  cursor: pointer;
+  transition: .5s;
+}
+.actions button:hover {
+  color: #4CAF50;
+  transform: rotate(22deg);
+}
