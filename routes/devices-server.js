@@ -224,6 +224,7 @@ router.post('/updateGarden', (req, res) => {
             //? có thể check bằng isExistGardenId() nhưng móc API mất thời gian hơn check null
             if (gardenId == null) {
                 arrPendingBrowser.push(userId);
+                console.log("[Browser] Waiting for New ESP-CAM");
                 setTimeout(() => {
                     console.log('[objPendingGarden 1]', objPendingGarden);
                     console.log('[arrPendingBrowser 1]', arrPendingBrowser);
@@ -250,7 +251,7 @@ router.post('/updateGarden', (req, res) => {
                     console.log('[objPendingGarden 2]', objPendingGarden);
                     console.log('[arrPendingBrowser 2]', arrPendingBrowser);
 
-                }, 20000);
+                }, 5000);
             }
             else {
                 FirebaseGarden.updateGarden();
@@ -291,10 +292,11 @@ router.post('/updateDevice', (req, res) => {
 const io = (io) => {
     io.on('connection', socket => {
         socket.on('regEsp', (message) => {
-            console.log('[ESP]', "Hello world from ESP");
+            console.log('[regEsp]', "Hello world from ESP");
             //? only update <objPendingGarden> if this <message.UID> not in Firebase && must be in <arrPendingBrowser>
             FirebaseDevices.staticIsExistGardenId(message.UID, message.MAC).then(flagExist => {
                 if (!flagExist) {
+                    // TODO: chuyen sang includes
                     var indexBrowser = arrPendingBrowser.indexOf(message.UID)
                     if (indexBrowser > -1) {
                         console.log('[ESP] are your browser wating for me');
@@ -330,11 +332,14 @@ wsServer.on("connection", ws => {
             const payload = JSON.parse(msg)[0];
             //? event handler
             switch (payload.EVENT) {
+                case "std":
+                    console.log("[ESP]", payload.detail);
                 case "regESP":
-                    // console.log('[ESP]', "Hello world from ESP 1");
-                    //? only update <objPendingGarden> if this <payload.UID> not in Firebase && must be in <arrPendingBrowser>
+                    console.log('[regESP]', `Hello world from ${payload.MAC}`);
+                    // only update <objPendingGarden> if this <payload.UID> not in Firebase && must be in <arrPendingBrowser>
                     FirebaseDevices.staticIsExistGardenId(payload.UID, payload.MAC).then(flagExist => {
                         if (!flagExist) {
+                            // TODO: chuyen sang includes
                             var indexBrowser = arrPendingBrowser.indexOf(payload.UID)
                             if (indexBrowser > -1) {
                                 console.log('[ESP] are your browser wating for me');
@@ -342,17 +347,26 @@ wsServer.on("connection", ws => {
                                     "userId": payload.UID,
                                     "gardenId": payload.MAC, // equal MAC
                                     "macAddr": payload.MAC,
-                                    // "indexBrowser": indexBrowser
                                 }
+                                //TODO: not sure
+                                ws.send("{'EVENT':'regESP_OK'}", err => {
+                                    if (err) throw err;
+                                    else console.log("[Browser] confirm <regESP_OK>");
+                                });
                             }
                             else {
                                 //TODO:
+                                console.log("[INFO] Please use web app to config new device");
                             }
-                            ws.send("{'EVENT':'demo','status':'OK','code':'200'}");
+                            // ws.send("{'EVENT':'demo','status':'OK','code':'200'}");
                         }
                         else {
                             //TODO: are you sure re-flash this device
                             console.log("[INFO] are you sure re-flash this device ? ");
+                            admin.database().ref(`Gardens/${payload.UID}/${payload.MAC}`).remove(err => {
+                                if (err) console.error(err);
+                                else console.log("[INFO] Complete delete this device in database");
+                            });
                         }
                     })
                     break;
@@ -363,6 +377,7 @@ wsServer.on("connection", ws => {
                     msgUID = payload.UID;
                     msgMAC = payload.MAC;
                     objEnCam[payload.MAC] = { "arrCamBrow": [ws], state: 0 };
+                    console.log(objEnCam);
                     break;
 
                 //? TEST CASE:
@@ -371,6 +386,7 @@ wsServer.on("connection", ws => {
                 //=3. có cam; current 1,2,n brow; state ON/OFF mà có brow khác vào
                 case "browserEnCam":
                     console.log("browserEnCam");
+                    // has property because esp-cam init this object
                     if (objEnCam.hasOwnProperty("8C:AA:B5:8C:7F:7C")) {
                         // just exec if <arrCamBrow> got ONLY camera ws in there at index 0
                         if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].length == 1) {
@@ -385,11 +401,28 @@ wsServer.on("connection", ws => {
                         else if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].length > 1) {
                             if (objEnCam["8C:AA:B5:8C:7F:7C"]["state"] == 0) {
                                 objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 1;
-                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
                                 objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserEnCam"}');
-                            } else {
-                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
                             }
+                            if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].includes(ws) == false)
+                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
+                            else
+                                console.log("[INFO] Oops, you reopen AddDevicesModal");
+
+                            // if (objEnCam["8C:AA:B5:8C:7F:7C"]["state"] == 0) {
+                            //     objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 1;
+                            //     // fix close modal then open again
+                            //     if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].includes(ws) == false)
+                            //         objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
+                            //     else
+                            //         console.log("[INFO] Oops, you reopen AddDevicesModal");
+                            //     objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserEnCam"}');
+                            // } else {
+                            //     if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].includes(ws) == false)
+                            //         objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
+                            //     else
+                            //         console.log("[INFO] Oops, you reopen AddDevicesModal");
+                            //     objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
+                            // }
                         }
                     } else {
                         //TODO: return to brow
@@ -403,13 +436,13 @@ wsServer.on("connection", ws => {
         } catch (error) {
             // console.error("[ERROR]:", error);
             const arrSocket = objEnCam[msgMAC]["arrCamBrow"]
-            arrSocket.forEach((wsItem, i) => {
+            arrSocket.forEach((wsItem, index) => {
                 // The current state of the connection https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
                 if (wsItem.readyState === wsItem.OPEN) {
                     wsItem.send(msg);
                 } else {
-                    console.error("[INFO] Socket Error >> POPing Error Socket");
-                    arrSocket.splice(i, 1);
+                    console.error("[INFO] Socket Error >> POP...ing Error Socket");
+                    arrSocket.splice(index, 1);
                     // check if only camera in <arrSocket>
                     if (arrSocket.length == 1) {
                         objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
@@ -428,7 +461,7 @@ wsServer.on("connection", ws => {
     //     }
     // })
     ws.on("error", (err) => {
-        console.err(err);
+        console.error(err);
     })
 })
 

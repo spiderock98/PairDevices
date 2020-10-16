@@ -105,7 +105,7 @@ getCurrentUID().then((uid) => {
 }); // Global Var
 
 //!================/ VanillaWebsocket /================!//
-const WS_URL = "ws:///192.168.1.5:81";
+const WS_URL = "ws:///192.168.1.4:81";
 const ws = new WebSocket(WS_URL);
 
 //!================/ ESP32-CAM on security area field /================!//
@@ -207,6 +207,10 @@ $("#btnReScan").on("click", () => {
 //!=======/when page load finish/=======!//
 $(() => {
   socket.emit("regBrowser");
+
+  setTimeout(() => {
+    startStream();
+  }, 2000);
 });
 
 

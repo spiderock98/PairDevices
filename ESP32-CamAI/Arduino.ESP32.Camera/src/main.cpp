@@ -2,12 +2,13 @@
 #define TEST true
 
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <WiFi.h>
 #include <WebSocketsClient.h>
 #include <ArduinoJson.h>
 #include "esp_camera.h"
 #define CAMERA_MODEL_AI_THINKER
-#if TEST == true
+#if TEST
 #include "camera_pins.h"
 #else
 #include "include/camera_pins.h"
@@ -15,15 +16,17 @@
 
 WebSocketsClient webSocket;
 
+// define the number of bytes you want to access
+#define EEPROM_SIZE 1
 bool flagEnCam = false;
 
-#if TEST == true
+#if TEST
 #define STASSID "VIETTEL"
 #define STAPSK "Sherlock21vtag"
 // bApb0Ypwg5YszGanWOBKre39zlg1
 #define UID "bApb0Ypwg5YszGanWOBKre39zlg1"
 #define NODENAME "vuon xoai"
-#define HOST "192.168.1.5" //HOME local ip
+#define HOST "192.168.1.4" //HOME local ip
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
@@ -49,57 +52,12 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length);
 
 void setup()
 {
-#if DEBUG == true
   Serial.begin(115200);
   Serial.setDebugOutput(true);
-#endif
-  pinMode(LED_BUILTIN, OUTPUT);
+  EEPROM.begin(EEPROM_SIZE);
 
-  //!================/ AI-Thinker Camera Config /================!//
-  camera_config_t config;
-  config.ledc_channel = LEDC_CHANNEL_0;
-  config.ledc_timer = LEDC_TIMER_0;
-  config.pin_d0 = Y2_GPIO_NUM;
-  config.pin_d1 = Y3_GPIO_NUM;
-  config.pin_d2 = Y4_GPIO_NUM;
-  config.pin_d3 = Y5_GPIO_NUM;
-  config.pin_d4 = Y6_GPIO_NUM;
-  config.pin_d5 = Y7_GPIO_NUM;
-  config.pin_d6 = Y8_GPIO_NUM;
-  config.pin_d7 = Y9_GPIO_NUM;
-  config.pin_xclk = XCLK_GPIO_NUM;
-  config.pin_pclk = PCLK_GPIO_NUM;
-  config.pin_vsync = VSYNC_GPIO_NUM;
-  config.pin_href = HREF_GPIO_NUM;
-  config.pin_sscb_sda = SIOD_GPIO_NUM;
-  config.pin_sscb_scl = SIOC_GPIO_NUM;
-  config.pin_pwdn = PWDN_GPIO_NUM;
-  config.pin_reset = RESET_GPIO_NUM;
-  config.xclk_freq_hz = 20000000;
-  config.pixel_format = PIXFORMAT_JPEG;
-  //? init with high specs to pre-allocate larger buffers
-  if (psramFound())
-  {
-    // change format and quality here
-    config.frame_size = FRAMESIZE_VGA;
-    config.jpeg_quality = 40;
-    config.fb_count = 2;
-  }
-  else
-  {
-    config.frame_size = FRAMESIZE_SVGA;
-    config.jpeg_quality = 12;
-    config.fb_count = 1;
-  }
-  //? camera init
-  esp_err_t err = esp_camera_init(&config);
-  if (err != ESP_OK)
-  {
-#if DEBUG == true
-    Serial.printf("Camera init failed with error 0x%x", err);
-#endif
-    return;
-  }
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(0, INPUT_PULLUP);
 
   //!================/ Internet Config /================!//
   WiFi.begin(ssid, password);
@@ -110,7 +68,7 @@ void setup()
     digitalWrite(LED_BUILTIN, 0);
     delay(100);
   }
-#if DEBUG == true
+#if DEBUG
   Serial.println("\nWiFi connected");
   Serial.print("Camera Ready! Use 'http://");
   Serial.print(WiFi.localIP());
@@ -121,44 +79,195 @@ void setup()
   JsonArray array = doc.to<JsonArray>();
   // array.add("regEsp");
   JsonObject param1 = array.createNestedObject(); // add payload (parameters) for the event
-  //TODO: nếu nhấn btn thì pair | re-pair không thì ko regEsp
-  // param1["EVENT"] = "regESP";
-  param1["EVENT"] = "espEnCamera";
+
+#if DEBUG
+  Serial.print("Current EEPROM[0]: ");
+  Serial.println(EEPROM.read(0));
+#endif
+
+  //!====/ Pairing Mode /====!//
+  // EEPROM addr no.0 is 1 when devices is DONE-PAIRING
+  if (EEPROM.read(0) == 1)
+  {
+    Serial.print("if you want to re-pair, please HOLD button in ... 3");
+    delay(1000);
+    Serial.print(" ... 2");
+    delay(1000);
+    Serial.print(" ... 1");
+    delay(1000);
+    Serial.println(" ... 0");
+    delay(1000);
+
+    // if agree then enter Pairing Mode
+    // if (!digitalRead(0))
+    // {
+    //   delay(20);
+    //   if (!digitalRead(0))
+    //   {
+    //     EEPROM.write(0, 0); // clear it to empty state
+    //     EEPROM.commit();
+    //     Serial.println("[ESP] EEPROM addr 0 is clear");
+    //     //TODO: send this UI to browser
+    //     Serial.println("**********************************");
+    //     delay(500);
+    //     Serial.println("*********\\ Pairing Mode /*********");
+    //     delay(500);
+    //     Serial.println("*                                *");
+    //     delay(500);
+    //     Serial.println("*      ! ! Release Button ! !    *");
+    //     delay(500);
+    //     Serial.println("*          @Spiderock            *");
+    //     delay(500);
+    //     Serial.println("*           @SuongLe             *");
+    //     delay(500);
+    //     Serial.println("*         @TamZThePoet           *");
+    //     delay(500);
+    //     Serial.println("*           @CuongNgo            *");
+    //     delay(500);
+    //     param1["EVENT"] = "regESP";
+    //     Serial.println();
+    //     Serial.println("*     Sending <regESP> EVENT     *");
+    //     delay(500);
+    //     Serial.println("**********************************");
+    //     delay(500);
+    //   }
+    // }
+
+    // if EEP addr 0 is 1 && not hold button >> send camera is ready
+    if (!digitalRead(0))
+    {
+      delay(20);
+      if (!digitalRead(0))
+      {
+        EEPROM.write(0, 0);
+        EEPROM.commit();
+        Serial.println("[ESP] BUTTON PRESSED EEPROM addr 0 is clear");
+
+        Serial.println("[ESP] Resetting ESP ... !!!");
+        ESP.restart();
+      }
+    }
+    // else
+    {
+      param1["EVENT"] = "espEnCamera";
+      Serial.println("*     Sending <espEnCamera> EVENT       *");
+    }
+  }
+  // if EEPROM addr no.0 is 0 then enter pairing mode WITHOUT asking
+  else
+  {
+    //TODO: send this UI to browser
+    // Serial.println("**********************************");
+    // delay(500);
+    // Serial.println("********\\ New Device /***********");
+    // delay(500);
+    // Serial.println("*                                *");
+    // delay(500);
+    // Serial.println("*          @Spiderock            *");
+    // delay(500);
+    // Serial.println("*           @SuongLe             *");
+    // delay(500);
+    // Serial.println("*         @TamZThePoet           *");
+    // delay(500);
+    // Serial.println("*           @CuongNgo            *");
+    // delay(500);
+    param1["EVENT"] = "regESP";
+    // Serial.println("*     Sending regESP EVENT       *");
+    // delay(500);
+    // Serial.println("**********************************");
+    // delay(500);
+  }
+
   param1["MAC"] = WiFi.macAddress();
   param1["IP"] = WiFi.localIP().toString();
   param1["SSID"] = WiFi.SSID();
   param1["PSK"] = WiFi.psk();
   param1["UID"] = uid;
   serializeJson(doc, jsonOut);
-  //!================/ WebSocket Config /================!//
+
   webSocket.begin(HOST, PORT, "/"); // server address, port and URL
+
+  //!================/ AI-Thinker Camera Config /================!//
+  if (EEPROM.read(0) == 1)
+  {
+    camera_config_t config;
+    config.ledc_channel = LEDC_CHANNEL_0;
+    config.ledc_timer = LEDC_TIMER_0;
+    config.pin_d0 = Y2_GPIO_NUM;
+    config.pin_d1 = Y3_GPIO_NUM;
+    config.pin_d2 = Y4_GPIO_NUM;
+    config.pin_d3 = Y5_GPIO_NUM;
+    config.pin_d4 = Y6_GPIO_NUM;
+    config.pin_d5 = Y7_GPIO_NUM;
+    config.pin_d6 = Y8_GPIO_NUM;
+    config.pin_d7 = Y9_GPIO_NUM;
+    config.pin_xclk = XCLK_GPIO_NUM;
+    config.pin_pclk = PCLK_GPIO_NUM;
+    config.pin_vsync = VSYNC_GPIO_NUM;
+    config.pin_href = HREF_GPIO_NUM;
+    config.pin_sscb_sda = SIOD_GPIO_NUM;
+    config.pin_sscb_scl = SIOC_GPIO_NUM;
+    config.pin_pwdn = PWDN_GPIO_NUM;
+    config.pin_reset = RESET_GPIO_NUM;
+    config.xclk_freq_hz = 20000000;
+    config.pixel_format = PIXFORMAT_JPEG;
+    //? init with high specs to pre-allocate larger buffers
+    if (psramFound())
+    {
+      // change format and quality here
+      config.frame_size = FRAMESIZE_VGA;
+      config.jpeg_quality = 40;
+      config.fb_count = 2;
+    }
+    else
+    {
+      config.frame_size = FRAMESIZE_SVGA;
+      config.jpeg_quality = 12;
+      config.fb_count = 1;
+    }
+    //? camera init
+    esp_err_t err = esp_camera_init(&config);
+    if (err != ESP_OK)
+    {
+      webSocket.sendTXT("[{'EVENT':'std','detail':'[Error] Init Camera'}]");
+#if DEBUG
+      Serial.printf("Camera init failed with error 0x%x", err);
+#endif
+      return;
+    }
+    else
+      webSocket.sendTXT("[{'EVENT':'std','detail':'[Success] Init Camera'}]");
+  }
+
+  //!================/ WebSocket Config /================!//
+  // webSocket.begin(HOST, PORT, "/"); // server address, port and URL
   webSocket.onEvent(webSocketEventHandle);
 }
 
 void loop()
 {
-  //     if (flagEnCam)
-  //     {
-  //         camera_fb_t *fb = esp_camera_fb_get();
-  //         if (!fb)
-  //         {
-  // #if DEBUG == true
-  //             Serial.println("[INFO] Capture failed");
-  // #endif
-  //             esp_camera_fb_return(fb);
-  //             return;
-  //         }
-  //         if (fb->format != PIXFORMAT_JPEG)
-  //         {
-  // #if DEBUG == true
-  //             Serial.println("[INFO] None-JPEG data");
-  // #endif
-  //             return;
-  //         }
-  //         webSocket.sendBIN(fb->buf, fb->len); // send message to server when Connected
+  if (flagEnCam)
+  {
+    camera_fb_t *fb = esp_camera_fb_get();
+    if (!fb)
+    {
+#if DEBUG
+      Serial.println("[INFO] Capture failed");
+#endif
+      esp_camera_fb_return(fb);
+      return;
+    }
+    if (fb->format != PIXFORMAT_JPEG)
+    {
+#if DEBUG
+      Serial.println("[INFO] None-JPEG data");
+#endif
+      return;
+    }
+    webSocket.sendBIN(fb->buf, fb->len); // send message to server when Connected
 
-  //         esp_camera_fb_return(fb);
-  //     }
+    esp_camera_fb_return(fb);
+  }
 
   webSocket.loop();
 }
@@ -169,13 +278,13 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
   switch (type)
   {
   case WStype_DISCONNECTED:
-#if DEBUG == true
+#if DEBUG
     Serial.printf("[WSc] Disconnected!\n");
 #endif
     break;
 
   case WStype_CONNECTED:
-#if DEBUG == true
+#if DEBUG
     Serial.printf("[WSc] Connected to url: %s\n", payload);
 #endif
     //? ====/ send message to server when Connected /==== ?//
@@ -192,7 +301,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
     //? Test if parsing succeeds.
     if (error)
     {
-#if DEBUG == true
+#if DEBUG
       Serial.print(F("[ERROR] deserializeJson() failed"));
 #endif
       return;
@@ -203,16 +312,34 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
       if (eventName == "browserEnCam")
       {
         flagEnCam = true;
-#if DEBUG == true
+#if DEBUG
         Serial.println("[INFO] START Streaming ...");
 #endif
       }
       else if (eventName == "browserDisCam")
       {
         flagEnCam = false;
-#if DEBUG == true
+#if DEBUG
         Serial.println("[INFO] STOP Streaming ...");
 #endif
+      }
+      else if (eventName == "regESP_OK")
+      {
+#if DEBUG
+        Serial.println("[INFO] ESP Registration Successfully ...");
+#endif
+        //TODO: save some thing to EEPROM
+        EEPROM.write(0, 1);
+        EEPROM.commit();
+
+        Serial.print("Current EEPROM[0]: ");
+        Serial.println(EEPROM.read(0));
+
+#if DEBUG
+        Serial.println("ESP Restarting ...");
+#endif
+        // RESET for the next setup()
+        ESP.restart();
       }
     }
 
