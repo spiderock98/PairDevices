@@ -11,7 +11,7 @@
     <!--? https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
     <% snapGardensInfo.forEach((child) => { %>
 
-    <div class="card-detail card" style="--background: brown; --text:white;">
+    <div class="card-detail card" style="--background: rgb(255, 174, 174); --text:white;">
         <div class="multi-button">
             <button class="fas fa-plus"></button>
             <button class="fas fa-cog" id="btnConfig<%-index%>"></button>
@@ -24,8 +24,12 @@
                 <h1 id="gardenName<%-index%>" class="title"><%= child.val().gardenName %></h1>
 
                 <ul class="desc" style="list-style-type: none;">
-                    <li id="gardenId<%-index%>" class=""><%= child.val().gardenId %></li>
-                    <li class="fas fa-map-marked-alt"> <%= child.val().location.place %></li>
+                    <li id="gardenId<%-index%>" class="">
+                        <img src="images/fingerprint.svg" width="30px" height="30px"> <%= child.val().gardenId %>
+                    </li>
+                    <li id="gardenPlace<%-index%>">
+                        <img src="images/flag_filled.svg" width="30px" height="30px"> <%= child.val().location.place %>
+                    </li>
                 </ul>
             </div>
         </div>

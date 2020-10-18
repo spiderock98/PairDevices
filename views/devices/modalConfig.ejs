@@ -1,5 +1,10 @@
 <!--? include in <devices.ejs> ?-->
 
+<script src="javascripts/UI/mapBypass.js"></script>
+<script defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7pWv_ReH_hkeTgscLBJFkJ6eXVQCkoJs&callback=configMap"
+    type="text/javascript">
+    </script>
 <style>
     .modal {
         background: linear-gradient(#03a9f4, #e91ee3) !important
@@ -7,14 +12,14 @@
 </style>
 <% let index = 0; %>
 <% snapGardensInfo.forEach((child) => { %>
-<div class="modal fade" data-backdrop="static" data-easein="whirlIn" id="modalConfig<%-index%>" tabindex="-1"
-    role="dialog" aria-labelledby="mdTitleConfig" aria-hidden="true">
+<div class="modal fade" data-keyboard="false" data-backdrop="static" data-easein="whirlIn" id="modalConfig<%-index%>"
+    tabindex="-1" role="dialog" aria-labelledby="mdTitleConfig" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
         <!-- ? trigger this form in preload.js app ? -->
         <form id="formConfig<%-index%>" class="modal-content">
             <div>
                 <h1 class="modal-title" id="mdTitleConfig">
-                    <i class="badge badge-pill badge-info">Config Gardens <%= index %> </i>
+                    <i class="badge badge-pill badge-info">Config Gardens No.<%= index %> </i>
                 </h1>
             </div>
             <div class="modal-body">
@@ -24,27 +29,41 @@
 
                     <div class="row align-items-center input-group mb-3">
                         <div class="input-group-prepend"> <span class="input-group-text">Device ID</span> </div>
-                        <input disabled required class="form-control" type="text" name="deviceId"
-                            value="<%- child.key %>" aria-label="deviceId" aria-describedby="addon-wrapping">
+                        <input disabled required class="form-control" type="text" name="gardenId"
+                            value="<%- child.key %>" aria-label="gardenId" aria-describedby="addon-wrapping">
                     </div>
                     <div class="row align-items-center input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Garden Name</span>
                         </div>
-                        <input required class="form-control" type="text" name="deviceName"
-                            value="<%- child.val().gardenName %>" aria-label="deviceName"
+                        <input required class="form-control" type="text" name="gardenName"
+                            value="<%- child.val().gardenName %>" aria-label="gardenName"
                             aria-describedby="addon-wrapping">
                     </div>
+                    <div class="row align-items-center input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Place</span>
+                        </div>
+                        <input required class="form-control" type="text" name="gardenPlace"
+                            value="<%- child.val().location.place %>" aria-label="gardenPlace"
+                            aria-describedby="addon-wrapping">
+                    </div>
+
+                    <!-- trick to take el val from devices-client.js file -->
+                    <p id="hidLatCoor<%-index%>" style="display: none;"><%= child.val().location.latCoor %></p>
+                    <p id="hidLngCoor<%-index%>" style="display: none;"><%= child.val().location.lngCoor %></p>
+
+                    <div class="row" id="configMap<%-index%>" style="height:400px; "></div>
 
                     <!-- </fieldset> -->
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary btnExit" data-dismiss="modal">
-                    <img src="images/cancel.svg" width="30px" height="30px" alt=""> Close
+                    <img src="images/cancel.svg" width="30px" height="30px"> Close
                 </button>
                 <button type="submit" class="btn btn-primary btnSave">
-                    <img src="images/telegram_app.svg" width="30px" height="30px" alt=""> Save
+                    <img src="images/telegram_app.svg" width="30px" height="30px"> Save
                     and Upload
                 </button>
             </div>
@@ -54,14 +73,55 @@
 
 <!-- Script in LOOP -->
 <script>
+    // restore default value if click CLOSE
+    $("#formConfig<%-index%> > .modal-footer > button.btnExit").on("click", (event) => {
+        $("#formConfig<%-index%>").find("input[name='gardenPlace']").val("<%- child.val().location.place %>");
+        $("#formConfig<%-index%>").find("input[name='gardenName']").val("<%- child.val().gardenName %>");
+    });
 
+    $("#formConfig<%-index%> > .modal-footer > button.btnSave").on("click", (event) => {
+        event.preventDefault();
+        Swal.showLoading();
+        const gardenId = "<%= child.key %>";
+        const gardenName = $("#formConfig<%-index%>").find("input[name='gardenName']").val();
+        const macAddr = "<%= child.key %>";
+        const gardenPlace = $("#formConfig<%-index%>").find("input[name='gardenPlace']").val();
+        const latCoor = $("#hidLatCoor<%-index%>").text();
+        const lngCoor = $("#hidLngCoor<%-index%>").text();
+        $.ajax({
+            method: "POST",
+            url: "devices/updateGarden",
+            data: {
+                gardenId: gardenId,
+                gardenName: gardenName,
+                macAddr: macAddr,
+                place: gardenPlace,
+                latCoor: latCoor,
+                lngCoor: lngCoor
+            },
+            success: (data) => {
+                Swal.fire({
+                    icon: data == "OK" ? "success" : "error",
+                    title: data == "OK" ? "Success" : "Failed",
+                    text: data == "OK" ? "Updated" : data,
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        $("#modalConfig<%-index%>").modal("toggle");
+                    }
+
+                    // change some text in cardGarden.ejs
+                    $("#gardenName<%-index%>").text(gardenName);
+                    // just change innertext html not all peer elements like use .text
+                    $("#gardenPlace<%-index%>").contents()[2].nodeValue = ` ${gardenPlace}`;
+                })
+            }
+        })
+    });
 </script>
 
 <% ++index; }) %>
 
 <!-- Script out of LOOP -->
 <script>
-    $(".modal-footer > button.btnExit").on("click", () => {
-        console.log("hehe");
-    })
+
 </script>
