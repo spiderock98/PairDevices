@@ -1,7 +1,7 @@
 const socket = io();
 
 // //!================/ VanillaWebsocket /================!//
-// const WS_URL = "ws:///192.168.1.4:81";
+// const WS_URL = "ws:///192.168.1.99:81";
 // const ws = new WebSocket(WS_URL);
 
 //!============/ init myCurrentUID as global scope variable  /===========!//

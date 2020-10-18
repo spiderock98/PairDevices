@@ -254,7 +254,7 @@ router.post('/updateGarden', (req, res) => {
                     console.log('[objPendingGarden 2]', objPendingGarden);
                     console.log('[arrPendingBrowser 2]', arrPendingBrowser);
 
-                }, 5000);
+                }, 20000);
             }
             else {
                 const err = FirebaseGarden.updateGarden();
@@ -323,7 +323,7 @@ wsServer.on("connection", ws => {
                     console.log("[ESP]", payload.detail);
 
                 case "regESP":
-                    console.log('[regESP]', `Hello world from ${payload.MAC}`);
+                    console.log('[NodeJS]', `hey ESP32-CAM ${payload.MAC} want to pair`);
                     // only update <objPendingGarden> if this <payload.UID> not in Firebase && must be in <arrPendingBrowser>
                     FirebaseDevices.staticIsExistGardenId(payload.UID, payload.MAC).then(flagExist => {
                         if (!flagExist) {
@@ -344,16 +344,16 @@ wsServer.on("connection", ws => {
                             }
                             else {
                                 //TODO:
-                                console.log("[INFO] Please use web app to config new device");
+                                console.log("[NodeJS] Please use web app to config new device");
                             }
                             // ws.send("{'EVENT':'demo','status':'OK','code':'200'}");
                         }
                         else {
                             //TODO: are you sure re-flash this device
-                            console.log("[INFO] are you sure re-flash this device ? ");
+                            console.log("[NodeJS] are you sure re-flash this device ? ");
                             admin.database().ref(`Gardens/${payload.UID}/${payload.MAC}`).remove(err => {
                                 if (err) console.error(err);
-                                else console.log("[INFO] Complete delete this device in database");
+                                else console.log("[Firebase] Complete delete this device in database");
                             });
                         }
                     })
