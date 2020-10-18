@@ -26,7 +26,7 @@ bool flagEnCam = false;
 // bApb0Ypwg5YszGanWOBKre39zlg1
 #define UID "bApb0Ypwg5YszGanWOBKre39zlg1"
 #define NODENAME "vuon xoai"
-#define HOST "192.168.1.4" //HOME local ip
+#define HOST "192.168.1.99" //HOME local ip
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
@@ -36,7 +36,7 @@ bool flagEnCam = false;
 // bApb0Ypwg5YszGanWOBKre39zlg1
 #define UID "dinhdanh"
 #define NODENAME "physicalId"
-#define HOST "192.168.1.4" //HOME local ip
+#define HOST "192.168.1.99" //HOME local ip
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
