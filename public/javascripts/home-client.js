@@ -184,7 +184,8 @@ function tick() {
 }
 //? trigger when add new device
 const startStream = () => {
-  ws.send('[{"EVENT":"browserEnCam"}]');
+  // ws.send(`[{"EVENT":"browserEnCam", "gardenId":"${}"}]`);
+  ws.send(`[{"EVENT":"browserEnCam"}]`);
   btnReScan.hidden = true;
   // Use facingMode: environment to attemt to get the front camera on phones
   navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })

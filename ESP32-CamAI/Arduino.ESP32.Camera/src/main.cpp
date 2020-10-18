@@ -298,7 +298,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
 #endif
     StaticJsonDocument<1024> recvDoc;
     DeserializationError error = deserializeJson(recvDoc, payload, length);
-    //? Test if parsing succeeds.
+    // Test if parsing success
     if (error)
     {
 #if DEBUG

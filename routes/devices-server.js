@@ -85,7 +85,10 @@ class FirebaseGardens extends FirebaseUsers {
     // call this when need to EDIT or ADD new garden
     updateGarden() {
         admin.database().ref(`Gardens/${this.userId}/${this.gardenId}`).update(this.objGardenInfo)
-            .catch(err => console.error(err))
+            .catch(err => {
+                console.error(err);
+                return err;
+            })
     }
     // GETTER & SETTER
     get getObjGardenInfo() { return this.objGardenInfo; }
@@ -213,11 +216,11 @@ router.post('/updateGarden', (req, res) => {
             const gardenId = req.body.gardenId || null;
             const gardenName = req.body.gardenName;
             // new garden: required from APP or ESP
-            // update garden info: required from FIREBASE >> render >> recieved from WEB
+            // if want update garden info: required from FIREBASE >> render >> recieved from WEB
             const macAddr = req.body.macAddr || null;
-            const latCoor = req.body.latCoor;
-            const lngCoor = req.body.lngCoor;
-            const place = req.body.place;
+            const latCoor = req.body.latCoor || null;
+            const lngCoor = req.body.lngCoor || null;
+            const place = req.body.place || null;
 
             let FirebaseGarden = new FirebaseGardens(userId, gardenId, gardenName, macAddr, latCoor, lngCoor, place);
             //? gửi kèm gardenId ? UPDATE : SET
@@ -231,7 +234,7 @@ router.post('/updateGarden', (req, res) => {
                     var flagSuccessfully = false;
                     for (const MAC in objPendingGarden) {
                         if (objPendingGarden[MAC].userId = userId) {
-                            const myMac = objPendingGarden[MAC].macAddr;
+                            const myMac = objPendingGarden[MAC].macAddr; // take from esp
 
                             FirebaseGarden.setMacAddr = myMac;
                             FirebaseGarden.setGardenId = myMac;
@@ -254,11 +257,19 @@ router.post('/updateGarden', (req, res) => {
                 }, 5000);
             }
             else {
-                FirebaseGarden.updateGarden();
-                res.end();
+                const err = FirebaseGarden.updateGarden();
+
+                // TODO: fix here never undefine though error
+                if (err == undefined)
+                    res.status(200).end("OK");
+                else
+                    res.status(200).end("Firebase Update Failed");
             }
         })
-        .catch(err => console.error(err))
+        .catch(err => {
+            console.error(err);
+            res.status(401).end("UNAUTHORIZED REQUEST!");
+        })
 })
 
 //!==================/ Route UPDATE & SET Device Slave /==================!//
@@ -290,31 +301,7 @@ router.post('/updateDevice', (req, res) => {
 
 //!==================/ SocketIO /==================!//
 const io = (io) => {
-    io.on('connection', socket => {
-        socket.on('regEsp', (message) => {
-            console.log('[regEsp]', "Hello world from ESP");
-            //? only update <objPendingGarden> if this <message.UID> not in Firebase && must be in <arrPendingBrowser>
-            FirebaseDevices.staticIsExistGardenId(message.UID, message.MAC).then(flagExist => {
-                if (!flagExist) {
-                    // TODO: chuyen sang includes
-                    var indexBrowser = arrPendingBrowser.indexOf(message.UID)
-                    if (indexBrowser > -1) {
-                        console.log('[ESP] are your browser wating for me');
-                        objPendingGarden[message.MAC] = {
-                            "userId": message.UID,
-                            "gardenId": message.MAC, // equal MAC
-                            "macAddr": message.MAC,
-                            // "indexBrowser": indexBrowser
-                        }
-                    }
-                }
-                else {
-                    //TODO: are you sure re-flash this device
-                }
-            })
-            //TODO: send back to esp
-        });
-    })
+    io.on('connection', socket => { })
 }
 
 //!================/ Vanilla WebSocket for ESP32-CAM /================!//
@@ -334,6 +321,7 @@ wsServer.on("connection", ws => {
             switch (payload.EVENT) {
                 case "std":
                     console.log("[ESP]", payload.detail);
+
                 case "regESP":
                     console.log('[regESP]', `Hello world from ${payload.MAC}`);
                     // only update <objPendingGarden> if this <payload.UID> not in Firebase && must be in <arrPendingBrowser>
@@ -373,7 +361,7 @@ wsServer.on("connection", ws => {
 
                 case "espEnCamera":
                     // init new array
-                    console.log("espEnCamera");
+                    console.log("[ESP] here your camera data is available");
                     msgUID = payload.UID;
                     msgMAC = payload.MAC;
                     objEnCam[payload.MAC] = { "arrCamBrow": [ws], state: 0 };
@@ -385,7 +373,7 @@ wsServer.on("connection", ws => {
                 //=2. có cam, current 0 brow, state ON/OFF mà có brow vào
                 //=3. có cam; current 1,2,n brow; state ON/OFF mà có brow khác vào
                 case "browserEnCam":
-                    console.log("browserEnCam");
+                    console.log("[Browser] i want to enable camera");
                     // has property because esp-cam init this object
                     if (objEnCam.hasOwnProperty("8C:AA:B5:8C:7F:7C")) {
                         // just exec if <arrCamBrow> got ONLY camera ws in there at index 0
@@ -441,10 +429,11 @@ wsServer.on("connection", ws => {
                 if (wsItem.readyState === wsItem.OPEN) {
                     wsItem.send(msg);
                 } else {
-                    console.error("[INFO] Socket Error >> POP...ing Error Socket");
+                    console.error("[Server] Socket Error >> POP...ing Error Socket");
                     arrSocket.splice(index, 1);
                     // check if only camera in <arrSocket>
                     if (arrSocket.length == 1) {
+                        console.log('[Server] Sent <browserDisCam>');
                         objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
                         objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 0;
                     }

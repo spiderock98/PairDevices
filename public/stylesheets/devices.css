@@ -175,8 +175,8 @@ body {
 }
 
 .card-detail .desc {
-  padding: 0.5rem 1rem;
-  font-size: 12px;
+  padding: 0 1rem;
+  font-size: 15px;
 }
 
 .card-detail .actions {
@@ -198,7 +198,7 @@ body {
 }
 
 .title-total {
-  padding: 2.5em 1.5em 1.5em 1.5em;
+  padding: 0.1em 1.5em 1em 1.5em;
 }
 
 path {

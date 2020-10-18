@@ -35,9 +35,6 @@
     <div id="wrapper">
         <div class="d-flex flex-column" id="content-wrapper">
             <div id="content">
-
-                <%- include('devices/modalConfig') %>
-
                 <div id="sectionDevices">
 
                     <%- include('common/header')%>
@@ -50,6 +47,9 @@
                     <%- include('devices/cardGarden') %>
 
                 </div>
+
+                <%- include('devices/modalConfig') %>
+
             </div>
 
             <%- include('common/footer')%>
@@ -58,10 +58,6 @@
         <!-- <a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a> -->
 
     </div>
-
-    <!-- //!======/hidden element <=> TRICKY to pass data to electronjs app/=======!// -->
-    <p id="hidLatCoor" style="display: none;"></p>
-    <p id="hidLngCoor" style="display: none;"></p>
 </body>
 
 </html>

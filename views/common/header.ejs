@@ -18,11 +18,11 @@
             <img width="250" height="45" src="images/banner.png" alt="banner">
         </a>
         <ul class="nav navbar-nav text-light" id="accordionSidebar">
-            <li class="nav-item"><a onclick="ajStart()" class="nav-link" href="/"><i
+            <li class="nav-item navHome"><a onclick="ajStart()" class="nav-link" href="/"><i
                         class="fas fa-chart-line"></i><span>&nbsp;Dashboard</span></a></li>
-            <li class="nav-item"><a onclick="ajStart()" class="nav-link" href="/devices"><i
+            <li class="nav-item navDevices"><a onclick="ajStart()" class="nav-link" href="/devices"><i
                         class="fas fa-microchip"></i><span>&nbsp;Devices</span></a></li>
-            <li class="nav-item"><a onclick="ajStart()" class="nav-link" href="#"><i
+            <li class="nav-item navProfile"><a onclick="ajStart()" class="nav-link" href="#"><i
                         class="fas fa-user-circle"></i><span>&nbsp;Profile</span></a></li>
             <li class="nav-item">
                 <button id="btnOut" class="nav-link" style="border: none; background-color: #fff;">
@@ -38,4 +38,18 @@
     $("#btnOut").on('click', () => {
         location.href = "/sessionLogout"; // to index-server
     });
+    switch (window.location.pathname) {
+        case "/home":
+            $("li.navHome i").remove();
+            $("li.navHome span").prepend('<img src="images/pie_chart.svg" width="40px" height="40px">');
+            break;
+
+        case "/devices":
+            $("li.navDevices i").remove();
+            $("li.navDevices span").prepend('<img src="images/video_card.svg" width="40px" height="40px">');
+            break;
+
+        default:
+            break;
+    }
 </script>

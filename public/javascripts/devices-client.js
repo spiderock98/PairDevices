@@ -22,9 +22,115 @@ getCurrentUID().then((uid) => {
 }); // Global Var
 
 
-//!============/ Others  /===========!//
+
+
 //todo: change this var name
-objDeviceName = $("div.card"); // list all card items
+const objDeviceName = $("div.card"); // list all card items
+//!======/ map on config device modal /=======!//
+function configMap() {
+    for (let index = 0; index < objDeviceName.length; index++) {
+        let varConfigMap = new google.maps.Map(document.getElementById(`configMap${index}`), {
+            center: new google.maps.LatLng($(`#hidLatCoor${index}`).text(), $(`#hidLngCoor${index}`).text()),
+            zoom: 15,
+            fullscreenControl: false,
+            keyboardShortcuts: false,
+            mapTypeControl: false,
+            panControl: false,
+            rotateControl: false,
+            scaleControl: false,
+            streetViewControl: false,
+            zoomControl: false,
+        });
+        //!================/ Listen click marker event /================!//
+        let markersArray = [];
+        let tmpTitle = "";
+
+        // clear marker on close modal
+        $(".modal-footer > button.btnExit").on("click", () => {
+            if (markersArray) {
+                for (i in markersArray) {
+                    markersArray[i].setMap(null);
+                }
+                markersArray.length = 0;
+            }
+        })
+        // set default marker on open config modal
+        $(`#btnConfig${index}`).on("click", () => {
+            const defaultMarker = new google.maps.Marker({
+                position: new google.maps.LatLng($(`#hidLatCoor${index}`).text(), $(`#hidLngCoor${index}`).text()),
+                map: varConfigMap,
+                animation: google.maps.Animation.BOUNCE,
+            });
+            markersArray.push(defaultMarker);
+        })
+
+        // on click my map
+        google.maps.event.addListener(varConfigMap, "click", function (event) {
+            // delete others overlays
+            if (markersArray) {
+                for (i in markersArray) {
+                    markersArray[i].setMap(null);
+                }
+                markersArray.length = 0;
+            }
+            const marker = new google.maps.Marker({
+                position: event.latLng,
+                map: varConfigMap,
+                animation: google.maps.Animation.BOUNCE,
+            });
+            markersArray.push(marker);
+
+            //!============/ Return something onClick /============!//
+            $(`#hidLatCoor${index}`).text(event.latLng.lat());
+            $(`#hidLngCoor${index}`).text(event.latLng.lng());
+
+            setTimeout(() => {
+                $('div.poi-info-window .title').addClass(`addTitle${index}`);
+                $('div.poi-info-window .title').removeClass("title");
+                const locatTitle = $(`div.poi-info-window .addTitle${index}`).text();
+                // destroy class for next search
+                // $('div.poi-info-window .title').removeClass("title");
+
+                const locatAdrr = $('div .address-line .full-width').text();
+                // cusArr[index] = locatTitle;
+
+                // var myArray = $('div.poi-info-window .title').get().map((el) => {
+                //     console.log(el);
+                //     return el;
+                //     // console.log(el[0].innerText);
+                //     // console.log(el["0"].innerText);
+                // });
+                // myArray.forEach(el => {
+                //     // console.log(el[index].innerHTML);
+                //     console.log(el.innerHTML);
+                // });
+
+
+
+                // function display(divs) {
+                //     var a = [];
+                //     for (var i = 0; i < divs.length; i++) {
+                //         a.push(divs[i].innerHTML);
+                //     }
+                //     console.log(a);
+                //     // $("span").text(a.join(" "));
+                // }
+                // display($('div.poi-info-window .title').get().reverse());
+
+
+                if (tmpTitle != locatTitle) {
+                    tmpTitle = locatTitle;
+                    $(`#formConfig${index}`).find("input[name='gardenPlace']").val(locatTitle);
+                }
+                else {
+                    $(`#formConfig${index}`).find("input[name='gardenPlace']").val("");
+                }
+            }, 10);
+        });
+    }
+}
+
+//!============/ Others  /===========!//
 // TODO: get database state
 let arrState = [];
 for (let i = 0; i < objDeviceName.length; i++) {
@@ -62,7 +168,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
     });
 
     $(`#btnRemoveGarden${i}`).on("click", () => {
-        const gardenId = $(`#gardenId${i}`).text();
+        const gardenId = $(`#gardenId${i}`).text().trim();
         const gardenName = $(`#gardenName${i}`).text();
 
         Swal.fire({
@@ -90,6 +196,7 @@ for (let i = 0; i < objDeviceName.length; i++) {
             }
         });
     });
+
 
     // $(`#btnConfigure${i + 1}`).on("click", () => {
     //     deviceName = $(`#btnRemoveGarden${i}`)
