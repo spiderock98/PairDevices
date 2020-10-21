@@ -6,14 +6,16 @@
     }
 </style>
 
+<script defer src="javascripts/UI/jsQR.js"></script>
+
 <div class="card-body">
     <% let index = 0; %>
     <!--? https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
     <% snapGardensInfo.forEach((child) => { %>
 
-    <div class="card-detail card" style="--background: rgb(255, 174, 174); --text:white;">
+    <div class="card-detail card" style="--background: rgb(255, 174, 174); --text:black;">
         <div class="multi-button">
-            <button class="fas fa-plus"></button>
+            <button class="fas fa-plus" id="btnAddGarden<%-index%>"></button>
             <button class="fas fa-cog" id="btnConfig<%-index%>"></button>
             <button class="fas fa-trash" id="btnRemoveGarden<%-index%>"></button>
         </div>
@@ -35,20 +37,208 @@
         </div>
     </div>
 
-    <!-- <div class="card" style="--background:brown; --text:white;">
-        <div class="multi-button">
-            <button class="fas fa-plus"></button>
-            <button class="fas fa-cog"></button>
-            <button class="fas fa-trash" id="btnRemoveGarden<%-index%>"></button>
-        </div>
-        <div class="card-container">
-            asdasd
-        </div>
-    </div> -->
-
     <script>
         $("#btnConfig<%-index%>").on("click", () => {
             $("#modalConfig<%-index%>").modal("toggle");
+        })
+
+        $("#btnAddGarden<%-index%>").on("click", () => {
+            let objDeviceInfo;
+
+            Swal.queue([
+                {
+                    showConfirmButton: false,
+                    title: "Pairing New Devices",
+                    text: "Place qr code to the front of the camera",
+                    confirmButtonText: "Next",
+                    html:
+                        '<div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div><canvas id="canvas" hidden></canvas><img hidden width="1" height="1" id="cap" onerror="this.src=`images/icons8-disconnected.svg`"><div id="output" hidden><div id="outputMessage">No QR code detected.</div><div hidden><b>Data:</b> <span id="outputData"></span></div><button id="btnReScan" hidden>Rescan</button></div>',
+                },
+                {
+                    title: "Pairing New Devices",
+                    text: "Name Your Garden",
+                    input: 'text',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'You need to write something!'
+                        }
+                    }
+                }
+            ]).then(result => {
+                if (result.value) {
+                    Swal.showLoading();
+                    const objAnswers = {
+                        gardenId: "<%- child.val().gardenId %>",
+                        deviceId: objDeviceInfo.deviceId,
+                        deviceName: result.value[1],
+                    };
+                    $.ajax({
+                        method: "POST",
+                        url: "/devices/updateDevice",
+                        data: {
+                            gardenId: "<%- child.val().gardenId %>",
+                            deviceId: objDeviceInfo.deviceId,
+                            deviceName: result.value[1],
+                        },
+                        success: () => {
+                            Swal.fire({
+                                icon: 'success',
+                                title: "DONE",
+                                text: "device has been added"
+                            }).then(result => {
+                                if (result.value) {
+                                    stopStream();
+                                    ws.close();
+                                }
+                            })
+                        }
+                    })
+                }
+                else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Suddenly Stopped",
+                        text: "camera stream has stopped working"
+                    })
+                    stopStream();
+                    ws.close();
+                }
+            })
+
+
+
+
+            // Swal.mixin({
+            //     // input: 'text',
+            //     confirmButtonText: 'Next &rarr;',
+            //     showCancelButton: true,
+            //     progressSteps: ['1', '2']
+            // }).queue([
+            //     {
+            //         html:
+            //             '<div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div><canvas id="canvas" hidden></canvas><img hidden width="1" height="1" id="cap" onerror="this.src=`images/icons8-disconnected.svg`"><div id="output" hidden><div id="outputMessage">No QR code detected.</div><div hidden><b>Data:</b> <span id="outputData"></span></div><button id="btnReScan" hidden>Rescan</button></div>'
+            //     },
+            //     {
+            //         title: 'Name your garden !',
+            //         input: 'text',
+            //     }
+            // ]).then((result) => {
+            //     if (result.value) {
+            //         const answers = JSON.stringify(result.value)
+            //         Swal.fire({
+            //             title: answers,
+            //         })
+            //     }
+            //     // on click cancel button or escape key
+            //     else {
+            //         stopStream();
+            //         ws.close();
+            //     }
+            // })
+
+
+            //!================/ ESP32-CAM on security area field /================!//
+            const WS_URL = "ws:///192.168.1.99:81";
+            const ws = new WebSocket(WS_URL);
+            let urlObj;
+            // <img width="320" height="240" id="cap" src="" onerror="this.src='images/icons8-disconnected.svg'">
+            let imgFrame = document.getElementById("cap");
+            ws.onopen = () => console.log("[INFO] Connected to", WS_URL);
+            ws.onmessage = (payload) => {
+                const arrBuffer = payload.data;
+                if (urlObj) {
+                    URL.revokeObjectURL(urlObj);
+                }
+                urlObj = URL.createObjectURL(new Blob([arrBuffer]));
+                imgFrame.src = urlObj;
+            };
+            //!================/ ESP32-CAM on QR SCANNER /================!//
+            var video = document.createElement("video");
+            var canvasElement = document.getElementById("canvas");
+            var canvas = canvasElement.getContext("2d");
+            var loadingMessage = document.getElementById("loadingMessage");
+            var outputContainer = document.getElementById("output");
+            var outputMessage = document.getElementById("outputMessage");
+            var outputData = document.getElementById("outputData");
+            const btnReScan = document.getElementById("btnReScan");
+
+            function drawLine(begin, end, color) {
+                canvas.beginPath();
+                canvas.moveTo(begin.x, begin.y);
+                canvas.lineTo(end.x, end.y);
+                canvas.lineWidth = 4;
+                canvas.strokeStyle = color;
+                canvas.stroke();
+            }
+            function tick() {
+                loadingMessage.innerText = "⌛ Loading video..."
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    loadingMessage.hidden = true;
+                    canvasElement.hidden = false;
+                    outputContainer.hidden = false;
+
+                    canvasElement.height = 120;
+                    canvasElement.width = 160;
+                    // canvasElement.height = video.videoHeight;
+                    // canvasElement.width = video.videoWidth;
+                    //? display video on canvas
+                    canvas.drawImage(imgFrame, 0, 0, canvasElement.width, canvasElement.height);
+                    var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                    //? try to find QR Image
+                    var code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: "dontInvert",
+                    });
+                    //? ON detect QR Image
+                    if (code) {
+                        //? retangle qrcode
+                        drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+                        drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+                        drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+                        drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+
+                        outputMessage.hidden = true;
+                        outputData.parentElement.hidden = false;
+                        outputData.innerText = code.data;
+
+                        stopStream();
+                        btnReScan.hidden = false;
+                        objDeviceInfo = JSON.parse(code.data);
+
+                        $(".swal2-actions").removeAttr("style");
+                        $("button.swal2-confirm").removeAttr("style");
+                        return;
+                    } else {
+                        outputMessage.hidden = false;
+                        outputData.parentElement.hidden = true;
+                    }
+                }
+                requestAnimationFrame(tick);
+            }
+            // trigger when add new device
+            const startStream = () => {
+                setTimeout(() => {
+                    if (ws.readyState == WebSocket.OPEN)
+                        ws.send(`[{"EVENT":"browserEnCam", "gardenId":"<%-child.val().gardenId%>", "userId": "<%-snapGardensInfo.key%>"}]`);
+                    else
+                        console.error(ws.readyState);
+                }, 2000);
+
+                btnReScan.hidden = true;
+                // Use facingMode: environment to attemt to get the front camera on phones
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                    .then(Stream => {
+                        video.srcObject = Stream;
+                        video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+                        requestAnimationFrame(tick);
+                    });
+            }
+            const stopStream = () => {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            $("#btnReScan").on("click", () => {
+                startStream();
+            })
+            startStream();
         })
     </script>
 

@@ -18,8 +18,28 @@
             <img width="250" height="45" src="images/banner.png" alt="banner">
         </a>
         <ul class="nav navbar-nav text-light" id="accordionSidebar">
-            <li class="nav-item navHome"><a onclick="ajStart()" class="nav-link" href="/"><i
-                        class="fas fa-chart-line"></i><span>&nbsp;Dashboard</span></a></li>
+            <li class="nav-item dropdown navHome">
+                <!-- <a onclick="ajStart()" class="nav-link" href="/"> -->
+                <!-- <i class="fas fa-chart-line"></i>
+                    <span>&nbsp;Dashboard</span> -->
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="/" role="button" aria-haspopup="true"
+                    aria-expanded="false">
+                    <i class="fas fa-chart-line"></i>
+                    <span>&nbsp;Dashboard</span>
+                </a>
+                <div class="dropdown-menu">
+                    <% let index = 0; %>
+                    <!-- https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
+                    <% snapGardensInfo.forEach(child => { %>
+                    <a class="dropdown-item" href="home/dashboard/?gardenId=<%- child.val().gardenId %>">
+                        <%= child.val().gardenName %>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <% ++index; }) %>
+                </div>
+
+                <!-- </a> -->
+            </li>
             <li class="nav-item navDevices"><a onclick="ajStart()" class="nav-link" href="/devices"><i
                         class="fas fa-microchip"></i><span>&nbsp;Devices</span></a></li>
             <li class="nav-item navProfile"><a onclick="ajStart()" class="nav-link" href="#"><i
@@ -52,4 +72,13 @@
         default:
             break;
     }
+
+    $(() => {
+        // use global <socket> var declare in <home-client.js>
+        socket.emit("regBrowser", "<%= snapGardensInfo.key %>");
+        // on camera init error >> change <outputMessage> in <cardGarden.ejs>
+        socket.on("resBrowserEnCam", status => {
+            outputMessage.innerHTML = status;
+        })
+    });
 </script>

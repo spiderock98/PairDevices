@@ -54,9 +54,11 @@
 
                 <div id="sectionDashboard" style="margin-top: 100px;" class="container-fluid">
                     <div class="d-sm-flex justify-content-between align-items-center mb-4">
-                        <h3 class="text-dark mb-0 glow">KHU VƯỜN TRÊN MÂY</h3><a
-                            class="btn btn-primary btn-sm d-none d-sm-inline-block" role="button" href="#"><i
-                                class="fas fa-download fa-sm text-white-50"></i>&nbsp;Generate Report</a>
+                        <h3 class="text-dark mb-0 glow">KHU VƯỜN TRÊN MÂY</h3>
+                        <div style="display: none;" id="hidGardenId"></div>
+                        <a class="btn btn-primary btn-sm d-none d-sm-inline-block" role="button" href="#">
+                            <i class="fas fa-download fa-sm text-white-50"></i>&nbsp;Generate Report
+                        </a>
                     </div>
                     <div class="row">
                         <div class="col-md-6 col-xl-3 mb-4">
@@ -136,17 +138,6 @@
                             <div class="card shadow mb-4">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="text-primary font-weight-bold m-0">Vị trí đặt thiết bị</h6>
-                                    <div class="dropdown no-arrow"><button class="btn btn-link btn-sm dropdown-toggle"
-                                            data-toggle="dropdown" aria-expanded="false" type="button"><i
-                                                class="fas fa-ellipsis-v text-gray-400"></i></button>
-                                        <div class="dropdown-menu shadow dropdown-menu-right animated--fade-in">
-                                            <p class="text-center dropdown-header">dropdown header:</p><a
-                                                class="dropdown-item" href="#">&nbsp;Action</a><a class="dropdown-item"
-                                                href="#">&nbsp;Another action</a>
-                                            <div class="dropdown-divider"></div><a class="dropdown-item"
-                                                href="#">&nbsp;Something else here</a>
-                                        </div>
-                                    </div>
                                 </div>
                                 <div id="viewMap" style="height:400px; "></div>
                             </div>
@@ -155,17 +146,6 @@
                             <div class="card shadow mb-4">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="text-primary font-weight-bold m-0">Camera an ninh khu vực</h6>
-                                    <div class="dropdown no-arrow"><button class="btn btn-link btn-sm dropdown-toggle"
-                                            data-toggle="dropdown" aria-expanded="false" type="button"><i
-                                                class="fas fa-ellipsis-v text-gray-400"></i></button>
-                                        <div class="dropdown-menu shadow dropdown-menu-right animated--fade-in">
-                                            <p class="text-center dropdown-header">dropdown header:</p><a
-                                                class="dropdown-item" href="#">&nbsp;Action</a><a class="dropdown-item"
-                                                href="#">&nbsp;Another action</a>
-                                            <div class="dropdown-divider"></div><a class="dropdown-item"
-                                                href="#">&nbsp;Something else here</a>
-                                        </div>
-                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <!-- 640x480 -->

@@ -48,10 +48,10 @@ require('./routes/devices-server.js').start(io);
 
 io.on("connection", (socket) => {
   // from browser: onLoad() to put browser in to owm room
-  socket.on("regBrowser", () => {
-    socket.join("browser");
-    console.log("[INFO] Reg Browser Successful");
-  });
+  // socket.on("regBrowser", () => {
+  //   socket.join("browser");
+  //   console.log("[INFO] Reg Browser Successful");
+  // });
   // from esp8266: register new node to server
   // socket.on("regEsp", (data) => {
   //   // add some stuff

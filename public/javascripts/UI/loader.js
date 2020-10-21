@@ -7,7 +7,7 @@ $(() => {
 }); // end of document ready
 
 
-//!====/when ajax START => loader in delay 20s timeout/====!//
+//!====/ when ajax START => loader in delay 20s timeout /====!//
 const ajStart = () => {
   $('div .container-fluid').removeClass('loaded');
 }

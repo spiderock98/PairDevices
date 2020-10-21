@@ -254,7 +254,7 @@ router.post('/updateGarden', (req, res) => {
                     console.log('[objPendingGarden 2]', objPendingGarden);
                     console.log('[arrPendingBrowser 2]', arrPendingBrowser);
 
-                }, 20000);
+                }, 30000);
             }
             else {
                 const err = FirebaseGarden.updateGarden();
@@ -277,8 +277,9 @@ router.post('/updateDevice', (req, res) => {
     let cookie = req.cookies.session || "";
     admin.auth().verifySessionCookie(cookie, true)
         .then((decodedClaims) => {
-            res.end();
+            // res.end();
 
+            //TODO: validate duplicate or fake device
             const userId = decodedClaims.uid; // absolute
             const gardenId = req.body.gardenId; // absolute
             const deviceId = req.body.deviceId || null;
@@ -294,17 +295,26 @@ router.post('/updateDevice', (req, res) => {
             }
             else {
                 FirebaseDevice.updateDevice();
+                res.end();
             }
         })
         .catch(err => console.error(err))
 })
 
 //!==================/ SocketIO /==================!//
-const io = (io) => {
-    io.on('connection', socket => { })
+let globIO;
+const ioFunc = (io) => {
+    globIO = io;
+    io.on('connection', socket => {
+        // get <browserUserId> from browser devices page <header.js>
+        socket.on("regBrowser", (browserUserId) => {
+            console.log(`[SocketIO] ${browserUserId} has join his own room`);
+            socket.join(`${browserUserId}`);
+        })
+    })
 }
 
-//!================/ Vanilla WebSocket for ESP32-CAM /================!//
+//!================/ Vanilla WebSocket for enable/disable pair/repair ESP32-CAM /================!//
 const WebSocket = require("ws");
 const wsServer = new WebSocket.Server({ port: 81 });
 // let arrSocket = [];
@@ -373,48 +383,36 @@ wsServer.on("connection", ws => {
                 //=2. có cam, current 0 brow, state ON/OFF mà có brow vào
                 //=3. có cam; current 1,2,n brow; state ON/OFF mà có brow khác vào
                 case "browserEnCam":
-                    console.log("[Browser] i want to enable camera");
+                    const browserRequestGardenId = payload.gardenId;
+                    const browserRequestUserId = payload.userId;
+                    console.log(`[Browser] We want to enable camera ${browserRequestGardenId}`);
                     // has property because esp-cam init this object
-                    if (objEnCam.hasOwnProperty("8C:AA:B5:8C:7F:7C")) {
+                    if (objEnCam.hasOwnProperty(browserRequestGardenId)) {
                         // just exec if <arrCamBrow> got ONLY camera ws in there at index 0
-                        if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].length == 1) {
-                            if (objEnCam["8C:AA:B5:8C:7F:7C"]["state"] == 0) {
-                                objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 1;
-                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
-                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserEnCam"}');
+                        if (objEnCam[browserRequestGardenId]["arrCamBrow"].length == 1) {
+                            if (objEnCam[browserRequestGardenId]["state"] == 0) {
+                                objEnCam[browserRequestGardenId]["state"] = 1;
+                                objEnCam[browserRequestGardenId]["arrCamBrow"].push(ws);
+                                objEnCam[browserRequestGardenId]["arrCamBrow"][0].send('{"EVENT":"browserEnCam"}');
                             } else {
                                 console.error("[INFO] Something Wrong !!!");
                             }
                         }
-                        else if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].length > 1) {
-                            if (objEnCam["8C:AA:B5:8C:7F:7C"]["state"] == 0) {
-                                objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 1;
-                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserEnCam"}');
+                        else if (objEnCam[browserRequestGardenId]["arrCamBrow"].length > 1) {
+                            if (objEnCam[browserRequestGardenId]["state"] == 0) {
+                                objEnCam[browserRequestGardenId]["state"] = 1;
+                                objEnCam[browserRequestGardenId]["arrCamBrow"][0].send('{"EVENT":"browserEnCam"}');
                             }
-                            if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].includes(ws) == false)
-                                objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
+                            if (objEnCam[browserRequestGardenId]["arrCamBrow"].includes(ws) == false)
+                                objEnCam[browserRequestGardenId]["arrCamBrow"].push(ws);
                             else
-                                console.log("[INFO] Oops, you reopen AddDevicesModal");
-
-                            // if (objEnCam["8C:AA:B5:8C:7F:7C"]["state"] == 0) {
-                            //     objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 1;
-                            //     // fix close modal then open again
-                            //     if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].includes(ws) == false)
-                            //         objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
-                            //     else
-                            //         console.log("[INFO] Oops, you reopen AddDevicesModal");
-                            //     objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserEnCam"}');
-                            // } else {
-                            //     if (objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].includes(ws) == false)
-                            //         objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
-                            //     else
-                            //         console.log("[INFO] Oops, you reopen AddDevicesModal");
-                            //     objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"].push(ws);
-                            // }
+                                console.log("[NodeJS] Oops, you reopen AddDevicesModal");
                         }
                     } else {
                         //TODO: return to brow
-                        console.error("[INFO] Camera is not connect to server or not ready !!!");
+                        console.error(`[NodeJS] Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
+                        // emit to <header.ejs>
+                        globIO.to(browserRequestUserId).emit("resBrowserEnCam", `Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
                     }
                     break;
 
@@ -423,7 +421,7 @@ wsServer.on("connection", ws => {
             }
         } catch (error) {
             // console.error("[ERROR]:", error);
-            const arrSocket = objEnCam[msgMAC]["arrCamBrow"]
+            const arrSocket = objEnCam[msgMAC]["arrCamBrow"];
             arrSocket.forEach((wsItem, index) => {
                 // The current state of the connection https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
                 if (wsItem.readyState === wsItem.OPEN) {
@@ -434,8 +432,8 @@ wsServer.on("connection", ws => {
                     // check if only camera in <arrSocket>
                     if (arrSocket.length == 1) {
                         console.log('[Server] Sent <browserDisCam>');
-                        objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
-                        objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 0;
+                        objEnCam[msgMAC]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
+                        objEnCam[msgMAC]["state"] = 0;
                     }
                 }
             });
@@ -458,5 +456,5 @@ wsServer.on("connection", ws => {
 
 module.exports = {
     router: router,
-    start: io
+    start: ioFunc
 }

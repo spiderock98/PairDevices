@@ -6,9 +6,9 @@ const fs = require('fs');
 const path = require('path')
 
 
-function getSnapshotCurrentDevice(uid) {
+const getSnapGardensInfo = (userId) => {
     return new Promise(resolve => {
-        admin.database().ref(`${uid}/LocationNodes`).once('value', snap => {
+        admin.database().ref(`Gardens/${userId}`).once('value', snap => {
             resolve(snap)
         })
     })
@@ -18,15 +18,33 @@ router.get('/', (req, res) => {
     let sessionCookie = req.cookies.session || '';
     admin.auth().verifySessionCookie(sessionCookie, true)
         .then(decodedClaims => {
-            getSnapshotCurrentDevice(decodedClaims.uid)
-                .then(snapDevices => {
-                    res.render('home', { snap: snapDevices });
+            getSnapGardensInfo(decodedClaims.uid)
+                .then(snapGardensInfo => {
+                    res.render('home', { snapGardensInfo: snapGardensInfo });
                 })
         })
         .catch(error => {
             // Session cookie is unavailable or invalid. Force user to login.
             console.log(error);
-            res.redirect('/');
+            res.redirect('/devices');
+        });
+});
+
+router.get("/dashboard", (req, res) => {
+    let sessionCookie = req.cookies.session || '';
+    admin.auth().verifySessionCookie(sessionCookie, true)
+        .then(decodedClaims => {
+            const userId = decodedClaims.uid;
+            const gardenId = req.query.gardenId;
+            admin.database().ref(`Gardens/${userId}/${gardenId}`).once("value", snapGardenId => {
+                console.log(snapGardenId.val());
+            })
+            // res.render('home', {}); 
+        })
+        .catch(error => {
+            // Session cookie is unavailable or invalid. Force user to login.
+            console.log(error);
+            res.redirect('/devices');
         });
 });
 
