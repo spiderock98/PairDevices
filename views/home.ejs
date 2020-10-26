@@ -17,9 +17,10 @@
     <script defer src='https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.2/velocity.ui.min.js'></script>
     <script defer
         src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-    <!-- <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script> -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.js"></script>
+    <script defer src="https://www.gstatic.com/charts/loader.js"></script>
 
+    <script defer src="javascripts/UI/js-fluid-meter.js"></script>
     <script defer src="javascripts/UI/jsQR.js"></script>
     <script defer src="javascripts/UI/openModal.js"></script>
     <script defer src="javascripts/home-client.js"></script>
@@ -52,9 +53,9 @@
 
                 <%-include ('devices/modalNewDevice') %>
 
-                <div id="sectionDashboard" style="margin-top: 100px;" class="container-fluid">
+                <div id="sectionDashboard" style="margin-top: 120px;" class="container-fluid">
                     <div class="d-sm-flex justify-content-between align-items-center mb-4">
-                        <h3 class="text-dark mb-0 glow">KHU VƯỜN TRÊN MÂY</h3>
+                        <h3 class="text-dark mb-0 glow"><%=detailGardenInfo.val().gardenName.toUpperCase()%></h3>
                         <div style="display: none;" id="hidGardenId"></div>
                         <a class="btn btn-primary btn-sm d-none d-sm-inline-block" role="button" href="#">
                             <i class="fas fa-download fa-sm text-white-50"></i>&nbsp;Generate Report
@@ -132,17 +133,25 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Start: Chart -->
+                    <!-- Start:  -->
                     <div class="row">
-                        <div class="col-lg-7 col-xl-8">
+                        <div class="col-lg-7 col-xl-10">
                             <div class="card shadow mb-4">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="text-primary font-weight-bold m-0">Vị trí đặt thiết bị</h6>
                                 </div>
-                                <div id="viewMap" style="height:400px; "></div>
+                                <div id="viewMap" style="height:400px; ">
+                                    <!-- pass value to home-client.js -->
+                                    <p style="display: none;" class="hidLatCoor">
+                                        <%= detailGardenInfo.val().location.latCoor %></p>
+                                    <p style="display: none;" class="hidLngCoor">
+                                        <%= detailGardenInfo.val().location.lngCoor %></p>
+                                    <p style="display: none;" class="hidPlace">
+                                        <%= detailGardenInfo.val().location.place %></p>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-lg-5 col-xl-4">
+                        <div class="col-lg-5 col-xl-2">
                             <div class="card shadow mb-4">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <h6 class="text-primary font-weight-bold m-0">Camera an ninh khu vực</h6>
@@ -153,17 +162,11 @@
                                         <img width="320" height="240" id="cap" src=""
                                             onerror="this.src='images/icons8-disconnected.svg'">
                                     </div>
-                                    <div class="text-center small mt-4"><span class="mr-2"><i
-                                                class="fas fa-circle text-primary"></i>&nbsp;Direct</span><span
-                                            class="mr-2"><i
-                                                class="fas fa-circle text-success"></i>&nbsp;Social</span><span
-                                            class="mr-2"><i class="fas fa-circle text-info"></i>&nbsp;Refferal</span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- End: Chart -->
+                    <!-- End:  -->
                     <div class="row">
                         <div class="col-lg-6 mb-4">
                             <div class="card shadow mb-4">
@@ -262,6 +265,42 @@
                             </div>
                         </div>
                     </div>
+
+
+
+                    <!-- Start: Chart -->
+                    <div class="row">
+                        <div class="col-lg-7 col-xl-10">
+                            <div class="card shadow mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="text-primary font-weight-bold m-0">My Chart</h6>
+                                </div>
+                                <div class="card-body">
+                                    <!--Div that will hold the pie chart-->
+                                    <div id="chart_div"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-5 col-xl-2">
+                            <div class="card shadow mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h6 class="text-primary font-weight-bold m-0">Water Tank Level</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col text-center">
+                                                <div id="fluid-meter" class="mx-auto"></div>
+                                                <p class="hidWaterLevel" style="display: none;">
+                                                    <%= arrDeviceInfo.val()[0].sensor.WaterLevel %></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End: Chart -->
                 </div>
 
                 <!-- //!=====================//device section//=====================!// -->

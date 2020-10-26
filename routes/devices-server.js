@@ -155,10 +155,9 @@ router.get('/', (req, res) => {
     admin.auth().verifySessionCookie(sessionCookie, true)
         .then(decodedClaims => {
             getSnapGardensInfo(decodedClaims.uid)
-                .then(snapGardensInfo => {
-                    //? https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach
-                    //? send {snapGardensInfo} to devices/tableListGarden.ejs
-                    res.render('devices', { snapGardensInfo: snapGardensInfo });
+                .then(objGardenInfo => {
+                    // https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach
+                    res.render('devices', { objGardenInfo: objGardenInfo });
                 })
         })
         .catch(error => {
@@ -439,14 +438,15 @@ wsServer.on("connection", ws => {
             });
         }
     })
-    // ws.on("close", (code) => {
-    //     console.log("[INFO] socket closed code", code);
-    //     const arrSocket = objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"];
-    //     if (arrSocket.length == 1) {
-    //         objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
-    //         objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 0;
-    //     }
-    // })
+    ws.on("close", (code) => {
+        console.log("[INFO] socket closed code", code);
+        //TODO: if browser disconnect POP out it
+        // const arrSocket = objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"];
+        // if (arrSocket.length == 1) {
+        //     objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
+        //     objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 0;
+        // }
+    })
     ws.on("error", (err) => {
         console.error(err);
     })

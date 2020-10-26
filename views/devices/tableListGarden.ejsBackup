@@ -1,6 +1,6 @@
 <% count = 0 %>
 <!--? https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
-<% snapGardensInfo.forEach((child) => { %>
+<% objGardenInfo.forEach((child) => { %>
 <tr>
     <th scope="row"><%= ++count%></th>
 

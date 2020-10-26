@@ -13,14 +13,14 @@
     "debug": "~4.2.0",
     "ejs": "~3.1.5",
     "express": "~4.17.1",
-    "firebase-admin": "^9.2.0",
+    "firebase-admin": "^9.3.0",
     "g": "^2.0.1",
     "http-errors": "~1.8.0",
     "jquery": "^3.5.1",
     "morgan": "~1.10.0",
     "nodemon": "^2.0.6",
     "socket.io": "^2.3.0",
-    "sweetalert2": "^10.6.1",
+    "sweetalert2": "^10.8.1",
     "ws": "^7.3.1"
   },
   "devDependencies": {

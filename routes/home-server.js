@@ -1,9 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const admin = require('firebase-admin');
-const { exec } = require('child_process')
-const fs = require('fs');
-const path = require('path')
 
 
 const getSnapGardensInfo = (userId) => {
@@ -18,28 +15,31 @@ router.get('/', (req, res) => {
     let sessionCookie = req.cookies.session || '';
     admin.auth().verifySessionCookie(sessionCookie, true)
         .then(decodedClaims => {
-            getSnapGardensInfo(decodedClaims.uid)
-                .then(snapGardensInfo => {
-                    res.render('home', { snapGardensInfo: snapGardensInfo });
-                })
-        })
-        .catch(error => {
-            // Session cookie is unavailable or invalid. Force user to login.
-            console.log(error);
-            res.redirect('/devices');
-        });
-});
-
-router.get("/dashboard", (req, res) => {
-    let sessionCookie = req.cookies.session || '';
-    admin.auth().verifySessionCookie(sessionCookie, true)
-        .then(decodedClaims => {
             const userId = decodedClaims.uid;
             const gardenId = req.query.gardenId;
-            admin.database().ref(`Gardens/${userId}/${gardenId}`).once("value", snapGardenId => {
-                console.log(snapGardenId.val());
+
+            admin.database().ref(`Gardens/${userId}`).once("value", snapGarden1 => {
+                admin.database().ref(`Gardens/${userId}/${gardenId}`).once("value", snapGarden2 => {
+                    admin.database().ref(`Devices/${userId}/${gardenId}`).once("value", snapGarden3 => {
+
+                        if (snapGarden2.val() == null) {
+                            let firstGardenId;
+                            for (const gardenId in snapGarden1.val()) {
+                                firstGardenId = gardenId;
+                                break;
+                            }
+                            res.redirect(`/home?gardenId=${firstGardenId}`);
+                        }
+                        else {
+                            res.render('home', {
+                                objGardenInfo: snapGarden1,
+                                arrDeviceInfo: snapGarden3,
+                                detailGardenInfo: snapGarden2
+                            });
+                        }
+                    })
+                })
             })
-            // res.render('home', {}); 
         })
         .catch(error => {
             // Session cookie is unavailable or invalid. Force user to login.
@@ -63,3 +63,22 @@ router.post('/configTime', (req, res) => {
 })
 
 module.exports = router;
+
+
+//!==================/ SocketIO /==================!//
+// let globIO;
+// const ioFunc = (io) => {
+//     globIO = io;
+//     io.on('connection', socket => {
+//         // get <browserUserId> from browser devices page <header.js>
+//         socket.on("regBrowser", (browserUserId) => {
+//             console.log(`[SocketIO] ${browserUserId} has join his own room`);
+//             socket.join(`${browserUserId}`);
+//         })
+//     })
+// }
+
+// module.exports = {
+//     router: router,
+//     start: ioFunc
+// }

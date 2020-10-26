@@ -28,6 +28,7 @@ app.use("/", require("./routes/index-server"));
 app.use("/home", require("./routes/home-server"));
 app.use("/auth", require("./routes/auth-server"));
 app.use("/devices", require("./routes/devices-server").router);
+// app.use("/home", require("./routes/home-server").router);
 //!====================//Firebase admin sdk config//====================!//
 const admin = require("firebase-admin");
 admin.initializeApp({
@@ -44,6 +45,7 @@ server.listen(app.get("port"), () => {
 });
 //?========/ load consumer.js and pass it the socket.io object /========?//
 require('./routes/devices-server.js').start(io);
+// require('./routes/home-server.js').start(io);
 
 
 io.on("connection", (socket) => {

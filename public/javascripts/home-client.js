@@ -73,9 +73,12 @@ const initAddMap = () => {
 //?======/ map on homepage /=======?//
 var viewMap;
 const initViewMap = () => {
+  const initLatLng = new google.maps.LatLng($(".hidLatCoor").text(), $(".hidLngCoor").text());
+  const currentPlace = $(".hidPlace").text();
+
   viewMap = new google.maps.Map(document.getElementById("viewMap"), {
-    center: new google.maps.LatLng(10.769444, 106.681944),
-    zoom: 9,
+    center: initLatLng,
+    zoom: 15,
     fullscreenControl: false,
     keyboardShortcuts: false,
     mapTypeControl: false,
@@ -85,6 +88,14 @@ const initViewMap = () => {
     streetViewControl: false,
     zoomControl: false,
   });
+  const marker = new google.maps.Marker({
+    position: initLatLng,
+    map: viewMap,
+    animation: google.maps.Animation.BOUNCE
+  });
+  const infowindow = new google.maps.InfoWindow({
+    content: currentPlace,
+  }).open(viewMap, marker);
 }
 
 //!============/ init myCurrentUID as global scope variable  /===========!//
@@ -205,15 +216,6 @@ $("#btnCloseDeviceModal").on("click", () => {
 $("#btnReScan").on("click", () => {
   startStream();
 })
-//!=======/when page load finish/=======!//
-$(() => {
-  socket.emit("regBrowser");
-
-  setTimeout(() => {
-    // startStream();
-  }, 2000);
-});
-
 
 //!============/ Others Script /===========!//
 
@@ -226,6 +228,78 @@ function floatBtnNewGarden() {
   //? views/devices/modalNewGarden.ejs
   $("#modalNewGarden").modal("toggle")
 }
+
+//!===/ execute new instace class object define in <js-fluid-meter.js> /===!//
+var fm = new FluidMeter();
+fm.init({
+  targetContainer: document.getElementById("fluid-meter"),
+  fillPercentage: 15,
+  options: {
+    fontFamily: "Raleway",
+    drawPercentageSign: false,
+    drawBubbles: true,
+    size: 200,
+    fontSize: "30px",
+    borderWidth: 10,
+    backgroundColor: "#e2e2e2",
+    foregroundColor: "#fafafa",
+    foregroundFluidLayer: {
+      fillStyle: "#0066ff",
+      angularSpeed: 100,
+      maxAmplitude: 12,
+      frequency: 30,
+      horizontalSpeed: -150
+    },
+    backgroundFluidLayer: {
+      fillStyle: "#00ffff",
+      angularSpeed: 100,
+      maxAmplitude: 9,
+      frequency: 30,
+      horizontalSpeed: 150
+    }
+  }
+});
+
+//!====/ google chart configuration https://developers.google.com/chart/interactive/docs/gallery/areachart /====!//
+google.charts.load('current', { 'packages': ['corechart'] });
+google.charts.setOnLoadCallback(drawChart);
+
+function drawChart() {
+  var chartData = google.visualization.arrayToDataTable([
+    // ['Time', 'Sensor Values'],
+    [{ label: 'Time', type: 'datetime' }, { label: "Temp", type: 'number' }, { label: "Humid", type: 'number' }, { label: "Dirt", type: 'number' }],
+    [new Date(2020, 9, 25), 30, 10, 200],
+    [new Date(2020, 9, 26), 20, 26, 167],
+  ]);
+
+  var options = {
+    title: 'My Chart',
+    hAxis: { title: 'Year', titleTextStyle: { color: '#333' } },
+    vAxis: { minValue: 0 },
+    animation: { startup: true, duration: 1750, easing: 'out' },
+    hAxis: { title: 'Time', titleTextStyle: { color: '#333' }, },
+    vAxis: { title: 'Sensor Value', minValue: 0 },
+    explorer: { axis: 'horizontal', keepInBounds: true, maxZoomIn: .05 },
+  };
+
+  var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+  chart.draw(chartData, options);
+
+  //! in event data handle
+  // data.addRows(sortDate);
+  // chart.draw(data, options);
+}
+
+
+//!=======/when page load finish/=======!//
+$(() => {
+  socket.emit("regBrowser");
+  fm.setPercentage(Number($(".hidWaterLevel").text()));
+
+  setTimeout(() => {
+    // startStream();
+  }, 2000);
+});
 
 // TODO: <!-- Overlay Button still get error - PLEASE COMMMENT to FIX LATER -->
 // (function () {

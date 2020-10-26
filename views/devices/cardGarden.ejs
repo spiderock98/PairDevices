@@ -11,7 +11,7 @@
 <div class="card-body">
     <% let index = 0; %>
     <!--? https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
-    <% snapGardensInfo.forEach((child) => { %>
+    <% objGardenInfo.forEach((child) => { %>
 
     <div class="card-detail card" style="--background: rgb(255, 174, 174); --text:black;">
         <div class="multi-button">
@@ -218,7 +218,7 @@
             const startStream = () => {
                 setTimeout(() => {
                     if (ws.readyState == WebSocket.OPEN)
-                        ws.send(`[{"EVENT":"browserEnCam", "gardenId":"<%-child.val().gardenId%>", "userId": "<%-snapGardensInfo.key%>"}]`);
+                        ws.send(`[{"EVENT":"browserEnCam", "gardenId":"<%-child.val().gardenId%>", "userId": "<%-objGardenInfo.key%>"}]`);
                     else
                         console.error(ws.readyState);
                 }, 2000);

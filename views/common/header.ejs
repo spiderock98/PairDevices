@@ -30,8 +30,8 @@
                 <div class="dropdown-menu">
                     <% let index = 0; %>
                     <!-- https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
-                    <% snapGardensInfo.forEach(child => { %>
-                    <a class="dropdown-item" href="home/dashboard/?gardenId=<%- child.val().gardenId %>">
+                    <% objGardenInfo.forEach(child => { %>
+                    <a class="dropdown-item" href="home?gardenId=<%- child.val().gardenId %>">
                         <%= child.val().gardenName %>
                     </a>
                     <div class="dropdown-divider"></div>
@@ -75,7 +75,7 @@
 
     $(() => {
         // use global <socket> var declare in <home-client.js>
-        socket.emit("regBrowser", "<%= snapGardensInfo.key %>");
+        socket.emit("regBrowser", "<%= objGardenInfo.key %>");
         // on camera init error >> change <outputMessage> in <cardGarden.ejs>
         socket.on("resBrowserEnCam", status => {
             outputMessage.innerHTML = status;
