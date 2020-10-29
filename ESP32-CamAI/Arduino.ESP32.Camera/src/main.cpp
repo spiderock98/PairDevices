@@ -50,8 +50,11 @@ const char *nodename = NODENAME;
 String jsonOut;
 void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length);
 
+StaticJsonDocument<200> docParser;
+
 void setup()
 {
+  Serial1.begin(9600, SERIAL_8N1, 13, 12); // zigbee RX TX
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   EEPROM.begin(EEPROM_SIZE);
@@ -229,14 +232,14 @@ void setup()
     esp_err_t err = esp_camera_init(&config);
     if (err != ESP_OK)
     {
-      webSocket.sendTXT("[{'EVENT':'std','detail':'[Error] Init Camera'}]");
+      webSocket.sendTXT("[{\"EVENT\":\"std\",\"detail\":\"[Error] Init Camera\"}]");
 #if DEBUG
       Serial.printf("Camera init failed with error 0x%x", err);
 #endif
       return;
     }
     else
-      webSocket.sendTXT("[{'EVENT':'std','detail':'[Success] Init Camera'}]");
+      webSocket.sendTXT("[{\"EVENT\":\"std\",\"detail\":\"[Success] Init Camera\"}]");
   }
 
   //!================/ WebSocket Config /================!//
@@ -269,6 +272,32 @@ void loop()
     esp_camera_fb_return(fb);
   }
 
+  if (Serial1.available())
+  {
+    String recvZigbee = Serial1.readStringUntil('\n');
+
+    StaticJsonDocument<200> docParser;
+    deserializeJson(docParser, recvZigbee);
+#if DEBUG
+    Serial.print(recvZigbee);
+#endif
+
+    String clientId = docParser["id"];
+    String recvEvent = docParser["ev"];
+
+    if (recvEvent == "initErr")
+    {
+      // resend init json string
+      Serial1.println("{\"id\":\"" + clientId + "\",\"ev\":\"init\"}");
+    }
+    else if (recvEvent == "initOK")
+    {
+#if DEBUG
+      Serial.println("[INFO] " + clientId + " complete pairing new device");
+#endif
+      webSocket.sendTXT("[{\"EVENT\":\"initDvOK\",\"detail\":\"pairing complete\"}]");
+    }
+  }
   webSocket.loop();
 }
 
@@ -288,10 +317,11 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
     Serial.printf("[WSc] Connected to url: %s\n", payload);
 #endif
     //? ====/ send message to server when Connected /==== ?//
+    // [{"EVENT":"espEnCamera","MAC":"24:6F:28:B0:B5:10","IP":"192.168.1.3","SSID":"VIETTEL","PSK":"Sherlock21vtag","UID":"bApb0Ypwg5YszGanWOBKre39zlg1"}]
     webSocket.sendTXT(jsonOut);
     break;
 
-    //!=====/ on recieve data /=====!//
+    //!=====/ ON recieve data /=====!//
   case WStype_TEXT:
 #if DEBUG == true
     Serial.printf("[WSc] get text: %s\n", payload);
@@ -340,6 +370,16 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
 #endif
         // RESET for the next setup()
         ESP.restart();
+      }
+      else if (eventName == "regDV")
+      {
+#if DEBUG
+        Serial.println("[INFO] New QR Device Detected");
+        Serial.println("[INFO] Ready to send ack confirm via UART1 Zigbee");
+#endif
+        String strInitDeviceAddr = recvDoc["strInitDeviceAddr"];
+        // sending init json string
+        Serial1.println("{\"id\":\"" + strInitDeviceAddr + "\",\"ev\":\"init\"}");
       }
     }
 

@@ -293,8 +293,18 @@ router.post('/updateDevice', (req, res) => {
                 // FirebaseDevice.updateDevice();
             }
             else {
-                FirebaseDevice.updateDevice();
-                res.end();
+                objEnCam[gardenId]["arrCamBrow"][0].send(`{"EVENT":"regDV","strInitDeviceAddr":"${deviceId}"}`);
+                objEnCam[gardenId]["arrCamBrow"][0].on("message", msg => {
+                    try {
+                        const pay = JSON.parse(msg)[0];
+                        if (pay.EVENT == "initDvOK") {
+                            FirebaseDevice.updateDevice();
+                            res.end();
+                        }
+                    } catch (error) {
+                        ;
+                    }
+                })
             }
         })
         .catch(err => console.error(err))
@@ -330,6 +340,7 @@ wsServer.on("connection", ws => {
             switch (payload.EVENT) {
                 case "std":
                     console.log("[ESP]", payload.detail);
+                    break;
 
                 case "regESP":
                     console.log('[NodeJS]', `hey ESP32-CAM ${payload.MAC} want to pair`);

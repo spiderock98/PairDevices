@@ -18,6 +18,8 @@ router.get('/', (req, res) => {
             const userId = decodedClaims.uid;
             const gardenId = req.query.gardenId;
 
+            // res.render("home-simple");
+
             admin.database().ref(`Gardens/${userId}`).once("value", snapGarden1 => {
                 admin.database().ref(`Gardens/${userId}/${gardenId}`).once("value", snapGarden2 => {
                     admin.database().ref(`Devices/${userId}/${gardenId}`).once("value", snapGarden3 => {
