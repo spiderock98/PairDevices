@@ -60,6 +60,7 @@ void setup()
   EEPROM.begin(EEPROM_SIZE);
 
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(FLASH_BUILTIN, OUTPUT);
   pinMode(0, INPUT_PULLUP);
 
   //!================/ Internet Config /================!//
@@ -92,51 +93,36 @@ void setup()
   // EEPROM addr no.0 is 1 when devices is DONE-PAIRING
   if (EEPROM.read(0) == 1)
   {
+#if DEBUG
     Serial.print("if you want to re-pair, please HOLD button in ... 3");
+#endif
+    digitalWrite(FLASH_BUILTIN, 1);
+    delay(25);
+    digitalWrite(FLASH_BUILTIN, 0);
     delay(1000);
+#if DEBUG
     Serial.print(" ... 2");
+#endif
+    digitalWrite(FLASH_BUILTIN, 1);
+    delay(25);
+    digitalWrite(FLASH_BUILTIN, 0);
     delay(1000);
+#if DEBUG
     Serial.print(" ... 1");
+#endif
+    digitalWrite(FLASH_BUILTIN, 1);
+    delay(25);
+    digitalWrite(FLASH_BUILTIN, 0);
     delay(1000);
+#if DEBUG
     Serial.println(" ... 0");
+#endif
+    digitalWrite(FLASH_BUILTIN, 1);
+    delay(25);
+    digitalWrite(FLASH_BUILTIN, 0);
     delay(1000);
 
-    // if agree then enter Pairing Mode
-    // if (!digitalRead(0))
-    // {
-    //   delay(20);
-    //   if (!digitalRead(0))
-    //   {
-    //     EEPROM.write(0, 0); // clear it to empty state
-    //     EEPROM.commit();
-    //     Serial.println("[ESP] EEPROM addr 0 is clear");
-    //     //TODO: send this UI to browser
-    //     Serial.println("**********************************");
-    //     delay(500);
-    //     Serial.println("*********\\ Pairing Mode /*********");
-    //     delay(500);
-    //     Serial.println("*                                *");
-    //     delay(500);
-    //     Serial.println("*      ! ! Release Button ! !    *");
-    //     delay(500);
-    //     Serial.println("*          @Spiderock            *");
-    //     delay(500);
-    //     Serial.println("*           @SuongLe             *");
-    //     delay(500);
-    //     Serial.println("*         @TamZThePoet           *");
-    //     delay(500);
-    //     Serial.println("*           @CuongNgo            *");
-    //     delay(500);
-    //     param1["EVENT"] = "regESP";
-    //     Serial.println();
-    //     Serial.println("*     Sending <regESP> EVENT     *");
-    //     delay(500);
-    //     Serial.println("**********************************");
-    //     delay(500);
-    //   }
-    // }
-
-    // if EEP addr 0 is 1 && not hold button >> send camera is ready
+    //  if agree then enter Pairing Mode
     if (!digitalRead(0))
     {
       delay(20);
@@ -144,19 +130,31 @@ void setup()
       {
         EEPROM.write(0, 0);
         EEPROM.commit();
-        Serial.println("[ESP] BUTTON PRESSED EEPROM addr 0 is clear");
 
+        digitalWrite(FLASH_BUILTIN, 1);
+        delay(20);
+        digitalWrite(FLASH_BUILTIN, 0);
+        delay(20);
+        digitalWrite(FLASH_BUILTIN, 1);
+        delay(20);
+        digitalWrite(FLASH_BUILTIN, 0);
+
+#if DEBUG
+        Serial.println("[ESP] BUTTON PRESSED >> EEPROM value at addr 0 is cleared");
         Serial.println("[ESP] Resetting ESP ... !!!");
-        ESP.restart();
+#endif
+        ESP.restart(); // return
       }
     }
-    // else
-    {
-      param1["EVENT"] = "espEnCamera";
-      Serial.println("*     Sending <espEnCamera> EVENT       *");
-    }
+
+    // if EEP value at addr 0 is 1 && not hold button >> send camera is ready
+    param1["EVENT"] = "espEnCamera";
+#if DEBUG
+    Serial.println("Sending <espEnCamera> EVENT");
+#endif
   }
-  // if EEPROM addr no.0 is 0 then enter pairing mode WITHOUT asking
+
+  // if EEPROM value at addr no.0 is 0 then enter pairing mode WITHOUT asking
   else
   {
     //TODO: send this UI to browser
@@ -175,10 +173,7 @@ void setup()
     // Serial.println("*           @CuongNgo            *");
     // delay(500);
     param1["EVENT"] = "regESP";
-    // Serial.println("*     Sending regESP EVENT       *");
-    // delay(500);
     // Serial.println("**********************************");
-    // delay(500);
   }
 
   param1["MAC"] = WiFi.macAddress();
@@ -313,15 +308,18 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
     break;
 
   case WStype_CONNECTED:
+    digitalWrite(FLASH_BUILTIN, 1);
 #if DEBUG
     Serial.printf("[WSc] Connected to url: %s\n", payload);
 #endif
     //? ====/ send message to server when Connected /==== ?//
     // [{"EVENT":"espEnCamera","MAC":"24:6F:28:B0:B5:10","IP":"192.168.1.3","SSID":"VIETTEL","PSK":"Sherlock21vtag","UID":"bApb0Ypwg5YszGanWOBKre39zlg1"}]
     webSocket.sendTXT(jsonOut);
+    digitalWrite(FLASH_BUILTIN, 0);
+
     break;
 
-    //!=====/ ON recieve data /=====!//
+    //!===============/ ON recieve data /================!//
   case WStype_TEXT:
 #if DEBUG == true
     Serial.printf("[WSc] get text: %s\n", payload);
@@ -339,6 +337,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
     else
     {
       String eventName = recvDoc["EVENT"];
+
       if (eventName == "browserEnCam")
       {
         flagEnCam = true;
@@ -346,6 +345,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
         Serial.println("[INFO] START Streaming ...");
 #endif
       }
+
       else if (eventName == "browserDisCam")
       {
         flagEnCam = false;
@@ -353,6 +353,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
         Serial.println("[INFO] STOP Streaming ...");
 #endif
       }
+
       else if (eventName == "regESP_OK")
       {
 #if DEBUG
@@ -361,16 +362,21 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
         //TODO: save some thing to EEPROM
         EEPROM.write(0, 1);
         EEPROM.commit();
-
-        Serial.print("Current EEPROM[0]: ");
-        Serial.println(EEPROM.read(0));
-
 #if DEBUG
         Serial.println("ESP Restarting ...");
 #endif
         // RESET for the next setup()
         ESP.restart();
       }
+
+      else if (eventName == "RESTART_ESP")
+      {
+#if DEBUG
+        Serial.println("[INFO] Server request ESP to restart");
+#endif
+        ESP.restart();
+      }
+
       else if (eventName == "regDV")
       {
 #if DEBUG

@@ -373,7 +373,13 @@ wsServer.on("connection", ws => {
                             console.log("[NodeJS] are you sure re-flash this device ? ");
                             admin.database().ref(`Gardens/${payload.UID}/${payload.MAC}`).remove(err => {
                                 if (err) console.error(err);
-                                else console.log("[Firebase] Complete delete this device in database");
+                                else {
+                                    console.log("[Firebase] Complete delete this device in database");
+                                    ws.send('{"EVENT":"RESTART_ESP"}', err => {
+                                        if (err) throw err;
+                                        else console.log("[Server] request ESP to restart");
+                                    });
+                                }
                             });
                         }
                     })
