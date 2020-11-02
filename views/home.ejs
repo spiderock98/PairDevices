@@ -21,15 +21,14 @@
     <script defer src="https://www.gstatic.com/charts/loader.js"></script>
 
     <script defer src="javascripts/UI/js-fluid-meter.js"></script>
-    <script defer src="javascripts/UI/jsQR.js"></script>
-    <script defer src="javascripts/UI/openModal.js"></script>
+    <!-- <script defer src="javascripts/UI/jsQR.js"></script> -->
     <script defer src="javascripts/home-client.js"></script>
     <script defer src="javascripts/UI/bs-init.js"></script>
     <script defer src="javascripts/UI/theme.js"></script>
 
     <script src="javascripts/UI/mapBypass.js"></script>
     <script defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7pWv_ReH_hkeTgscLBJFkJ6eXVQCkoJs&callback=initMultiMap"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7pWv_ReH_hkeTgscLBJFkJ6eXVQCkoJs&callback=initViewMap"
         type="text/javascript">
         </script>
 
@@ -51,13 +50,10 @@
 
                 <%- include('common/header')%>
 
-                <%- include('devices/modalNewGarden')%>
-
-                <%-include ('devices/modalNewDevice') %>
-
                 <div id="sectionDashboard" style="margin-top: 120px;" class="container-fluid">
                     <div class="d-sm-flex justify-content-between align-items-center mb-4">
-                        <h3 class="text-dark mb-0 glow"><%=detailGardenInfo.val().gardenName.toUpperCase()%></h3>
+                        <h3 class="text-dark mb-0" style="font-family: 'Pacifico', cursive;">
+                            <%=detailGardenInfo.val().gardenName.toUpperCase()%></h3>
                         <div style="display: none;" id="hidGardenId"></div>
                         <a class="btn btn-primary btn-sm d-none d-sm-inline-block" role="button" href="#">
                             <i class="fas fa-download fa-sm text-white-50"></i>&nbsp;Generate Report
@@ -312,23 +308,16 @@
 
         </div>
 
-        <!-- //!=====================/ float button /=====================!// -->
-        <a href="#" class="float" id="menu-share">
-            <i class="fas fa-plus my-float"></i>
-        </a>
-        <ul id="floatBtn">
-            <li><a href="javascript:floatBtnNewGarden();">
-                    <i class="fas fa-map-marked-alt my-float"></i>
-                </a></li>
-            <li><a href="javascript:floatBtnNewDevice();startStream();">
-                    <i class="fab fa-pagelines my-float"></i>
-                </a></li>
-            <!-- <li><a href="#">
-                    <i class="fa fa-twitter my-float"></i>
-                </a></li> -->
-        </ul>
-
     </div>
 </body>
+
+<script>
+    setTimeout(() => {
+        if (ws.readyState == WebSocket.OPEN)
+            ws.send(`[{"EVENT":"browserEnCam", "gardenId":"<%-detailGardenInfo.key%>", "userId": "<%-objGardenInfo.key%>"}]`);
+        else
+            console.error(ws.readyState);
+    }, 2000);
+</script>
 
 </html>

@@ -1,5 +1,11 @@
 const socket = io();
 
+//!================/ MapInit onload /================!//
+function initMultiMap() {
+    configMap();
+    addGardenMap();
+}
+
 // //!================/ VanillaWebsocket /================!//
 // const WS_URL = "ws:///192.168.1.99:81";
 // const ws = new WebSocket(WS_URL);
@@ -22,11 +28,66 @@ getCurrentUID().then((uid) => {
 }); // Global Var
 
 
+//!==============/ map on add garden modal /===============!//
+let addMap;
+let service;
+let infowindow;
+let autocomplete;
+const addGardenMap = () => {
+    addMap = new google.maps.Map(document.getElementById("addMap"), {
+        center: new google.maps.LatLng(10.769444, 106.681944),
+        zoom: 9,
+        fullscreenControl: false,
+        keyboardShortcuts: false,
+        mapTypeControl: false,
+        panControl: false,
+        rotateControl: false,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: false,
+    });
 
+    //================/ Listen click marker event /================//
+    let markersArray = [];
+    let tmpTitle = "";
+
+    google.maps.event.addListener(addMap, "click", function (event) {
+        // delete others overlays
+        if (markersArray) {
+            for (i in markersArray) {
+                markersArray[i].setMap(null);
+            }
+            markersArray.length = 0;
+        }
+        const marker = new google.maps.Marker({
+            position: event.latLng,
+            map: addMap,
+            animation: google.maps.Animation.BOUNCE,
+        });
+        markersArray.push(marker);
+
+        //============/ Return something onClick /============//
+        $("#hidLatCoor").text(event.latLng.lat());
+        $("#hidLngCoor").text(event.latLng.lng());
+
+        setTimeout(() => {
+            const locatTitle = $('div .title').text();
+            const locatAdrr = $('div .address-line .full-width').text();
+
+            if (tmpTitle != locatTitle) {
+                tmpTitle = locatTitle;
+                $("#formGarden").find("input[name='locat']").val(locatTitle);
+            }
+            else {
+                $("#formGarden").find("input[name='locat']").val("");
+            }
+        }, 10);
+    });
+}
 
 //todo: change this var name
 const objDeviceName = $("div.card"); // list all card items
-//!======/ map on config device modal /=======!//
+//!==============/ map on config device modal /================!//
 function configMap() {
     for (let index = 0; index < objDeviceName.length; index++) {
         let varConfigMap = new google.maps.Map(document.getElementById(`configMap${index}`), {
@@ -128,6 +189,16 @@ function configMap() {
             }, 10);
         });
     }
+}
+
+//!================/ Float button /================!//
+// function floatBtnNewDevice() {
+//     //? views/devices/modalNewDevice.ejs
+//     $("#modalNewDevice").modal("toggle")
+// }
+function floatBtnNewGarden() {
+    //? views/devices/modalNewGarden.ejs
+    $("#modalNewGarden").modal("toggle")
 }
 
 //!============/ Others  /===========!//

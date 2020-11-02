@@ -364,17 +364,17 @@ wsServer.on("connection", ws => {
                             }
                             else {
                                 //TODO:
-                                console.log("[NodeJS] Please use web app to config new device");
+                                console.log("[NodeJS] Please use web app to config new garden");
                             }
                             // ws.send("{'EVENT':'demo','status':'OK','code':'200'}");
                         }
                         else {
-                            //TODO: are you sure re-flash this device
-                            console.log("[NodeJS] are you sure re-flash this device ? ");
+                            //TODO: are you sure re-flash this garden
+                            console.log("[NodeJS] are you sure re-flash this garden ? ");
                             admin.database().ref(`Gardens/${payload.UID}/${payload.MAC}`).remove(err => {
                                 if (err) console.error(err);
                                 else {
-                                    console.log("[Firebase] Complete delete this device in database");
+                                    console.log("[Firebase] Complete delete this garden in database");
                                     ws.send('{"EVENT":"RESTART_ESP"}', err => {
                                         if (err) throw err;
                                         else console.log("[Server] request ESP to restart");

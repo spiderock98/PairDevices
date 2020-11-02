@@ -3,6 +3,7 @@
 
 body{
   font-family: 'Muli', sans-serif;
+  background-image: linear-gradient(to top, #96fbc4 0%, #f9f586 100%);
   /* background: url("https://www.toptal.com/designers/subtlepatterns/patterns/geometry2.png"); */
 }
 
@@ -11,27 +12,7 @@ html {
   scroll-behavior: smooth;
 }
 
-/*!====================/glowing title/====================!*/
-.glow {
-  font-family: 'Pacifico', cursive;
-  color: #fff;
-  text-align: center;
-  -webkit-animation: glow 1s ease-in-out infinite alternate;
-  -moz-animation: glow 1s ease-in-out infinite alternate;
-  animation: glow 1s ease-in-out infinite alternate;
-}
-
-@-webkit-keyframes glow {
-  from {
-    text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e60073, 0 0 40px #e60073, 0 0 50px #e60073, 0 0 60px #e60073, 0 0 70px #e60073;
-  }
-  
-  to {
-    text-shadow: 0 0 20px #fff, 0 0 30px #ff4da6, 0 0 40px #ff4da6, 0 0 50px #ff4da6, 0 0 60px #ff4da6, 0 0 70px #ff4da6, 0 0 80px #ff4da6;
-  }
-}
-
-/*==================== green line title <h2> effect ====================*/
+/*!====================/ green line title <h2> effect /====================!*/
 h1 {
     font-family: 'Damion', cursive;
     font-weight: 400;
@@ -56,96 +37,6 @@ h1 i {
     padding: 10px; 
 }
 :focus{outline: none;}
-
-
-
-/*!====================/float button/====================!*/
-.float{
-	position:fixed;
-	width:60px;
-	height:60px;
-	bottom:40px;
-	right:40px;
-	background-color: rgb(228, 213, 0);
-	color:#FFF;
-	border-radius:50px;
-	text-align:center;
-	box-shadow: 2px 2px 3px #999;
-	z-index:1000;
-	animation: bot-to-top 2s ease-out;
-}
-
-ul#floatBtn{
-	position:fixed;
-	right:40px;
-	padding-bottom:20px;
-	bottom:80px;
-	z-index:100;
-}
-
-ul#floatBtn li{
-	list-style:none;
-	margin-bottom:10px;
-}
-
-ul#floatBtn li a{
-	background-color:rgb(228, 213, 0);
-	color:#FFF;
-	border-radius:50px;
-	text-align:center;
-	box-shadow: 2px 2px 3px #999;
-	width:60px;
-	height:60px;
-	display:block;
-}
-
-ul#floatBtn:hover{
-	visibility:visible!important;
-	opacity:1!important;
-}
-
-
-.my-float{
-	font-size:24px;
-	margin-top:18px;
-}
-
-a#menu-share + ul{
-  visibility: hidden;
-}
-
-a#menu-share:hover + ul{
-  visibility: visible;
-  animation: scale-in 0.5s;
-}
-
-a#menu-share i{
-	animation: rotate-in 0.5s;
-}
-
-a#menu-share:hover > i{
-	animation: rotate-out 0.5s;
-}
-
-@keyframes bot-to-top {
-    0%   {bottom:-40px}
-    50%  {bottom:40px}
-}
-
-@keyframes scale-in {
-    from {transform: scale(0);opacity: 0;}
-    to {transform: scale(1);opacity: 1;}
-}
-
-@keyframes rotate-in {
-    from {transform: rotate(0deg);}
-    to {transform: rotate(360deg);}
-}
-
-@keyframes rotate-out {
-    from {transform: rotate(360deg);}
-    to {transform: rotate(0deg);}
-}
 
 /*!====================/ modal background /====================!*/
 .modal {

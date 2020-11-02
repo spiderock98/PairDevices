@@ -24,7 +24,12 @@ router.get('/', (req, res) => {
                 admin.database().ref(`Gardens/${userId}/${gardenId}`).once("value", snapGarden2 => {
                     admin.database().ref(`Devices/${userId}/${gardenId}`).once("value", snapGarden3 => {
 
-                        if (snapGarden2.val() == null) {
+                        // if no garden in garden database
+                        if (snapGarden1.val() == null) {
+                            res.redirect("/devices");
+                        }
+                        // if pass null query
+                        else if (snapGarden2.val() == null) {
                             let firstGardenId;
                             for (const gardenId in snapGarden1.val()) {
                                 firstGardenId = gardenId;
