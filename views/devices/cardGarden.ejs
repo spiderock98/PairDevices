@@ -88,7 +88,6 @@
                             }).then(result => {
                                 if (result.value) {
                                     stopStream();
-                                    ws.close();
                                 }
                             })
                         }
@@ -101,47 +100,13 @@
                         text: "camera stream has stopped working"
                     })
                     stopStream();
-                    ws.close();
                 }
             })
-
-
-
-
-            // Swal.mixin({
-            //     // input: 'text',
-            //     confirmButtonText: 'Next &rarr;',
-            //     showCancelButton: true,
-            //     progressSteps: ['1', '2']
-            // }).queue([
-            //     {
-            //         html:
-            //             '<div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div><canvas id="canvas" hidden></canvas><img hidden width="1" height="1" id="cap" onerror="this.src=`images/icons8-disconnected.svg`"><div id="output" hidden><div id="outputMessage">No QR code detected.</div><div hidden><b>Data:</b> <span id="outputData"></span></div><button id="btnReScan" hidden>Rescan</button></div>'
-            //     },
-            //     {
-            //         title: 'Name your garden !',
-            //         input: 'text',
-            //     }
-            // ]).then((result) => {
-            //     if (result.value) {
-            //         const answers = JSON.stringify(result.value)
-            //         Swal.fire({
-            //             title: answers,
-            //         })
-            //     }
-            //     // on click cancel button or escape key
-            //     else {
-            //         stopStream();
-            //         ws.close();
-            //     }
-            // })
-
 
             //!================/ ESP32-CAM on security area field /================!//
             const WS_URL = "ws:///192.168.1.99:81";
             const ws = new WebSocket(WS_URL);
             let urlObj;
-            // <img width="320" height="240" id="cap" src="" onerror="this.src='images/icons8-disconnected.svg'">
             let imgFrame = document.getElementById("cap");
             ws.onopen = () => console.log("[INFO] Connected to", WS_URL);
             ws.onmessage = (payload) => {
@@ -153,7 +118,6 @@
                 imgFrame.src = urlObj;
             };
             //!================/ ESP32-CAM on QR SCANNER /================!//
-            var video = document.createElement("video");
             var canvasElement = document.getElementById("canvas");
             var canvas = canvasElement.getContext("2d");
             var loadingMessage = document.getElementById("loadingMessage");
@@ -171,69 +135,59 @@
                 canvas.stroke();
             }
             function tick() {
-                loadingMessage.innerText = "⌛ Loading video..."
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    loadingMessage.hidden = true;
-                    canvasElement.hidden = false;
-                    outputContainer.hidden = false;
+                // loadingMessage.innerText = "⌛ Loading video..."
+                loadingMessage.hidden = true;
+                canvasElement.hidden = false;
+                outputContainer.hidden = false;
 
-                    canvasElement.height = 120;
-                    canvasElement.width = 160;
-                    // canvasElement.height = video.videoHeight;
-                    // canvasElement.width = video.videoWidth;
-                    //? display video on canvas
-                    canvas.drawImage(imgFrame, 0, 0, canvasElement.width, canvasElement.height);
-                    var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-                    //? try to find QR Image
-                    var code = jsQR(imageData.data, imageData.width, imageData.height, {
-                        inversionAttempts: "dontInvert",
-                    });
-                    //? ON detect QR Image
-                    if (code) {
-                        //? retangle qrcode
-                        drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
-                        drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
-                        drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
-                        drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+                canvasElement.height = 120;
+                canvasElement.width = 160;
+                // display video on canvas
+                canvas.drawImage(imgFrame, 0, 0, canvasElement.width, canvasElement.height);
+                var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                // try to find QR Image
+                var code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+                // ON detect QR Image
+                if (code) {
+                    // retangle qrcode
+                    drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+                    drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+                    drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+                    drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
 
-                        outputMessage.hidden = true;
-                        outputData.parentElement.hidden = false;
-                        outputData.innerText = code.data;
+                    outputMessage.hidden = true;
+                    outputData.parentElement.hidden = false;
+                    outputData.innerText = code.data;
 
-                        stopStream();
-                        btnReScan.hidden = false;
-                        objDeviceInfo = JSON.parse(code.data);
+                    stopStream();
+                    btnReScan.hidden = false;
+                    objDeviceInfo = JSON.parse(code.data);
 
-                        $(".swal2-actions").removeAttr("style");
-                        $("button.swal2-confirm").removeAttr("style");
-                        return;
-                    } else {
-                        outputMessage.hidden = false;
-                        outputData.parentElement.hidden = true;
-                    }
+                    $(".swal2-actions").removeAttr("style");
+                    $("button.swal2-confirm").removeAttr("style");
+                    return;
+                } else {
+                    outputMessage.hidden = false;
+                    outputData.parentElement.hidden = true;
                 }
+                // }
                 requestAnimationFrame(tick);
             }
             // trigger when add new device
             const startStream = () => {
                 setTimeout(() => {
                     if (ws.readyState == WebSocket.OPEN)
-                        ws.send(`[{"EVENT":"browserEnCam", "gardenId":"<%-child.val().gardenId%>", "userId": "<%-objGardenInfo.key%>"}]`);
+                        ws.send(`[{"EVENT":"browserEnCam","gardenId":"<%-child.val().gardenId%>","userId": "<%-objGardenInfo.key%>"}]`);
                     else
                         console.error(ws.readyState);
                 }, 2000);
-
                 btnReScan.hidden = true;
-                // Use facingMode: environment to attemt to get the front camera on phones
-                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                    .then(Stream => {
-                        video.srcObject = Stream;
-                        video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
-                        requestAnimationFrame(tick);
-                    });
+                requestAnimationFrame(tick);
             }
             const stopStream = () => {
-                video.srcObject.getTracks().forEach(track => track.stop());
+                ws.close();
             }
             $("#btnReScan").on("click", () => {
                 startStream();

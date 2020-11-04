@@ -1,5 +1,6 @@
 #define DEBUG true
 #define TEST true
+#define FLASH false
 
 #include <Arduino.h>
 #include <EEPROM.h>
@@ -341,6 +342,9 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
       if (eventName == "browserEnCam")
       {
         flagEnCam = true;
+#if FLASH
+        digitalWrite(FLASH_BUILTIN, 1);
+#endif
 #if DEBUG
         Serial.println("[INFO] START Streaming ...");
 #endif
@@ -349,6 +353,9 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
       else if (eventName == "browserDisCam")
       {
         flagEnCam = false;
+#if FLASH
+        digitalWrite(FLASH_BUILTIN, 0);
+#endif
 #if DEBUG
         Serial.println("[INFO] STOP Streaming ...");
 #endif

@@ -61,7 +61,8 @@ class FirebaseGardens extends FirebaseUsers {
                 place: this.place,
                 latCoor: this.latCoor,
                 lngCoor: this.lngCoor
-            }
+            },
+            waterLevel: 0
         }
     }
     isExistGardenId() {

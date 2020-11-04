@@ -290,7 +290,7 @@
                                             <div class="col text-center">
                                                 <div id="fluid-meter" class="mx-auto"></div>
                                                 <p class="hidWaterLevel" style="display: none;">
-                                                    <%= arrDeviceInfo.val()[0].sensor.WaterLevel %></p>
+                                                    <%= detailGardenInfo.val().waterLevel %></p>
                                             </div>
                                         </div>
                                     </div>
@@ -300,8 +300,6 @@
                     </div>
                     <!-- End: Chart -->
                 </div>
-
-                <!-- //!=====================//device section//=====================!// -->
             </div>
 
             <%- include('common/footer')%>
@@ -314,7 +312,7 @@
 <script>
     setTimeout(() => {
         if (ws.readyState == WebSocket.OPEN)
-            ws.send(`[{"EVENT":"browserEnCam", "gardenId":"<%-detailGardenInfo.key%>", "userId": "<%-objGardenInfo.key%>"}]`);
+            ws.send(`[{"EVENT":"browserEnCam","gardenId":"<%-detailGardenInfo.key%>","userId": "<%-objGardenInfo.key%>"}]`);
         else
             console.error(ws.readyState);
     }, 2000);
