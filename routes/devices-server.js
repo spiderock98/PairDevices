@@ -458,7 +458,7 @@ wsServer.on("connection", ws => {
     })
     ws.on("close", (code) => {
         console.log("[INFO] socket closed code", code);
-        //TODO: if browser disconnect POP out it
+        //TODO: if ESP disconnect POP out it
         // const arrSocket = objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"];
         // if (arrSocket.length == 1) {
         //     objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
@@ -466,7 +466,7 @@ wsServer.on("connection", ws => {
         // }
     })
     ws.on("error", (err) => {
-        console.error(err);
+        console.log("WSerr", err);
     })
 })
 

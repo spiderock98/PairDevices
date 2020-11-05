@@ -103,21 +103,12 @@
                 }
             })
 
-            //!================/ ESP32-CAM on security area field /================!//
-            const WS_URL = "ws:///192.168.1.99:81";
-            const ws = new WebSocket(WS_URL);
+            //!================/ ESP32-CAM on QR SCANNER /================!//
             let urlObj;
             let imgFrame = document.getElementById("cap");
-            ws.onopen = () => console.log("[INFO] Connected to", WS_URL);
-            ws.onmessage = (payload) => {
-                const arrBuffer = payload.data;
-                if (urlObj) {
-                    URL.revokeObjectURL(urlObj);
-                }
-                urlObj = URL.createObjectURL(new Blob([arrBuffer]));
-                imgFrame.src = urlObj;
-            };
-            //!================/ ESP32-CAM on QR SCANNER /================!//
+            const WS_URL = "ws:///192.168.1.99:81";
+            let ws; // global websocket var
+
             var canvasElement = document.getElementById("canvas");
             var canvas = canvasElement.getContext("2d");
             var loadingMessage = document.getElementById("loadingMessage");
@@ -161,7 +152,6 @@
                     outputData.parentElement.hidden = false;
                     outputData.innerText = code.data;
 
-                    stopStream();
                     btnReScan.hidden = false;
                     objDeviceInfo = JSON.parse(code.data);
 
@@ -172,11 +162,21 @@
                     outputMessage.hidden = false;
                     outputData.parentElement.hidden = true;
                 }
-                // }
                 requestAnimationFrame(tick);
             }
             // trigger when add new device
             const startStream = () => {
+                ws = new WebSocket(WS_URL);
+                ws.onopen = () => console.log("[INFO] Connected to", WS_URL);
+                ws.onmessage = (payload) => {
+                    const arrBuffer = payload.data;
+                    if (urlObj) {
+                        URL.revokeObjectURL(urlObj);
+                    }
+                    urlObj = URL.createObjectURL(new Blob([arrBuffer]));
+                    imgFrame.src = urlObj;
+                };
+
                 setTimeout(() => {
                     if (ws.readyState == WebSocket.OPEN)
                         ws.send(`[{"EVENT":"browserEnCam","gardenId":"<%-child.val().gardenId%>","userId": "<%-objGardenInfo.key%>"}]`);
@@ -188,6 +188,7 @@
             }
             const stopStream = () => {
                 ws.close();
+                ws.onclose = () => console.log("[WS] CLOSED ", WS_URL);
             }
             $("#btnReScan").on("click", () => {
                 startStream();
