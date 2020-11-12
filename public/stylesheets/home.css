@@ -34,7 +34,7 @@ h1 i {
     font-style: normal;
     background: #fff;
     position: relative;
-    padding: 10px; 
+    padding: 10px;
 }
 :focus{outline: none;}
 
@@ -42,6 +42,199 @@ h1 i {
 .modal {
   background: linear-gradient(#03a9f4, #e91ee3) !important
 }
+
+/*!====================/ button toogle in accordion field /====================!*/
+.all-toogle:before, .all-toogle:after {
+  content: '';
+  position: absolute;
+}
+
+input.all-toogle {
+  height: 40px;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  width: 40px;
+}
+
+.toggle-wrapper {
+  /* flex: 1 1 calc(100% / 3); */
+  /* min-height: 50vh; */
+  /* display: flex; */
+  /* align-items: center; */
+  /* justify-content: center; */
+  /* overflow: hidden; */
+  /* position: relative; */
+}
+@media (max-width: 960px) {
+  .toggle-wrapper {
+    flex: 1 1 calc(100% / 2);
+  }
+}
+@media (max-width: 700px) {
+  .toggle-wrapper {
+    flex: 1 1 100%;
+  }
+}
+
+label.toggle-item {
+  margin-bottom: 0rem;
+  width: 6.8em;
+  background: #2e394d;
+  height: 3em;
+  display: inline-block;
+  border-radius: 50px;
+  /* margin: 40px; */
+  position: relative;
+  transition: all .3s ease;
+  transform-origin: 20% center;
+  /* cursor: pointer; */
+}
+label.toggle-item:before {
+  display: block;
+  transition: all .2s ease;
+  width: 2.3em;
+  height: 2.3em;
+  top: .25em;
+  left: .25em;
+  border-radius: 2em;
+  border: 2px solid #88cf8f;
+  transition: .3s ease;
+}
+
+.checkcross label:before {
+  content: none;
+}
+.checkcross .check {
+  border-radius: 50%;
+  width: 2.5em;
+  height: 2.5em;
+  position: absolute;
+  background: #8BC34A;
+  transition: .4s ease;
+  top: 4.5px;
+  left: 4.5px;
+}
+.checkcross .check:before, .checkcross .check:after {
+  height: 4px;
+  border-radius: 10px;
+  background: #fff;
+  transition: .4s ease;
+}
+.checkcross .check:before {
+  width: 25px;
+  transform: rotate(-45deg) translate(-6px, 20px);
+}
+.checkcross .check:after {
+  width: 10px;
+  transform: rotate(45deg) translate(20px, 11px);
+}
+
+input.all-toogle:checked + label .check {
+  left: 68px;
+  transform: rotate(360deg);
+  background: #c34a4a;
+}
+input.all-toogle:checked + label .check:before {
+  width: 27px;
+  transform: rotate(-45deg) translate(-8px, 18px);
+}
+input.all-toogle:checked + label .check:after {
+  width: 27px;
+  transform: rotate(45deg) translate(18px, 8px);
+}
+
+
+/*!====================/ accordion device in garden /====================!*/
+@font-face {
+  font-family: "JF Flat Regular";
+  src: url("https://f9ir.github.io/acc/acc/font/JF-Flat-regular.eot");
+  src: url("https://f9ir.github.io/acc/acc/font/JF-Flat-regular.eot?#iefix") format("embedded-opentype"), url("https://f9ir.github.io/acc/acc/font/JF-Flat-regular.svg#JF Flat Regular") format("svg"), url("https://f9ir.github.io/acc/acc/font/JF-Flat-regular.woff") format("woff"), url("https://f9ir.github.io/acc/acc/font/JF-Flat-regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+.txt{
+  /* font-family: "JF Flat Regular"; */
+  font-size: 25px;
+}
+.accordion {
+  margin: 50px auto;
+  background: #ccc;
+  cursor: pointer;
+}
+.accordion .accordion-item {
+  height: 100px;
+}
+.accordion .accordion-item h3 {
+  display: inline-block;
+  vertical-align: middle;
+  height: 100%;
+  padding-left: 50px;
+  font-family: "JF Flat Regular";
+  font-size: 20px;
+  font-weight: 400;
+}
+.accordion .accordion-item img {
+  padding-left: 15px;
+  width: 30px;
+  vertical-align: middle;
+}
+.accordion .accordion-item h3:before {
+  content: "";
+  display: inline-block;
+  vertical-align: middle;
+  height: 100%;
+}
+.accordion .accordion-item:first-of-type {
+  background: #620808;
+  color: #f4ce74;
+}
+.accordion .accordion-item:nth-of-type(2) {
+  background: #a53f3f;
+  color: #ffe9c1;
+}
+.accordion .accordion-item:nth-of-type(3) {
+  background: #f4ce74;
+  color: #620808;
+}
+.accordion .accordion-item:nth-of-type(4) {
+  background: #ffe9c1;
+  color: #d5441c;
+}
+.accordion .accordion-item:last-of-type {
+  background: #d5441c;
+  color: #ffe9c1;
+}
+.accordion .toggle-wrapper {
+  /* font-family: "JF Flat Regular"; */
+  font-size: 17px;
+  font-weight: 400;
+  padding: 5px;
+  display: none;
+  box-shadow: inset 0 3px 7px rgba(0, 0, 0, 0.2);
+}
+.accordion .toggle-wrapper:first-of-type {
+  background: #620808;
+  color: #f4ce74;
+}
+.accordion .toggle-wrapper:nth-of-type(2) {
+  background: #a53f3f;
+  color: #ffe9c1;
+}
+.accordion .toggle-wrapper:nth-of-type(3) {
+  background: #f4ce74;
+  color: #620808;
+}
+.accordion .toggle-wrapper:nth-of-type(4) {
+  background: #ffe9c1;
+  color: #d5441c;
+}
+.accordion .toggle-wrapper:last-of-type {
+  background: #d5441c;
+  color: #ffe9c1;
+}
+
 
 /*!====================/ new idea button replace modal /====================!*/
 /*TODO: not done fix duplicate style - PLEASE COMMMENT to FIX LATER*/

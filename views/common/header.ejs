@@ -74,11 +74,14 @@
     }
 
     $(() => {
-        // use global <socket> var declare in <home-client.js>
+        // use global socketIO <socket> var declare in <home-client.js>
         socket.emit("regBrowser", "<%= objGardenInfo.key %>");
         // on camera init error >> change <outputMessage> in <cardGarden.ejs>
-        socket.on("resBrowserEnCam", status => {
-            outputMessage.innerHTML = status;
+        socket.on("errBrowserEnCam", status => {
+            if (window.location.pathname == "/devices")
+                outputMessage.innerHTML = status;
+            else if (window.location.pathname == "/home")
+                console.error(status);
         })
     });
 </script>

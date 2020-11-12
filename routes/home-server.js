@@ -16,9 +16,9 @@ router.get('/', (req, res) => {
     admin.auth().verifySessionCookie(sessionCookie, true)
         .then(decodedClaims => {
             const userId = decodedClaims.uid;
-            const gardenId = req.query.gardenId;
+            const gardenId = req.query.gardenId; // get from 
 
-            // res.render("home-simple");
+            // res.render("index");
 
             admin.database().ref(`Gardens/${userId}`).once("value", snapGarden1 => {
                 admin.database().ref(`Gardens/${userId}/${gardenId}`).once("value", snapGarden2 => {

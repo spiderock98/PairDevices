@@ -116,7 +116,10 @@ class FirebaseDevices extends FirebaseGardens {
                     humid: 60,
                     temp: 30,
                 },
-                WaterLevel: 4
+                threshold: {
+                    humid: 0,
+                    temp: 0,
+                }
             },
             controller: {
                 kP: 1,
@@ -210,8 +213,6 @@ router.post('/updateGarden', (req, res) => {
     const cookie = req.cookies.session || "";
     admin.auth().verifySessionCookie(cookie, true)
         .then((decodedClaims) => {
-            // res.end();
-
             const userId = decodedClaims.uid; // auto gen
             const gardenId = req.body.gardenId || null;
             const gardenName = req.body.gardenName;
@@ -223,8 +224,8 @@ router.post('/updateGarden', (req, res) => {
             const place = req.body.place || null;
 
             let FirebaseGarden = new FirebaseGardens(userId, gardenId, gardenName, macAddr, latCoor, lngCoor, place);
-            //? gửi kèm gardenId ? UPDATE : SET
-            //? có thể check bằng isExistGardenId() nhưng móc API mất thời gian hơn check null
+            // gửi kèm gardenId ? UPDATE : SET
+            // có thể check bằng isExistGardenId() nhưng móc API mất thời gian hơn check null
             if (gardenId == null) {
                 arrPendingBrowser.push(userId);
                 console.log("[Browser] Waiting for New ESP-CAM");
@@ -277,8 +278,6 @@ router.post('/updateDevice', (req, res) => {
     let cookie = req.cookies.session || "";
     admin.auth().verifySessionCookie(cookie, true)
         .then((decodedClaims) => {
-            // res.end();
-
             //TODO: validate duplicate or fake device
             const userId = decodedClaims.uid; // absolute
             const gardenId = req.body.gardenId; // absolute
@@ -286,20 +285,19 @@ router.post('/updateDevice', (req, res) => {
             const deviceName = req.body.deviceName; // required
             const randDeviceId = uuidv4();
 
-            let FirebaseDevice = new FirebaseDevices(userId, gardenId, deviceId, deviceName);
+            let slaveDevice = new FirebaseDevices(userId, gardenId, deviceId, deviceName);
             if (deviceId == null) {
-                FirebaseDevice.setDeviceId = randDeviceId;
+                slaveDevice.setDeviceId = randDeviceId;
 
-                console.log(FirebaseDevice.getObjDeviceInfo);
-                // FirebaseDevice.updateDevice();
+                console.log(slaveDevice.getObjDeviceInfo);
             }
             else {
-                objEnCam[gardenId]["arrCamBrow"][0].send(`{"EVENT":"regDV","strInitDeviceAddr":"${deviceId}"}`);
+                objEnCam[gardenId]["arrCamBrow"][0].send(`{"EVENT":"regDV","initDvAddr":"${deviceId}"}`);
                 objEnCam[gardenId]["arrCamBrow"][0].on("message", msg => {
                     try {
                         const pay = JSON.parse(msg)[0];
                         if (pay.EVENT == "initDvOK") {
-                            FirebaseDevice.updateDevice();
+                            slaveDevice.updateDevice();
                             res.end();
                         }
                     } catch (error) {
@@ -320,6 +318,67 @@ const ioFunc = (io) => {
         socket.on("regBrowser", (browserUserId) => {
             console.log(`[SocketIO] ${browserUserId} has join his own room`);
             socket.join(`${browserUserId}`);
+        })
+
+
+        // get custom motor ON/OFF state from <accordion.ejs>
+        socket.on("customDC", ({ gardenId, dvId, state }) => {
+            const socketCookie = socket.handshake.headers.cookie || '';
+            admin.auth().verifySessionCookie(socketCookie.slice(8), true)
+                .then((decodedClaims) => {
+                    const socketUID = decodedClaims.uid;
+                    if (objEnCam.hasOwnProperty(gardenId)) {
+                        objEnCam[gardenId]["arrCamBrow"][0].send(`{"EVENT":"manualMode","dvId":"${dvId}","type":"DC","state":"${state}"}`);
+                        admin.database().ref(`Devices/${socketUID}/${gardenId}/${dvId}/dcMotor`).update({
+                            NhoGiot: state
+                        });
+                    }
+
+                    else
+                        console.error("[Server] Cannot connect to esp32-cam. Check your connection");
+                })
+        });
+        socket.on("customPump", ({ gardenId, dvId, state }) => {
+            const socketCookie = socket.handshake.headers.cookie || '';
+            admin.auth().verifySessionCookie(socketCookie.slice(8), true)
+                .then((decodedClaims) => {
+                    const socketUID = decodedClaims.uid;
+
+                    if (objEnCam.hasOwnProperty(gardenId)) {
+                        objEnCam[gardenId]["arrCamBrow"][0].send(`{"EVENT":"manualMode","dvId":"${dvId}","type":"PUMP","state":"${state}"}`);
+                        admin.database().ref(`Devices/${socketUID}/${gardenId}/${dvId}/dcMotor`).update({
+                            PhunSuong: state
+                        });
+                    }
+                    else
+                        console.error("[Server] Cannot connect to esp32-cam. Check your connection");
+                })
+        });
+
+
+        // get threshold value from <accordion.ejs>
+        socket.on("thresh", ({ type, gardenId, dvId, valT, valH }) => {
+            const socketCookie = socket.handshake.headers.cookie || '';
+            admin.auth().verifySessionCookie(socketCookie.slice(8), true)
+                .then((decodedClaims) => {
+                    const socketUID = decodedClaims.uid;
+                    if (objEnCam.hasOwnProperty(gardenId)) {
+                        if (type == "temp") {
+                            objEnCam[gardenId]["arrCamBrow"][0].send(`{"EVENT":"setThresh","dvId":"${dvId}","type":"t","valT":"${valT}","valH":"${valH}"}`);
+                            admin.database().ref(`Devices/${socketUID}/${gardenId}/${dvId}/sensor/threshold`).update({
+                                temp: valT
+                            })
+                        }
+                        else if (type == "humid") {
+                            objEnCam[gardenId]["arrCamBrow"][0].send(`{"EVENT":"setThresh","dvId":"${dvId}","type":"h","valT":"${valT}","valH":"${valH}"}`);
+                            admin.database().ref(`Devices/${socketUID}/${gardenId}/${dvId}/sensor/threshold`).update({
+                                humid: valH
+                            })
+                        }
+                    }
+                    else
+                        console.error("[Server] Cannot connect to esp32-cam. Check your connection");
+                })
         })
     })
 }
@@ -391,7 +450,12 @@ wsServer.on("connection", ws => {
                     console.log("[ESP] here your camera data is available");
                     msgUID = payload.UID;
                     msgMAC = payload.MAC;
-                    objEnCam[payload.MAC] = { "arrCamBrow": [ws], state: 0 };
+                    objEnCam[payload.MAC] = { "arrCamBrow": [ws], state: 0, pingpong: true };
+                    ws.on("pong", () => {
+                        if (objEnCam.hasOwnProperty(payload.MAC)) {
+                            objEnCam[payload.MAC]["pingpong"] = true;
+                        }
+                    })
                     console.log(objEnCam);
                     break;
 
@@ -426,10 +490,10 @@ wsServer.on("connection", ws => {
                                 console.log("[NodeJS] Oops, you reopen AddDevicesModal");
                         }
                     } else {
-                        //TODO: return to brow
+                        //TODO: return to browser
                         console.error(`[NodeJS] Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
                         // emit to <header.ejs>
-                        globIO.to(browserRequestUserId).emit("resBrowserEnCam", `Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
+                        globIO.to(browserRequestUserId).emit("errBrowserEnCam", `Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
                     }
                     break;
 
@@ -438,37 +502,55 @@ wsServer.on("connection", ws => {
             }
         } catch (error) {
             // console.error("[ERROR]:", error);
-            const arrSocket = objEnCam[msgMAC]["arrCamBrow"];
-            arrSocket.forEach((wsItem, index) => {
-                // The current state of the connection https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
-                if (wsItem.readyState === wsItem.OPEN) {
-                    wsItem.send(msg);
-                } else {
-                    console.error("[Server] Socket Error >> POP...ing Error Socket");
-                    arrSocket.splice(index, 1);
-                    // check if only camera in <arrSocket>
-                    if (arrSocket.length == 1) {
-                        console.log('[Server] Sent <browserDisCam>');
-                        objEnCam[msgMAC]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
-                        objEnCam[msgMAC]["state"] = 0;
+            if (objEnCam.hasOwnProperty(msgMAC)) {
+                const arrSocket = objEnCam[msgMAC]["arrCamBrow"];
+                arrSocket.forEach((wsItem, index) => {
+                    // The current state of the connection https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
+                    if (wsItem.readyState === wsItem.OPEN) {
+                        wsItem.send(msg);
+                    } else {
+                        // if camera is connected but cannot send msg to any browser
+                        console.error("[Server] Socket Error >> POP...ing Error BROWSER");
+                        arrSocket.splice(index, 1);
+                        // check if only camera in <arrSocket>
+                        if (arrSocket.length == 1) {
+                            console.log('[Server] Sent <browserDisCam>');
+                            objEnCam[msgMAC]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
+                            objEnCam[msgMAC]["state"] = 0;
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     })
     ws.on("close", (code) => {
         console.log("[INFO] socket closed code", code);
-        //TODO: if ESP disconnect POP out it
-        // const arrSocket = objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"];
-        // if (arrSocket.length == 1) {
-        //     objEnCam["8C:AA:B5:8C:7F:7C"]["arrCamBrow"][0].send('{"EVENT":"browserDisCam"}');
-        //     objEnCam["8C:AA:B5:8C:7F:7C"]["state"] = 0;
-        // }
     })
+
     ws.on("error", (err) => {
         console.log("WSerr", err);
     })
 })
+
+setInterval(() => {
+    for (const mac in objEnCam) {
+        if (objEnCam.hasOwnProperty(mac)) {
+            const currentMac = mac;
+            const el = objEnCam[mac];
+            if (el["pingpong"] == false) {
+                console.error("[Server] Cannot recieve PONG from", mac);
+                console.error("[Server] Socket Error >> POP...ing Error CAMERA");
+                //todo: send messgae log error to all browser before delete
+                delete objEnCam[mac];
+            }
+            if (objEnCam.hasOwnProperty(currentMac)) {
+                el["pingpong"] = false
+                console.log("pingging", mac);
+                el["arrCamBrow"][0].ping();
+            }
+        }
+    }
+}, 10000);
 
 
 

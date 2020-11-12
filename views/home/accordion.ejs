@@ -1,0 +1,137 @@
+<!-- Embbedded in <home.ejs> -->
+
+<section class="accordion">
+    <% let index=0; %>
+    <% arrDeviceInfo.forEach(child => { %>
+
+    <div class="accordion-item">
+        <img src="https://f9ir.github.io/acc/acc/img/Location-Pin.png" alt="">
+        <h3><%= child.val().deviceName %></h3>
+    </div>
+    <div class="toggle-wrapper all-toogle">
+        <div class="toggle checkcross all-toogle">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-auto p-0">
+                        <input id="checkDC<%-index%>" type="checkbox" class="all-toogle" />
+                        <label class="toggle-item all-toogle" for="checkDC<%-index%>">
+                            <div class="check all-toogle"></div>
+                        </label>
+                    </div>
+                    <div class="col-md-5 p-2 txt">
+                        Động cơ nhỏ giọt
+                    </div>
+
+                    <div class="col-md-auto p-0">
+                        <input id="checkPump<%-index%>" type="checkbox" class="all-toogle" />
+                        <label class="toggle-item all-toogle" for="checkPump<%-index%>">
+                            <div class="check all-toogle"></div>
+                        </label>
+                    </div>
+                    <div class="col-md p-2 txt">
+                        Động cơ phun sương
+                    </div>
+                </div>
+
+                <div class="row-12 pt-5 ">
+
+                    <form>
+                        <div class="form-group row pt-0" id="lbTempThresh<%-index%>">
+                            <label class="col-5" for="formControlTempRange<%-index%>">
+                                Giới hạn <strong>NHIỆT ĐỘ</strong>
+                            </label>
+                            <i class="col-4" style="font-size: larger;"><%-child.val().sensor.threshold.temp%> °C</i>
+                            <button type="button" class="btn disabled col-3">Cập Nhật</button>
+                            <input oninput="percentTempThresh()" type="range" class="form-control-range" min="10"
+                                max="40" step="1" id="formControlTempRange<%-index%>">
+                        </div>
+                    </form>
+
+                    <form>
+                        <div class="form-group row pt-0" id="lbHumidThresh<%-index%>">
+                            <label class="col-5" for="formControlHumidRange<%-index%>">
+                                Giới hạn <strong>ĐỘ ẨM</strong>
+                            </label>
+                            <i class="col-4" style="font-size: larger;"><%-child.val().sensor.threshold.humid%> %</i>
+                            <button type="button" class="btn disabled col-3">Cập Nhật</button>
+                            <input oninput="percentHumidThresh()" type="range" class="form-control-range" min="10"
+                                max="100" step="1" id="formControlHumidRange<%-index%>">
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // init threshhold value from firebase
+        $("#lbTempThresh<%-index%> input").val("<%-child.val().sensor.threshold.temp%>");
+        $("#lbHumidThresh<%-index%> input").val("<%-child.val().sensor.threshold.humid%>");
+        // event on change range slider
+        percentTempThresh = () => {
+            $("#lbTempThresh<%-index%> i").text(document.getElementById("formControlTempRange<%-index%>").value + " °C");
+            $("#lbTempThresh<%-index%> button").addClass("btn-success");
+            $("#lbTempThresh<%-index%> button").removeClass("disabled");
+        }
+        percentHumidThresh = () => {
+            $("#lbHumidThresh<%-index%> i").text(document.getElementById("formControlHumidRange<%-index%>").value + " %");
+            $("#lbHumidThresh<%-index%> button").addClass("btn-success");
+            $("#lbHumidThresh<%-index%> button").removeClass("disabled");
+        }
+        // submit thresh
+        $("#lbTempThresh<%-index%> button").on("click", () => {
+
+            $("#lbTempThresh<%-index%> button").addClass("diabled");
+            $("#lbTempThresh<%-index%> button").removeClass("btn-success");
+
+            socket.emit("thresh", {
+                type: "temp",
+                gardenId: window.location.search.slice(10),
+                dvId: "<%-child.key%>",
+                valT: parseInt(document.getElementById("formControlTempRange<%-index%>").value),
+                valH: parseInt(document.getElementById("formControlHumidRange<%-index%>").value)
+            })
+        })
+        $("#lbHumidThresh<%-index%> button").on("click", () => {
+
+            $("#lbHumidThresh<%-index%> button").addClass("diabled");
+            $("#lbHumidThresh<%-index%> button").removeClass("btn-success");
+
+            socket.emit("thresh", {
+                type: "humid",
+                gardenId: window.location.search.slice(10),
+                dvId: "<%-child.key%>",
+                valueT: parseInt(document.getElementById("formControlTempRange<%-index%>").value),
+                valueH: parseInt(document.getElementById("formControlHumidRange<%-index%>").value)
+            })
+        })
+
+        // init state from database
+        document.getElementById('checkDC<%-index%>').checked = "<%-child.val().dcMotor.NhoGiot%>" == "1" ? false : true;
+        document.getElementById('checkPump<%-index%>').checked = "<%-child.val().dcMotor.PhunSuong%>" == "1" ? false : true;
+
+
+        // <socket> is socketIO var declare in home-client.js
+        $('#checkDC<%-index%>').on("click", () => {
+            // Động cơ nhỏ giọt
+            socket.emit("customDC", {
+                gardenId: window.location.search.slice(10),
+                dvId: "<%-child.key%>",
+                state: document.getElementById('checkDC<%-index%>').checked ? 0 : 1
+            });
+        })
+        $('#checkPump<%-index%>').on("click", () => {
+            // Động cơ nhỏ giọt
+            socket.emit("customPump", {
+                gardenId: window.location.search.slice(10),
+                dvId: "<%-child.key%>",
+                state: document.getElementById('checkPump<%-index%>').checked ? 0 : 1
+            });
+        })
+    </script>
+
+
+    <% ++index; }) %>
+</section>

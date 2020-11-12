@@ -211,10 +211,21 @@ function drawChart() {
 }
 
 
-//!=======/when page load finish/=======!//
+//!=======/ when page load finish /=======!//
 $(() => {
-  socket.emit("regBrowser");
+  $('.accordion-item').on("click", function () {
+    $(this).next().slideToggle(100);
+    $('p').not($(this).next()).slideUp('fast');
+  });
+
   fm.setPercentage(Number($(".hidWaterLevel").text()));
+
+  // setTimeout(() => {
+  //   socket.emit("threshHumid", {
+  //     dvId: "1A",
+  //     humid: 120
+  //   });
+  // }, 2000);
 });
 
 // TODO: <!-- Overlay Button still get error - PLEASE COMMMENT to FIX LATER -->

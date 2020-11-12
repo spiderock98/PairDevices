@@ -11,7 +11,7 @@ livereload.watch(path.join(__dirname, 'public'));
 livereload.watch(path.join(__dirname, 'views'));
 
 app.set("port", process.env.PORT || 8880)
-app.set("views", [path.join(__dirname, "views"), path.join(__dirname, "views", "devices")]);
+app.set("views", [path.join(__dirname, "views"), path.join(__dirname, "views", "devices"), path.join(__dirname, "views", "home")]);
 app.set("view engine", "ejs");
 app.use(logger("dev"));
 app.use(express.json());

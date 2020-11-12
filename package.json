@@ -19,9 +19,9 @@
     "jquery": "^3.5.1",
     "morgan": "~1.10.0",
     "nodemon": "^2.0.6",
-    "socket.io": "^2.3.0",
-    "sweetalert2": "^10.9.0",
-    "ws": "^7.3.1"
+    "socket.io": "^3.0.1",
+    "sweetalert2": "^10.10.0",
+    "ws": "^7.4.0"
   },
   "devDependencies": {
     "livereload": "^0.9.1"

@@ -1,29 +1,5 @@
 {
   "Devices" : {
-    "bApb0Ypwg5YszGanWOBKre39zlg1" : {
-      "89fc1786-8104-4406-9149-3ec9bf89f034" : {
-        "926c9b4e-2082-4ba7-a84e-a207534e87ea" : {
-          "controller" : {
-            "kD" : 3,
-            "kI" : 2,
-            "kP" : 1
-          },
-          "dcMotor" : {
-            "NhoGiot" : 1,
-            "PhunSuong" : 1
-          },
-          "deviceId" : "926c9b4e-2082-4ba7-a84e-a207534e87ea",
-          "deviceName" : "Rainbow",
-          "sensor" : {
-            "DHT" : {
-              "humid" : 60,
-              "temp" : 30
-            },
-            "WaterLevel" : 4
-          }
-        }
-      }
-    },
     "userid-1" : {
       "gardenid-1" : {
         "deviceid-1" : {
@@ -76,15 +52,16 @@
   },
   "Gardens" : {
     "bApb0Ypwg5YszGanWOBKre39zlg1" : {
-      "5bc39ae5-0187-48ca-b91d-69595cd74217" : {
-        "gardenId" : "5bc39ae5-0187-48ca-b91d-69595cd74217",
-        "gardenName" : "Vuon Sau Rieng",
+      "8C:AA:B5:8C:7F:7C" : {
+        "gardenId" : "8C:AA:B5:8C:7F:7C",
+        "gardenName" : "vườn ổi cô 10",
         "location" : {
-          "latCoor" : "1.2.3.4",
-          "lngCoor" : "5.6.7.8",
-          "place" : "Lam Dong"
+          "latCoor" : "10.952736627322501",
+          "lngCoor" : "106.86779022216797",
+          "place" : "Dong Nai General Hospitalasdasd"
         },
-        "macAddr" : "4D:5E:6F"
+        "macAddr" : "8C:AA:B5:8C:7F:7C",
+        "waterLevel" : 0
       }
     },
     "userid-1" : {
@@ -115,14 +92,6 @@
     }
   },
   "Users" : {
-    "bApb0Ypwg5YszGanWOBKre39zlg1" : {
-      "address" : "38B Go Cat",
-      "age" : "22",
-      "email" : "admin@google.com",
-      "imgAvatar" : "",
-      "name" : "john wick",
-      "userId" : "bApb0Ypwg5YszGanWOBKre39zlg1"
-    },
     "userid-1" : {
       "UserId" : "userid-1"
     },
@@ -136,6 +105,22 @@
     },
     "userid-2" : {
       "UserId" : "userid-2"
+    }
+  },
+  "bApb0Ypwg5YszGanWOBKre39zlg1" : {
+    "24:6F:28:B0:B5:10" : {
+      "2B" : {
+        "dcMotor" : {
+          "NhoGiot" : 0
+        }
+      }
+    },
+    "gardenId=24:6F:28:B0:B5:10" : {
+      "2B" : {
+        "dcMotor" : {
+          "NhoGiot" : 0
+        }
+      }
     }
   }
 }

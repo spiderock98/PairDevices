@@ -50,6 +50,7 @@ const char *nodename = NODENAME;
 
 String jsonOut;
 void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length);
+void checkReProgram();
 
 StaticJsonDocument<200> docParser;
 
@@ -101,6 +102,8 @@ void setup()
     delay(25);
     digitalWrite(FLASH_BUILTIN, 0);
     delay(1000);
+    checkReProgram();
+
 #if DEBUG
     Serial.print(" ... 2");
 #endif
@@ -108,6 +111,8 @@ void setup()
     delay(25);
     digitalWrite(FLASH_BUILTIN, 0);
     delay(1000);
+    checkReProgram();
+
 #if DEBUG
     Serial.print(" ... 1");
 #endif
@@ -115,6 +120,8 @@ void setup()
     delay(25);
     digitalWrite(FLASH_BUILTIN, 0);
     delay(1000);
+    checkReProgram();
+
 #if DEBUG
     Serial.println(" ... 0");
 #endif
@@ -122,6 +129,7 @@ void setup()
     delay(25);
     digitalWrite(FLASH_BUILTIN, 0);
     delay(1000);
+    checkReProgram();
 
     //  if agree then enter Pairing Mode
     if (!digitalRead(0))
@@ -302,6 +310,11 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
 {
   switch (type)
   {
+  case WStype_PING:
+    // pong will be send automatically
+    Serial.printf("[WSc] get ping\n");
+    break;
+
   case WStype_DISCONNECTED:
 #if DEBUG
     Serial.printf("[WSc] Disconnected!\n");
@@ -390,9 +403,9 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
         Serial.println("[INFO] New QR Device Detected");
         Serial.println("[INFO] Ready to send ack confirm via UART1 Zigbee");
 #endif
-        String strInitDeviceAddr = recvDoc["strInitDeviceAddr"];
+        String initDvAddr = recvDoc["initDvAddr"];
         // sending init json string
-        Serial1.println("{\"id\":\"" + strInitDeviceAddr + "\",\"ev\":\"init\"}");
+        Serial1.println("{\"id\":\"" + initDvAddr + "\",\"ev\":\"init\"}");
       }
     }
 
@@ -406,5 +419,20 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
     // double longitude = recvDoc["data"][1];
 
     break;
+  }
+}
+
+void checkReProgram()
+{
+  if (Serial.readStringUntil('\n') == "clearEEPROM")
+  {
+    digitalWrite(FLASH_BUILTIN, 1);
+    EEPROM.write(0, 0);
+    EEPROM.commit();
+#if DEBUG
+    Serial.println("[ESP] RE-PROGRAM THIS ESP >> EEPROM value at addr 0 is cleared");
+    Serial.println("[ESP] Resetting ESP ... !!!");
+#endif
+    ESP.restart(); // return
   }
 }
