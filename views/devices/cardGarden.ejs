@@ -16,6 +16,7 @@
     <div class="card-detail card" style="--background: rgb(255, 174, 174); --text:black;">
         <div class="multi-button">
             <button class="fas fa-plus" id="btnAddGarden<%-index%>"></button>
+            <button class="fas fa-receipt" id="btnShowLstDV<%-index%>"></button>
             <button class="fas fa-cog" id="btnConfig<%-index%>"></button>
             <button class="fas fa-trash" id="btnRemoveGarden<%-index%>"></button>
         </div>
@@ -67,11 +68,6 @@
             ]).then(result => {
                 if (result.value) {
                     Swal.showLoading();
-                    const objAnswers = {
-                        gardenId: "<%- child.val().gardenId %>",
-                        deviceId: objDeviceInfo.deviceId,
-                        deviceName: result.value[1],
-                    };
                     $.ajax({
                         method: "POST",
                         url: "/devices/updateDevice",
@@ -106,7 +102,7 @@
             //!================/ ESP32-CAM on QR SCANNER /================!//
             let urlObj;
             let imgFrame = document.getElementById("cap");
-            const WS_URL = "ws:///192.168.1.99:81";
+            const WS_URL = "ws:///192.168.2.126:81";
             let ws; // global websocket var
 
             var canvasElement = document.getElementById("canvas");

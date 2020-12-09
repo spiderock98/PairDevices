@@ -22,12 +22,12 @@ WebSocketsClient webSocket;
 bool flagEnCam = false;
 
 #if TEST
-#define STASSID "VIETTEL"
-#define STAPSK "Sherlock21vtag"
+#define STASSID "HTC"
+#define STAPSK "chitam1234"
 // bApb0Ypwg5YszGanWOBKre39zlg1
 #define UID "bApb0Ypwg5YszGanWOBKre39zlg1"
 #define NODENAME "vuon xoai"
-#define HOST "192.168.1.99" //HOME local ip
+#define HOST "192.168.43.145" //HOME local ip
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
@@ -37,7 +37,7 @@ bool flagEnCam = false;
 // bApb0Ypwg5YszGanWOBKre39zlg1
 #define UID "dinhdanh"
 #define NODENAME "physicalId"
-#define HOST "192.168.1.99" //HOME local ip
+#define HOST "192.168.43.145" //HOME local ip
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
@@ -312,7 +312,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
   {
   case WStype_PING:
     // pong will be send automatically
-    Serial.printf("[WSc] get ping\n");
+    // Serial.printf("[WSc] get ping\n");
     break;
 
   case WStype_DISCONNECTED:
@@ -335,9 +335,12 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
 
     //!===============/ ON recieve data /================!//
   case WStype_TEXT:
-#if DEBUG == true
-    Serial.printf("[WSc] get text: %s\n", payload);
+#if DEBUG
+    Serial.printf("[WSc] %s\n", payload);
 #endif
+    // forward all message to all slave
+    Serial1.printf("%s\n", payload);
+
     StaticJsonDocument<1024> recvDoc;
     DeserializationError error = deserializeJson(recvDoc, payload, length);
     // Test if parsing success
@@ -350,7 +353,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
     }
     else
     {
-      String eventName = recvDoc["EVENT"];
+      String eventName = recvDoc["ev"];
 
       if (eventName == "browserEnCam")
       {
@@ -407,7 +410,42 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
         // sending init json string
         Serial1.println("{\"id\":\"" + initDvAddr + "\",\"ev\":\"init\"}");
       }
+
+      // else if (eventName == "setThresh")
+      // {
+      // String dvId = recvDoc["dvId"];
+      // String type = recvDoc["type"];
+      // byte valT = recvDoc["valT"];
+      // byte valH = recvDoc["valH"];
+      // byte cSum = valT + valH;
+
+      // Serial1.println("{\"id\":\"" + dvId + "\",\"ev\":\"thresh\",\"tVal\":" + valT + ",\"hVal\":" + valH + ",\"cSum\":" + cSum + ",\"type\":\"" + type + "\"}");
+
+      // Serial1.printf("%s\n", payload);
+      // Serial1.write(payload, length);
+      // }
+
+      // else if (eventName == "manualMode")
+      // {
+      // String dvId = recvDoc["dvId"];
+      // String type = recvDoc["type"];
+      // bool state = recvDoc["state"];
+
+      // Serial1.println("{\"id\":\"" + dvId + "\",\"ev\":\"manual\",\"mode\":" + state + ",\"type\":\"" + type + "\"}");
+      // Serial1.printf("%s\n", payload);
+      // Serial1.println(length);
+      // Serial1.write(payload, length);
+      // }
+
+      // else forward everything to slave
+      // else
+      // {
+      //   Serial.printf("%s\n", payload);
+      // }
     }
+
+    // Serial.printf("%s\n", payload);
+    // Serial1.printf("%s\n", payload);
 
     //? Fetch values.
     // char json[] = "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";

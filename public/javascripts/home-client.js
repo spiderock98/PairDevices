@@ -46,7 +46,7 @@ getCurrentUID().then((uid) => {
 }); // Global Var
 
 //!================/ VanillaWebsocket /================!//
-const WS_URL = "ws:///192.168.1.99:81";
+const WS_URL = "ws:///192.168.2.126:81";
 const ws = new WebSocket(WS_URL);
 
 //!================/ ESP32-CAM on security area field /================!//
@@ -181,34 +181,34 @@ fm.init({
 });
 
 //!====/ google chart configuration https://developers.google.com/chart/interactive/docs/gallery/areachart /====!//
-google.charts.load('current', { 'packages': ['corechart'] });
-google.charts.setOnLoadCallback(drawChart);
+// google.charts.load('current', { 'packages': ['corechart'] });
+// google.charts.setOnLoadCallback(drawChart);
 
-function drawChart() {
-  var chartData = google.visualization.arrayToDataTable([
-    // ['Time', 'Sensor Values'],
-    [{ label: 'Time', type: 'datetime' }, { label: "Temp", type: 'number' }, { label: "Humid", type: 'number' }, { label: "Dirt", type: 'number' }],
-    [new Date(2020, 9, 25), 30, 10, 200],
-    [new Date(2020, 9, 26), 20, 26, 167],
-  ]);
+// function drawChart() {
+//   var chartData = google.visualization.arrayToDataTable([
+//     // ['Time', 'Sensor Values'],
+//     [{ label: 'Time', type: 'datetime' }, { label: "Temp", type: 'number' }, { label: "Humid", type: 'number' }, { label: "Dirt", type: 'number' }],
+//     [new Date(2020, 9, 25), 30, 10, 200],
+//     [new Date(2020, 9, 26), 20, 26, 167],
+//   ]);
 
-  var options = {
-    title: 'My Chart',
-    hAxis: { title: 'Year', titleTextStyle: { color: '#333' } },
-    vAxis: { minValue: 0 },
-    animation: { startup: true, duration: 1750, easing: 'out' },
-    hAxis: { title: 'Time', titleTextStyle: { color: '#333' }, },
-    vAxis: { title: 'Sensor Value', minValue: 0 },
-    explorer: { axis: 'horizontal', keepInBounds: true, maxZoomIn: .05 },
-  };
+//   var options = {
+//     title: 'My Chart',
+//     hAxis: { title: 'Year', titleTextStyle: { color: '#333' } },
+//     vAxis: { minValue: 0 },
+//     animation: { startup: true, duration: 1750, easing: 'out' },
+//     hAxis: { title: 'Time', titleTextStyle: { color: '#333' }, },
+//     vAxis: { title: 'Sensor Value', minValue: 0 },
+//     explorer: { axis: 'horizontal', keepInBounds: true, maxZoomIn: .05 },
+//   };
 
-  var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-  chart.draw(chartData, options);
+//   var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+//   chart.draw(chartData, options);
 
-  //! in event data handle
-  // data.addRows(sortDate);
-  // chart.draw(data, options);
-}
+//   //! in event data handle
+//   // data.addRows(sortDate);
+//   // chart.draw(data, options);
+// }
 
 
 //!=======/ when page load finish /=======!//
@@ -218,14 +218,12 @@ $(() => {
     $('p').not($(this).next()).slideUp('fast');
   });
 
+  // init watterlv from db
   fm.setPercentage(Number($(".hidWaterLevel").text()));
-
-  // setTimeout(() => {
-  //   socket.emit("threshHumid", {
-  //     dvId: "1A",
-  //     humid: 120
-  //   });
-  // }, 2000);
+  // waterlv db listerner
+  socket.on("wtlv", numMsg => {
+    fm.setPercentage(numMsg);
+  });
 });
 
 // TODO: <!-- Overlay Button still get error - PLEASE COMMMENT to FIX LATER -->
