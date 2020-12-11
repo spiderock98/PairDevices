@@ -1,0 +1,87 @@
+<!--? include in <devices.ejs> ?-->
+
+<% let count = 0; %>
+<% snapGars.forEach((childGar) => { %>
+
+<% var rawGarId = childGar.key.replace(/:/g,''); %>
+
+<div class="modal fade" data-keyboard="false" data-backdrop="static" data-easein="whirlIn"
+    id="modalTableDV<%-rawGarId%>" tabindex="-1" role="dialog" aria-labelledby="mdTitleTableDV" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <!-- trigger this form in preload.js app -->
+        <form id="formTableDV<%-count%>" class="modal-content">
+            <div>
+                <h1 class="modal-title" id="mdTitleTableDV">
+                    <i class="badge badge-pill badge-info">Table Devices In This Garden No.<%= count %> </i>
+                </h1>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+
+                    <table class="table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col" class="text-center">#GardenID</th>
+                                <th scope="col" class="text-center">Name</th>
+                                <th scope="col" class="text-center">
+                                    <button id="btnCheckDVStt<%-count%>" type="button" class="btn btn-info">Check
+                                        Status</button>
+                                </th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody<%-count%>">
+                            <% let countDV=0; %>
+                            <% childGar.forEach(childDV => { %>
+                            <tr id="row<%-count%><%-countDV%>">
+                                <th class="text-center"><%=childDV.key%></th>
+                                <td class="text-center"><%=childDV.val().deviceName%></td>
+                                <td class="text-center lbDvStt" id="lbDvStt<%-count%><%-childDV.key%>"></td>
+                                <td>
+                                    <button id="btnDelDv<%-count%><%-countDV%>" type="button"
+                                        class="btn btn-danger fas fa-trash-alt text-center"></button>
+                                </td>
+                            </tr>
+
+                            <script>
+                                // listen DELETE device button
+                                $("#btnDelDv<%-count%><%-countDV%>").on("click", () => {
+                                    // take socket from <device-client.js>
+                                    socket.emit("delDV", { garId: "<%-childGar.key%>", dvId: "<%-childDV.key%>" });
+                                    socket.once("delDvOK", (objQueue) => {
+                                        $("#row<%-count%><%-countDV%>").remove();
+                                    });
+                                });
+                            </script>
+
+                            <% ++countDV; }) %>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            <div>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <img src="images/cancel.svg" width="30px" height="30px"> Close
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Script -->
+<script>
+    // listen check status button
+    $("#btnCheckDVStt<%-count%>").on("click", () => {
+        // take socket from <device-client.js>
+        socket.emit("checkDVStt", { garId: "<%-childGar.key%>" });
+
+        $("#tbody<%-count%> td.lbDvStt").append('<div class="spinner-border text-success" role="status"></div>')
+        socket.on("ckstOK", dvId => {
+            $(`#lbDvStt<%-count%>${dvId} div`).remove();
+            $(`#lbDvStt<%-count%>${dvId}`).append('<i class="fas fa-check-circle"></i>');
+        });
+    });
+</script>
+
+<% ++count; }) %>

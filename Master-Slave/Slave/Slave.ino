@@ -8,7 +8,7 @@
 #include <EEPROM.h>
 #include "DHT.h"
 
-String deviceId = "2B"; // fixed value
+String deviceId = "1A"; // fixed value
 
 #if VERSION == 1
 #define misty 5              // phun sương
@@ -246,6 +246,28 @@ void loop()
 #endif
           }
         }
+
+        else if (recvEvName == "ckst")
+        {
+          // pong back
+          zigbee.println("{\"id\":\"" + deviceId + "\",\"ev\":\"ckstOK\"}");
+
+          blinkNtimes(BUZZER, 2, 100);
+          blinkNtimes(BUZZER, 1, 3500);
+        }
+
+        else if (recvEvName == "dDV")
+        {
+#if DEBUG
+          Serial.println("Clearing EEPROM at addr 0 and Trying delete database");
+#endif
+          EEPROM.update(0, 0);
+          blinkNtimes(BUZZER, 1, 2000);
+#if DEBUG
+          Serial.println("Reseting ...");
+#endif
+          asm volatile("jmp 0"); // reset arduino
+        }
       }
     }
   }
@@ -415,7 +437,6 @@ void waitRstEEP(uint8_t left)
     delay(20);
     if (!digitalRead(btnClearEEP))
     {
-      blinkNtimes(BUZZER, 2, 50);
 #if DEBUG
       Serial.println("Clearing EEPROM at addr 0 and Trying delete database");
 #endif

@@ -29,7 +29,7 @@ bool flagEnCam = false;
 // bApb0Ypwg5YszGanWOBKre39zlg1
 // #define UID "bApb0Ypwg5YszGanWOBKre39zlg1"
 // #define NODENAME "vuon xoai"
-#define HOST "192.168.2.126" // HOME local ip
+#define HOST "192.168.2.128" // HOME local ip
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
@@ -426,6 +426,10 @@ void loop()
     else if (recvEvent == "thrOK")
     {
       webSocket.sendTXT("[{\"EVENT\":\"thrOK\"}]");
+    }
+    else if (recvEvent == "ckstOK")
+    {
+      webSocket.sendTXT("[{\"EVENT\":\"ckstOK\",\"dvId\":\"" + slaveId + "\"}]");
     }
     else if (recvEvent == "delGar")
     {

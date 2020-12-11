@@ -13,10 +13,12 @@
     <!--? https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
     <% objGardenInfo.forEach((child) => { %>
 
+    <% var rawGarId = child.val().gardenId.replace(/:/g,''); %>
+
     <div class="card-detail card" style="--background: rgb(255, 174, 174); --text:black;">
         <div class="multi-button">
             <button class="fas fa-plus" id="btnAddGarden<%-index%>"></button>
-            <button class="fas fa-receipt" id="btnShowLstDV<%-index%>"></button>
+            <button class="fas fa-receipt" id="btnShowTableDV<%-rawGarId%>"></button>
             <button class="fas fa-cog" id="btnConfig<%-index%>"></button>
             <button class="fas fa-trash" id="btnRemoveGarden<%-index%>"></button>
         </div>
@@ -39,6 +41,10 @@
     </div>
 
     <script>
+        $("#btnShowTableDV<%-rawGarId%>").on("click", () => {
+            $("#modalTableDV<%-rawGarId%>").modal("toggle");
+        })
+
         $("#btnConfig<%-index%>").on("click", () => {
             $("#modalConfig<%-index%>").modal("toggle");
         })
@@ -84,6 +90,7 @@
                             }).then(result => {
                                 if (result.value) {
                                     stopStream();
+                                    location.reload();
                                 }
                             })
                         }
@@ -102,7 +109,7 @@
             //!================/ ESP32-CAM on QR SCANNER /================!//
             let urlObj;
             let imgFrame = document.getElementById("cap");
-            const WS_URL = "ws:///192.168.2.126:81";
+            const WS_URL = "ws:///192.168.2.128:81";
             let ws; // global websocket var
 
             var canvasElement = document.getElementById("canvas");

@@ -1,4 +1,4 @@
-// objEnCam = { gardenIdMac1: { arrCamBrow: [wsESP, wsBrowser, wsElectron, ...], state: 0, pingpong: true, arrQueue: [ { thrTemp: [uid, garId, dvId, valTemp] }, { thrGround: [uid, garId, dvId, valGround] }, {swrNho: 1/0}, {swTO: 1/0} ...] } }
+// objEnCam = { gardenIdMac1: { arrCamBrow: [wsESP, wsBrowser, wsElectron, ...], uid: ownerUID,  state: 0, pingpong: true, arrQueue: [ { thrTemp: [uid, garId, dvId, valTemp] }, { thrGround: [uid, garId, dvId, valGround] }, {swrNho: 1/0}, {swTO: 1/0}, {delDeviceCmdFromBrow: 1} ...] } }
 
 const express = require('express');
 const router = express.Router();
@@ -10,13 +10,13 @@ class Emitter extends require('events') { }
 // const path = require('path')
 
 
-const getSnapGardensInfo = (userId) => {
-    return new Promise(resolve => {
-        admin.database().ref(`Gardens/${userId}`).once('value', snap => {
-            resolve(snap)
-        })
-    })
-}
+// const getSnapGardensInfo = (userId) => {
+//     return new Promise(resolve => {
+//         admin.database().ref(`Gardens/${userId}`).once('value', snap => {
+//             resolve(snap)
+//         })
+//     })
+// }
 
 
 //!==================/ Users Class /==================!//
@@ -64,7 +64,8 @@ class FirebaseGardens extends FirebaseUsers {
                 latCoor: this.latCoor,
                 lngCoor: this.lngCoor
             },
-            waterLevel: 0
+            waterLevel: 0,
+            status: 0
         }
     }
     isExistGardenId() {
@@ -164,11 +165,18 @@ router.get('/', (req, res) => {
     let sessionCookie = req.cookies.session || '';
     admin.auth().verifySessionCookie(sessionCookie, true)
         .then(decodedClaims => {
-            getSnapGardensInfo(decodedClaims.uid)
-                .then(objGardenInfo => {
-                    // https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach
-                    res.render('devices', { objGardenInfo: objGardenInfo });
-                })
+            admin.database().ref(`Gardens/${decodedClaims.uid}`).once("value", objGardenInfo => {
+                admin.database().ref(`Devices/${decodedClaims.uid}`).once("value", snapGars => {
+                    res.render('devices', {
+                        objGardenInfo: objGardenInfo,
+                        snapGars: snapGars
+                    });
+                });
+            });
+            // getSnapGardensInfo(decodedClaims.uid)
+            //     .then(objGardenInfo => {
+            //         res.render('devices', { objGardenInfo: objGardenInfo });
+            //     })
         })
         .catch(error => {
             // Session cookie is unavailable or invalid. Force user to login.
@@ -326,7 +334,35 @@ let globIO;
 const ioFunc = (io) => {
     globIO = io;
     io.on('connection', socket => {
-        // get <browserUserId> from browser devices page <header.js>
+        //! when user click DELETE device button in table devices
+        socket.on("delDV", ({ garId, dvId }) => {
+            const socketCookie = socket.handshake.headers.cookie || '';
+            admin.auth().verifySessionCookie(socketCookie.slice(8), true)
+                .then((decodedClaims) => {
+                    if (objEnCam.hasOwnProperty(garId)) {
+                        objEnCam[garId]["arrCamBrow"][0].send(`{"ev":"dDV","id":"${dvId}"}`);
+                        // add this update thresh command to queue
+                        objEnCam[garId]["arrQueue"].push({ delDV: [decodedClaims.uid, garId, dvId] });
+                    }
+                })
+        });
+
+        //! when user click CHECK STATUS button in tabe devices
+        socket.on("checkDVStt", ({ garId }) => {
+            const socketCookie = socket.handshake.headers.cookie || '';
+            admin.auth().verifySessionCookie(socketCookie.slice(8), true)
+                .then((decodedClaims) => {
+                    if (objEnCam.hasOwnProperty(garId)) {
+                        admin.database().ref(`Devices/${decodedClaims.uid}/${garId}`).once("value", snapDv => {
+                            snapDv.forEach(lstDV => {
+                                objEnCam[garId]["arrCamBrow"][0].send(`{"ev":"ckst","id":"${lstDV.key}"}`);
+                            });
+                        });
+                    }
+                })
+        });
+
+        //! get <browserUserId> from browser devices page <header.js>
         socket.on("regBrowser", (browserUserId) => {
             console.log(`[SocketIO] ${browserUserId} has join his own room`);
             socket.join(`${browserUserId}`);
@@ -474,6 +510,10 @@ wsServer.on("connection", ws => {
             const payload = JSON.parse(msg)[0];
             // event handler
             switch (payload.EVENT) {
+                case "ckstOK":
+                    globIO.to(msgUID).emit("ckstOK", payload.dvId);
+                    break;
+
                 case "wtlv":
                     // var wtlvRef = admin.database().ref(`Gardens/${payload.uId}/${payload.gId}`);
                     //todo: testing
@@ -595,6 +635,18 @@ wsServer.on("connection", ws => {
                         if (err) { console.error(err); }
                         else {
                             console.log("[NodeJS] Well done, see you later");
+
+                            // if user delete garden using browser
+                            objEnCam[msgMAC]["arrQueue"].forEach((objQueue, index) => {
+                                if (objQueue.hasOwnProperty("delDV")) {
+                                    // pong back to browser
+                                    globIO.to(objQueue["delDV"][0]).emit("delDvOK", objQueue);
+                                    // pop queue out
+                                    objEnCam[msgMAC]["arrQueue"].splice(index, 1);
+                                }
+                            })
+
+                            // pong back to device to EEPROM.update(1,0);
                             if (objEnCam.hasOwnProperty(msgMAC)) {
                                 objEnCam[msgMAC]["arrCamBrow"][0].send(`{"ev":"delGarOK","id":"${payload.dvId}"}`);
                             }
@@ -661,8 +713,16 @@ wsServer.on("connection", ws => {
                     console.log("[ESP] here your camera data is available");
                     msgUID = payload.UID;
                     msgMAC = payload.MAC;
+                    var refStatus = admin.database().ref(`Gardens/${msgUID}/${msgMAC}`);
+                    refStatus.once("value", () => {
+                        refStatus.update({
+                            status: 1 // online
+                        }, err => { if (err) console.log(err); });
+                    });
+
+
                     //! create a new objEnCam instance
-                    objEnCam[payload.MAC] = { "arrCamBrow": [ws], state: 0, pingpong: true, arrQueue: [] };
+                    objEnCam[payload.MAC] = { "arrCamBrow": [ws], uid: msgUID, state: 0, pingpong: true, arrQueue: [] };
                     // listener pong back from esp32
                     ws.on("pong", () => {
                         if (objEnCam.hasOwnProperty(payload.MAC)) {
@@ -755,6 +815,9 @@ setInterval(() => {
             // check ping pong state
             if (el["pingpong"] == false) {
                 console.error("[Server] Cannot recieve PONG from", mac);
+                admin.database().ref(`Gardens/${el["uid"]}/${mac}`).update({
+                    status: 0 // offline
+                }, err => { if (err) console.log(err); });
                 console.error("[Server] Socket Error >> POP...ing Error CAMERA");
                 objEnCam[mac]["arrCamBrow"][0].send('{"ev":"RESTART_ESP"}');
                 //todo: send messgae log error to all browser before delete
@@ -767,7 +830,7 @@ setInterval(() => {
 
         }
     }
-}, 30000);
+}, 15000);
 
 //! watchdog update/change value from browser to esp32 then feedback to update database
 setInterval(() => {
@@ -791,12 +854,14 @@ setInterval(() => {
                     else if (objQueue.hasOwnProperty("btnTo")) {
                         el["arrCamBrow"][0].send(`{"ev":"isM","id":"${objQueue["btnTo"][2]}","st":${objQueue["btnTo"][3]}}`);
                     }
-
+                    else if (objQueue.hasOwnProperty("delDV")) {
+                        el["arrCamBrow"][0].send(`{"ev":"dDV","id":"${objQueue["delDV"][2]}"}`)
+                    }
                 });
             }
         }
     }
-}, 5000);
+}, 7500);
 
 
 module.exports = {
