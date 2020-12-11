@@ -51,8 +51,8 @@
                         </label>
                         <i class="col-4" style="font-size: larger;"><%-child.val().sensor.threshold.temp%> °C</i>
                         <button type="button" class="btn disabled col-3">Cập Nhật</button>
-                        <input oninput="percentTempThresh()" type="range" class="custom-range" min="10" max="40"
-                            step="1" id="formControlTempRange<%-index%>">
+                        <input oninput="percentTempThresh('<%-index%>')" type="range" class="custom-range" min="10"
+                            max="40" step="1" id="formControlTempRange<%-index%>">
                     </div>
                 </form>
 
@@ -108,14 +108,14 @@
                             <i class="col-4" style="font-size: larger;">
                                 <i class="sliderVal"><%-child.val().sensor.threshold.ground%></i>
                                 <i>±</i>
-                                <input oninput="offsetGroundThresh()" type="number" id="offsetGround<%-index%>" min="0"
-                                    max="500" step="10" style="width: 80px;">
+                                <input oninput="offsetGroundThresh('<%-index%>')" type="number"
+                                    id="offsetGround<%-index%>" min="0" max="500" step="10" style="width: 80px;">
                                 <i> %</i>
                             </i>
 
                             <button type="button" class="btn disabled col-3">Cập Nhật</button>
-                            <input oninput="percentGroundThresh()" type="range" class="custom-range" min="10" max="1023"
-                                step="1" id="formControlGroundRange<%-index%>">
+                            <input oninput="percentGroundThresh('<%-index%>')" type="range" class="custom-range"
+                                min="10" max="1023" step="1" id="formControlGroundRange<%-index%>">
                         </div>
                     </form>
 
@@ -209,19 +209,19 @@
         $("#formControlGroundRange<%-index%>").val("<%-child.val().sensor.threshold.ground%>");
 
         // event on change range SLIDER
-        percentTempThresh = () => {
-            $("#lbTempThresh<%-index%> i").text(document.getElementById("formControlTempRange<%-index%>").value + " °C");
-            $("#lbTempThresh<%-index%> button").addClass("btn-success");
-            $("#lbTempThresh<%-index%> button").removeClass("disabled");
+        percentTempThresh = (index) => {
+            $(`#lbTempThresh${index} i`).text(document.getElementById(`formControlTempRange${index}`).value + " °C");
+            $(`#lbTempThresh${index} button`).addClass("btn-success");
+            $(`#lbTempThresh${index} button`).removeClass("disabled");
         }
-        percentGroundThresh = () => {
-            $("i.sliderVal").text(document.getElementById("formControlGroundRange<%-index%>").value);
-            $("#lbGroundThresh<%-index%> button").addClass("btn-success");
-            $("#lbGroundThresh<%-index%> button").removeClass("disabled");
+        percentGroundThresh = (index) => {
+            $("i.sliderVal").text(document.getElementById(`formControlGroundRange${index}`).value);
+            $(`#lbGroundThresh${index} button`).addClass("btn-success");
+            $(`#lbGroundThresh${index} button`).removeClass("disabled");
         }
-        offsetGroundThresh = () => {
-            $("#lbGroundThresh<%-index%> button").addClass("btn-success");
-            $("#lbGroundThresh<%-index%> button").removeClass("disabled");
+        offsetGroundThresh = (index) => {
+            $(`#lbGroundThresh${index} button`).addClass("btn-success");
+            $(`#lbGroundThresh${index} button`).removeClass("disabled");
         }
 
         // submit threshold
