@@ -3,21 +3,6 @@
 const express = require('express');
 const router = express.Router();
 const admin = require('firebase-admin');
-const { v4: uuidv4 } = require('uuid');
-class Emitter extends require('events') { }
-// const { exec } = require('child_process')
-// const fs = require('fs');
-// const path = require('path')
-
-
-// const getSnapGardensInfo = (userId) => {
-//     return new Promise(resolve => {
-//         admin.database().ref(`Gardens/${userId}`).once('value', snap => {
-//             resolve(snap)
-//         })
-//     })
-// }
-
 
 //!==================/ Users Class /==================!//
 class FirebaseUsers {
@@ -173,10 +158,6 @@ router.get('/', (req, res) => {
                     });
                 });
             });
-            // getSnapGardensInfo(decodedClaims.uid)
-            //     .then(objGardenInfo => {
-            //         res.render('devices', { objGardenInfo: objGardenInfo });
-            //     })
         })
         .catch(error => {
             // Session cookie is unavailable or invalid. Force user to login.
@@ -299,32 +280,24 @@ router.post('/updateDevice', (req, res) => {
             const gardenId = req.body.gardenId; // absolute
             const deviceId = req.body.deviceId || null;
             const deviceName = req.body.deviceName; // required
-            const randDeviceId = uuidv4();
 
             let slaveDevice = new FirebaseDevices(userId, gardenId, deviceId, deviceName);
-            if (deviceId == null) {
-                slaveDevice.setDeviceId = randDeviceId;
 
-                console.log(slaveDevice.getObjDeviceInfo);
-            }
-            else {
-                // objEnCam[gardenId]["arrCamBrow"][0].send(`{"ev":"regDV","initDvAddr":"${deviceId}"}`);
-                // console.log(`{"ev":"init","id":"${deviceId}"}`);
-                objEnCam[gardenId]["arrCamBrow"][0].send(`{"ev":"init","id":"${deviceId}"}`);
-                //todo: this on() will on() many time >> once()
-                objEnCam[gardenId]["arrCamBrow"][0].on("message", msg => {
-                    try {
-                        const pay = JSON.parse(msg)[0];
-                        if (pay.EVENT == "inOK") {
-                            console.log("[NodeJS] new device was add to database");
-                            slaveDevice.updateDevice();
-                            res.end();
-                        }
-                    } catch (error) {
-                        ;
+            objEnCam[gardenId]["arrCamBrow"][0].send(`{"ev":"init","id":"${deviceId}"}`);
+            //todo: fix this on() will on() many time >> once()
+            objEnCam[gardenId]["arrCamBrow"][0].on("message", msg => {
+                try {
+                    const pay = JSON.parse(msg)[0];
+                    if (pay.ev == "inOK") {
+                        console.log("[NodeJS] new device was add to database");
+                        slaveDevice.updateDevice();
+                        res.end();
                     }
-                })
-            }
+                } catch (error) {
+                    ;
+                }
+            });
+
         })
         .catch(err => console.error(err))
 })
@@ -391,7 +364,7 @@ const ioFunc = (io) => {
                                                     socket.emit(`lgH${lstDv.key}`, logDHT.val());
                                                     break;
                                             }
-                                        })
+                                        });
                                         break;
                                 }
                             })
@@ -400,10 +373,9 @@ const ioFunc = (io) => {
                                 if (mnState.key == "NhoGiot") {
                                     socket.emit(`lgMnStt${lstDv.key}`, mnState.val());
                                 }
-                            })
-
+                            });
                         })
-                    })
+                    });
                 })
             })
             admin.database().ref(`Gardens/${browserUserId}`).once("value", master => {
@@ -450,23 +422,6 @@ const ioFunc = (io) => {
                         console.error("[Server] Cannot connect to esp32-cam. Check your connection");
                 })
         });
-        // socket.on("customPump", ({ gardenId, dvId, state }) => {
-        //     const socketCookie = socket.handshake.headers.cookie || '';
-        //     admin.auth().verifySessionCookie(socketCookie.slice(8), true)
-        //         .then((decodedClaims) => {
-        //             const socketUID = decodedClaims.uid;
-
-        //             if (objEnCam.hasOwnProperty(gardenId)) {
-        //                 // objEnCam[gardenId]["arrCamBrow"][0].send(`{"ev":"manualMode","dvId":"${dvId}","type":"PUMP","state":${state}}`);
-        //                 objEnCam[gardenId]["arrCamBrow"][0].send(`{"ev":"manual","id":"${dvId}","type":"PUMP","mode":${state}}`);
-        //                 admin.database().ref(`Devices/${socketUID}/${gardenId}/${dvId}/dcMotor`).update({
-        //                     PhunSuong: state
-        //                 });
-        //             }
-        //             else
-        //                 console.error("[Server] Cannot connect to esp32-cam. Check your connection");
-        //         })
-        // });
 
         //! get threshold value from <accordion.ejs>
         socket.on("thresh", ({ type, gardenId, dvId, val }) => {
@@ -509,7 +464,7 @@ wsServer.on("connection", ws => {
         try {
             const payload = JSON.parse(msg)[0];
             // event handler
-            switch (payload.EVENT) {
+            switch (payload.ev) {
                 case "ckstOK":
                     globIO.to(msgUID).emit("ckstOK", payload.dvId);
                     break;
@@ -613,7 +568,7 @@ wsServer.on("connection", ws => {
                     var humidRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/DHT`);
                     // prvent update trash things 
                     humidRef.once("value", () => {
-                        groundRef.update({
+                        humidRef.update({
                             humid: payload.val
                         });
                     });
@@ -630,21 +585,24 @@ wsServer.on("connection", ws => {
                     break;
 
                 case "delGar":
-                    console.log(`[ESP32] we want to delete slave garden < ${payload.dvId} > from garden < ${msgMAC} >`);
+                    console.log(`[ESP32] we want to delete slave garden <${payload.dvId}> from garden <${msgMAC}>`);
                     admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}`).remove(err => {
                         if (err) { console.error(err); }
                         else {
                             console.log("[NodeJS] Well done, see you later");
 
+                            console.log(objEnCam[msgMAC]);
                             // if user delete garden using browser
-                            objEnCam[msgMAC]["arrQueue"].forEach((objQueue, index) => {
-                                if (objQueue.hasOwnProperty("delDV")) {
-                                    // pong back to browser
-                                    globIO.to(objQueue["delDV"][0]).emit("delDvOK", objQueue);
-                                    // pop queue out
-                                    objEnCam[msgMAC]["arrQueue"].splice(index, 1);
-                                }
-                            })
+                            if (objEnCam[msgMAC].hasOwnProperty("arrQueue")) {
+                                objEnCam[msgMAC]["arrQueue"].forEach((objQueue, index) => {
+                                    if (objQueue.hasOwnProperty("delDV")) {
+                                        // pong back to browser
+                                        globIO.to(objQueue["delDV"][0]).emit("delDvOK", objQueue);
+                                        // pop queue out
+                                        objEnCam[msgMAC]["arrQueue"].splice(index, 1);
+                                    }
+                                })
+                            }
 
                             // pong back to device to EEPROM.update(1,0);
                             if (objEnCam.hasOwnProperty(msgMAC)) {
@@ -719,7 +677,6 @@ wsServer.on("connection", ws => {
                             status: 1 // online
                         }, err => { if (err) console.log(err); });
                     });
-
 
                     //! create a new objEnCam instance
                     objEnCam[payload.MAC] = { "arrCamBrow": [ws], uid: msgUID, state: 0, pingpong: true, arrQueue: [] };

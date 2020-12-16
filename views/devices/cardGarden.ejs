@@ -73,9 +73,23 @@
                 }
             ]).then(result => {
                 if (result.value) {
-                    Swal.showLoading();
+                    setTimeout(() => {
+                        Swal.showLoading();
+                    }, 500);
                     $.ajax({
                         method: "POST",
+                        timeout: 4000,
+                        error: () => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: "TIMEOUT",
+                                text: "SERVER cannot recieve pong back from GATEWAY"
+                            }).then(result => {
+                                if (result.value) {
+                                    stopStream();
+                                }
+                            })
+                        },
                         url: "/devices/updateDevice",
                         data: {
                             gardenId: "<%- child.val().gardenId %>",
@@ -86,7 +100,7 @@
                             Swal.fire({
                                 icon: 'success',
                                 title: "DONE",
-                                text: "device has been added"
+                                text: "Device has been paired"
                             }).then(result => {
                                 if (result.value) {
                                     stopStream();
@@ -94,14 +108,14 @@
                                 }
                             })
                         }
-                    })
+                    });
                 }
                 else {
                     Swal.fire({
-                        icon: 'error',
+                        icon: 'warning',
                         title: "Suddenly Stopped",
-                        text: "camera stream has stopped working"
-                    })
+                        text: "Camera Stream has stopped working"
+                    });
                     stopStream();
                 }
             })
@@ -109,7 +123,7 @@
             //!================/ ESP32-CAM on QR SCANNER /================!//
             let urlObj;
             let imgFrame = document.getElementById("cap");
-            const WS_URL = "ws:///192.168.2.128:81";
+            const WS_URL = "ws:///192.168.1.99:81";
             let ws; // global websocket var
 
             var canvasElement = document.getElementById("canvas");
@@ -145,7 +159,7 @@
                 });
                 // ON detect QR Image
                 if (code) {
-                    // retangle qrcode
+                    // draw red retangle qrcode
                     drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
                     drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
                     drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
@@ -172,20 +186,20 @@
                 ws = new WebSocket(WS_URL);
                 ws.onopen = () => console.log("[INFO] Connected to", WS_URL);
                 ws.onmessage = (payload) => {
-                    const arrBuffer = payload.data;
                     if (urlObj) {
                         URL.revokeObjectURL(urlObj);
                     }
-                    urlObj = URL.createObjectURL(new Blob([arrBuffer]));
+                    urlObj = URL.createObjectURL(new Blob([payload.data]));
                     imgFrame.src = urlObj;
                 };
 
                 setTimeout(() => {
                     if (ws.readyState == WebSocket.OPEN)
-                        ws.send(`[{"EVENT":"browserEnCam","gardenId":"<%-child.val().gardenId%>","userId": "<%-objGardenInfo.key%>"}]`);
+                        ws.send(`[{"ev":"browserEnCam","gardenId":"<%-child.val().gardenId%>","userId": "<%-objGardenInfo.key%>"}]`);
                     else
                         console.error(ws.readyState);
-                }, 2000);
+                }, 1000);
+
                 btnReScan.hidden = true;
                 requestAnimationFrame(tick);
             }

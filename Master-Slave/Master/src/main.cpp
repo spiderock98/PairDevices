@@ -19,46 +19,23 @@
 
 WebSocketsClient webSocket;
 
-// define the number of bytes you want to access
-#define EEPROM_SIZE 100
+#define EEPROM_SIZE 100 // define the number of bytes you want to access
 bool flagEnCam = false;
 
-#if TEST
-// #define STASSID "HTC"
-// #define STAPSK "chitam1234"
-// bApb0Ypwg5YszGanWOBKre39zlg1
-// #define UID "bApb0Ypwg5YszGanWOBKre39zlg1"
-// #define NODENAME "vuon xoai"
-#define HOST "192.168.2.128" // HOME local ip
+#define HOST "192.168.1.99"
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
-#else
-#define STASSID "taikhoan"
-#define STAPSK "matkhau"
-// bApb0Ypwg5YszGanWOBKre39zlg1
-#define UID "dinhdanh"
-#define NODENAME "physicalId"
-#define HOST "192.168.2.129" // HOME local ip
-#define PORT 81
-#define LED_BUILTIN 33
-#define FLASH_BUILTIN 4
-#endif
 
-// const char *ssid = STASSID;
-// const char *password = STAPSK;
-// const char *uid = UID;
 String finalUID = "";
-// const char *nodename = NODENAME;
 
 String jsonOut;
 void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length);
-// void checkReProgram();
 void Task2Func(void *pvParameters);
 // TaskHandle_t Task1;
 TaskHandle_t Task2;
 
-// StaticJsonDocument<200> docParser;
+StaticJsonDocument<200> docParser;
 
 uint8_t currWtlv = 0, preWtlv = 0;
 
@@ -96,9 +73,6 @@ void setup()
   delay(500);
 
   //!================/ Internet Config /================!//
-  // WiFi.begin(ssid, password);
-  // WiFi.setAutoConnect(true);
-  // WiFi.reconnect();
   String finalSSID = "";
   uint8_t sizeSSID = EEPROM.read(1);
   for (int i = 2; sizeSSID--; i++)
@@ -190,7 +164,6 @@ void setup()
     delay(25);
     digitalWrite(FLASH_BUILTIN, 0);
     delay(100);
-    // checkReProgram();
 
 #if DEBUG
     Serial.print(" ... 2");
@@ -199,7 +172,6 @@ void setup()
     delay(25);
     digitalWrite(FLASH_BUILTIN, 0);
     delay(100);
-    // checkReProgram();
 
 #if DEBUG
     Serial.print(" ... 1");
@@ -208,7 +180,6 @@ void setup()
     delay(25);
     digitalWrite(FLASH_BUILTIN, 0);
     delay(100);
-    // checkReProgram();
 
 #if DEBUG
     Serial.println(" ... 0");
@@ -217,7 +188,6 @@ void setup()
     delay(25);
     digitalWrite(FLASH_BUILTIN, 0);
     delay(109);
-    // checkReProgram();
 
     //!  if agree then enter Pairing Mode
     //     if (!digitalRead(0))
@@ -245,16 +215,16 @@ void setup()
     //     }
 
     //! if EEP value at addr 0 is 1 && not hold button >> send camera is ready
-    param1["EVENT"] = "espEnCamera";
+    param1["ev"] = "espEnCamera";
 #if DEBUG
-    Serial.println("Sending <espEnCamera> EVENT");
+    Serial.println("Sending <espEnCamera> event");
 #endif
   }
 
   //! else if EEPROM value at addr no.0 is 0 then enter pairing mode WITHOUT asking
   else
   {
-    param1["EVENT"] = "regESP";
+    param1["ev"] = "regESP";
   }
 
   param1["MAC"] = WiFi.macAddress();
@@ -311,14 +281,14 @@ void setup()
     esp_err_t err = esp_camera_init(&config);
     if (err != ESP_OK)
     {
-      webSocket.sendTXT("[{\"EVENT\":\"std\",\"detail\":\"[Error] Init Camera\"}]");
+      webSocket.sendTXT("[{\"ev\":\"std\",\"detail\":\"[Error] Init Camera\"}]");
 #if DEBUG
       Serial.printf("Camera init failed with error 0x%x", err);
 #endif
       return;
     }
     else
-      webSocket.sendTXT("[{\"EVENT\":\"std\",\"detail\":\"[Success] Init Camera\"}]");
+      webSocket.sendTXT("[{\"ev\":\"std\",\"detail\":\"[Success] Init Camera\"}]");
   }
 
   //!================/ WebSocket Config /================!//
@@ -345,23 +315,23 @@ void loop()
         {
           // low
         case 0b11111111:
-          // webSocket.sendTXT("[{\"EVENT\":\"wtlv\",\"uId\":\"" + finalUID + "\",\"gId\":\"" + WiFi.macAddress() + "\",\"val\":30}]");
+          // webSocket.sendTXT("[{\"ev\":\"wtlv\",\"uId\":\"" + finalUID + "\",\"gId\":\"" + WiFi.macAddress() + "\",\"val\":30}]");
           //todo: testing
-          webSocket.sendTXT("[{\"EVENT\":\"wtlv\",\"val\":30}]");
+          webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":30}]");
           break;
 
           // medium
         case 0b01111111:
-          // webSocket.sendTXT("[{\"EVENT\":\"wtlv\",\"uId\":\"" + finalUID + "\",\"gId\":\"" + WiFi.macAddress() + "\",\"val\":60}]");
+          // webSocket.sendTXT("[{\"ev\":\"wtlv\",\"uId\":\"" + finalUID + "\",\"gId\":\"" + WiFi.macAddress() + "\",\"val\":60}]");
           //todo: testing
-          webSocket.sendTXT("[{\"EVENT\":\"wtlv\",\"val\":60}]");
+          webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":60}]");
           break;
 
           // high
         case 0b00111111:
-          // webSocket.sendTXT("[{\"EVENT\":\"wtlv\",\"uId\":\"" + finalUID + "\",\"gId\":\"" + WiFi.macAddress() + "\",\"val\":90}]");
+          // webSocket.sendTXT("[{\"ev\":\"wtlv\",\"uId\":\"" + finalUID + "\",\"gId\":\"" + WiFi.macAddress() + "\",\"val\":90}]");
           //todo: testing
-          webSocket.sendTXT("[{\"EVENT\":\"wtlv\",\"val\":90}]");
+          webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":90}]");
           break;
         }
         preWtlv = currWtlv;
@@ -395,52 +365,60 @@ void loop()
   //!================= Zigbee OnEvent ==================!//
   if (Serial1.available())
   {
-    String recvZigbee = Serial1.readStringUntil('\n');
-    // Serial.println(recvZigbee);
-
-    StaticJsonDocument<200> docParser;
-    deserializeJson(docParser, recvZigbee);
+    // String recvZigbee = Serial1.readStringUntil('\n');
     // #if DEBUG
     //     Serial.println(recvZigbee);
     // #endif
 
-    String slaveId = docParser["id"];
-    String recvEvent = docParser["ev"];
-
-    if (recvEvent == "lgH")
+    // StaticJsonDocument<200> docParser;
+    DeserializationError error = deserializeJson(docParser, Serial1);
+    if (error)
     {
-      webSocket.sendTXT("[{\"EVENT\":\"lgH\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
-    }
-    else if (recvEvent == "lgT")
-    {
-      webSocket.sendTXT("[{\"EVENT\":\"lgT\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
-    }
-    else if (recvEvent == "lgG")
-    {
-      webSocket.sendTXT("[{\"EVENT\":\"lgG\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
-    }
-    else if (recvEvent == "mns")
-    {
-      webSocket.sendTXT("[{\"EVENT\":\"mns\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<bool>() + "}]");
-    }
-    else if (recvEvent == "thrOK")
-    {
-      webSocket.sendTXT("[{\"EVENT\":\"thrOK\"}]");
-    }
-    else if (recvEvent == "ckstOK")
-    {
-      webSocket.sendTXT("[{\"EVENT\":\"ckstOK\",\"dvId\":\"" + slaveId + "\"}]");
-    }
-    else if (recvEvent == "delGar")
-    {
-      webSocket.sendTXT("[{\"EVENT\":\"delGar\",\"dvId\":\"" + slaveId + "\"}]");
-    }
-    else if (recvEvent == "inOK")
-    {
-      webSocket.sendTXT("[{\"EVENT\":\"inOK\"}]");
 #if DEBUG
-      Serial.println("[INFO] " + slaveId + " complete pairing new device");
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.c_str());
 #endif
+    }
+    else
+    {
+      String slaveId = docParser["id"];
+      String recvEvent = docParser["ev"];
+
+      if (recvEvent == "lgH")
+      {
+        webSocket.sendTXT("[{\"ev\":\"lgH\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
+      }
+      else if (recvEvent == "lgT")
+      {
+        webSocket.sendTXT("[{\"ev\":\"lgT\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
+      }
+      else if (recvEvent == "lgG")
+      {
+        webSocket.sendTXT("[{\"ev\":\"lgG\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
+      }
+      else if (recvEvent == "mns")
+      {
+        webSocket.sendTXT("[{\"ev\":\"mns\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<bool>() + "}]");
+      }
+      else if (recvEvent == "thrOK")
+      {
+        webSocket.sendTXT("[{\"ev\":\"thrOK\"}]");
+      }
+      else if (recvEvent == "ckstOK")
+      {
+        webSocket.sendTXT("[{\"ev\":\"ckstOK\",\"dvId\":\"" + slaveId + "\"}]");
+      }
+      else if (recvEvent == "delGar")
+      {
+        webSocket.sendTXT("[{\"ev\":\"delGar\",\"dvId\":\"" + slaveId + "\"}]");
+      }
+      else if (recvEvent == "inOK")
+      {
+        webSocket.sendTXT("[{\"ev\":\"inOK\"}]");
+#if DEBUG
+        Serial.println("[INFO] " + slaveId + " complete pairing new device");
+#endif
+      }
     }
   }
   webSocket.loop();
@@ -458,131 +436,73 @@ void Task2Func(void *pvParameters)
     //! on event add new gardens
     if (Serial.available())
     {
-      String recvTTL = Serial.readStringUntil('\n');
-      StaticJsonDocument<200> docParser;
-      deserializeJson(docParser, recvTTL);
-
-      if (docParser["ev"] == "newGarden")
+      // String recvTTL = Serial.readStringUntil('\n');
+      // StaticJsonDocument<200> docParser;
+      DeserializationError error = deserializeJson(docParser, Serial);
+      if (error)
       {
-        const char *ttlUID = docParser["uid"];
-        const char *ttlSSID = docParser["ssid"];
-        const char *ttlPsk = docParser["psk"];
-
-        digitalWrite(FLASH_BUILTIN, 1);
-        delay(1000);
-
-        uint8_t ptrEEPROM = 2;
-        // addr 0 is flagExist, addr 1 is size of ssid
-        for (int i = 0; ttlSSID[i] != NULL; ++i)
-        {
-          EEPROM.write(ptrEEPROM, ttlSSID[i]);
-          EEPROM.commit();
-          ++ptrEEPROM;
-        }
-        // write size of ssid
-        EEPROM.write(1, ptrEEPROM - 2);
-        EEPROM.commit();
-
-        // leave a position for password size
-        uint8_t posSizePsk = ptrEEPROM++;
-
-        for (int i = 0; ttlPsk[i] != NULL; ++i)
-        {
-          EEPROM.write(ptrEEPROM, ttlPsk[i]);
-          EEPROM.commit();
-          ++ptrEEPROM;
-        }
-        // write size of password
-        EEPROM.write(posSizePsk, ptrEEPROM - 1 - posSizePsk);
-        EEPROM.commit();
-
-        // leave a position for UID size
-        uint8_t posSizeUID = ptrEEPROM++;
-
-        for (int i = 0; ttlUID[i] != NULL; ++i)
-        {
-          EEPROM.write(ptrEEPROM, ttlUID[i]);
-          EEPROM.commit();
-          ++ptrEEPROM;
-        }
-        // write size of uid
-        EEPROM.write(posSizeUID, ptrEEPROM - 1 - posSizeUID);
-        EEPROM.commit();
-
-        // clear this garden slave
-        EEPROM.write(0, 0);
-        EEPROM.commit();
-
-        digitalWrite(FLASH_BUILTIN, 0);
-        ESP.restart(); // return to connect new wifi network in void setup
+#if DEBUG
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.c_str());
+#endif
       }
+      else
+      {
+        if (docParser["ev"] == "newGarden")
+        {
+          const char *ttlUID = docParser["uid"];
+          const char *ttlSSID = docParser["ssid"];
+          const char *ttlPsk = docParser["psk"];
 
-      //       if (docParser["ev"] == "newGarden")
-      //       {
-      //         String ttlUID = docParser["uid"];
-      //         const char *ttlSSID = docParser["ssid"];
-      //         const char *ttlPsk = docParser["psk"];
+          digitalWrite(FLASH_BUILTIN, 1);
+          delay(1000);
 
-      //         WiFi.disconnect();
-      //         WiFi.begin(ttlSSID, ttlPsk);
-      //         uint8_t idxTimeOutPair = 1;
-      //         // 10s timeout
-      //         while ((WiFi.status() != WL_CONNECTED) && (idxTimeOutPair < 26))
-      //         {
-      //           digitalWrite(LED_BUILTIN, 1);
-      //           delay(100);
-      //           digitalWrite(LED_BUILTIN, 0);
-      //           delay(100);
-      //           ++idxTimeOutPair;
-      //         }
-      //         if (WiFi.status() == WL_CONNECTED)
-      //         {
-      //           digitalWrite(FLASH_BUILTIN, 1);
-      //           delay(1000);
+          uint8_t ptrEEPROM = 2;
+          // addr 0 is flagExist, addr 1 is size of ssid
+          for (int i = 0; ttlSSID[i] != NULL; ++i)
+          {
+            EEPROM.write(ptrEEPROM, ttlSSID[i]);
+            EEPROM.commit();
+            ++ptrEEPROM;
+          }
+          // write size of ssid
+          EEPROM.write(1, ptrEEPROM - 2);
+          EEPROM.commit();
 
-      //           uint8_t ptrEEPROM = 2;
-      //           // addr 0 is flagExist, addr 1 is size of ssid
-      //           for (int i = 0; ttlSSID[i] != NULL; ++i)
-      //           {
-      //             EEPROM.write(ptrEEPROM, ttlSSID[i]);
-      //             EEPROM.commit();
-      //             ++ptrEEPROM;
-      //           }
-      //           // write size of ssid
-      //           EEPROM.write(1, ptrEEPROM - 2);
-      //           EEPROM.commit();
+          // leave a position for password size
+          uint8_t posSizePsk = ptrEEPROM++;
 
-      //           // leave a position for password size
-      //           uint8_t posSizePsk = ptrEEPROM++;
+          for (int i = 0; ttlPsk[i] != NULL; ++i)
+          {
+            EEPROM.write(ptrEEPROM, ttlPsk[i]);
+            EEPROM.commit();
+            ++ptrEEPROM;
+          }
+          // write size of password
+          EEPROM.write(posSizePsk, ptrEEPROM - 1 - posSizePsk);
+          EEPROM.commit();
 
-      //           for (int i = 0; ttlPsk[i] != NULL; ++i)
-      //           {
-      //             EEPROM.write(ptrEEPROM, ttlPsk[i]);
-      //             EEPROM.commit();
-      //             ++ptrEEPROM;
-      //           }
-      //           // write size of ssid
-      //           EEPROM.write(posSizePsk, ptrEEPROM - 1 - posSizePsk);
-      //           EEPROM.commit();
+          // leave a position for UID size
+          uint8_t posSizeUID = ptrEEPROM++;
 
-      // #if DEBUG
-      //           Serial.print("\nWiFi connected");
-      //           Serial.println(WiFi.localIP());
-      // #endif
-      //           EEPROM.write(0, 0);
-      //           EEPROM.commit();
-      // #if DEBUG
-      //           Serial.println("[ESP] RE-PROGRAM THIS ESP >> EEPROM value at addr 0 is cleared");
-      //           Serial.println("[ESP] Resetting ESP ... !!!");
-      // #endif
-      //           ESP.restart(); // return
-      //         }
-      //         else
-      //         {
-      //           // ack stderr
-      //           Serial.println("WrongSSIDPsk");
-      //         }
-      //       }
+          for (int i = 0; ttlUID[i] != NULL; ++i)
+          {
+            EEPROM.write(ptrEEPROM, ttlUID[i]);
+            EEPROM.commit();
+            ++ptrEEPROM;
+          }
+          // write size of uid
+          EEPROM.write(posSizeUID, ptrEEPROM - 1 - posSizeUID);
+          EEPROM.commit();
+
+          // clear this garden slave
+          EEPROM.write(0, 0);
+          EEPROM.commit();
+
+          digitalWrite(FLASH_BUILTIN, 0);
+          ESP.restart(); // return to connect new wifi network in void setup
+        }
+      }
     }
   }
 }
@@ -609,7 +529,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
     Serial.printf("[WSc] Connected to url: %s\n", payload);
 #endif
     //? ====/ send message to server when Connected /==== ?//
-    // [{"EVENT":"espEnCamera","MAC":"24:6F:28:B0:B5:10","IP":"192.168.1.3","SSID":"VIETTEL","PSK":"Sherlock21vtag","UID":"bApb0Ypwg5YszGanWOBKre39zlg1"}]
+    // [{"ev":"espEnCamera","MAC":"24:6F:28:B0:B5:10","IP":"192.168.1.3","SSID":"VIETTEL","PSK":"Sherlock21vtag","UID":"bApb0Ypwg5YszGanWOBKre39zlg1"}]
     webSocket.sendTXT(jsonOut);
 
     break;
@@ -623,8 +543,9 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
     // forward all message to all slave
     Serial1.printf("%s\n", payload);
 
-    StaticJsonDocument<1024> recvDoc;
-    DeserializationError error = deserializeJson(recvDoc, payload, length);
+    // StaticJsonDocument<1024> recvDoc;
+    // DeserializationError error = deserializeJson(recvDoc, payload, length);
+    DeserializationError error = deserializeJson(docParser, payload, length);
     // Test if parsing success
     if (error)
     {
@@ -635,7 +556,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
     }
     else
     {
-      String eventName = recvDoc["ev"];
+      String eventName = docParser["ev"];
 
       if (eventName == "enC")
       {
@@ -705,18 +626,3 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
     break;
   }
 }
-
-// void checkReProgram()
-// {
-//   if (Serial.readStringUntil('\n') == "clearEEPROM")
-//   {
-//     digitalWrite(FLASH_BUILTIN, 1);
-//     EEPROM.write(0, 0);
-//     EEPROM.commit();
-// #if DEBUG
-//     Serial.println("[ESP] RE-PROGRAM THIS ESP >> EEPROM value at addr 0 is cleared");
-//     Serial.println("[ESP] Resetting ESP ... !!!");
-// #endif
-//     ESP.restart(); // return
-//   }
-// }

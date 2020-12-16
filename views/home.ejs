@@ -154,7 +154,9 @@
                         <div class="col-lg-5 col-xl-2">
                             <div class="card shadow mb-4">
                                 <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h6 class="text-primary font-weight-bold m-0">Camera an ninh khu vực</h6>
+                                    <h6 class="text-primary font-weight-bold m-0">Security Camera</h6>
+                                    <button id="btnReloadCam" type="button" class="btn btn-warning">Refresh
+                                        Camera</button>
                                 </div>
                                 <div class="card-body">
                                     <!-- 640x480 -->
@@ -332,10 +334,33 @@
 <script>
     setTimeout(() => {
         if (ws.readyState == WebSocket.OPEN)
-            ws.send(`[{"EVENT":"browserEnCam","gardenId":"<%-detailGardenInfo.key%>","userId": "<%-objGardenInfo.key%>"}]`);
+            ws.send(`[{"ev":"browserEnCam","gardenId":"<%-detailGardenInfo.key%>","userId": "<%-objGardenInfo.key%>"}]`);
         else
             console.error(ws.readyState);
-    }, 2000);
+    }, 1000);
+
+    $("#btnReloadCam").on("click", () => {
+        // <ws> variable init in <home-client.js>
+        ws.close();
+        ws.onclose = () => console.log("[WS] CLOSED ", WS_URL);
+
+        ws = new WebSocket(WS_URL);
+        ws.onopen = () => console.log("[INFO] Connected to", WS_URL);
+        ws.onmessage = (payload) => {
+            if (urlObj) {
+                URL.revokeObjectURL(urlObj);
+            }
+            urlObj = URL.createObjectURL(new Blob([payload.data]));
+            imgFrame.src = urlObj;
+        };
+
+        setTimeout(() => {
+            if (ws.readyState == WebSocket.OPEN)
+                ws.send(`[{"ev":"browserEnCam","gardenId":"<%-detailGardenInfo.key%>","userId": "<%-objGardenInfo.key%>"}]`);
+            else
+                console.error(ws.readyState);
+        }, 1000);
+    });
 </script>
 
 </html>

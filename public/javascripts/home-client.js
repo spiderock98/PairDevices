@@ -46,19 +46,18 @@ getCurrentUID().then((uid) => {
 }); // Global Var
 
 //!================/ VanillaWebsocket /================!//
-const WS_URL = "ws:///192.168.2.128:81";
-const ws = new WebSocket(WS_URL);
+const WS_URL = "ws:///192.168.1.99:81";
+let ws = new WebSocket(WS_URL);
 
 //!================/ ESP32-CAM on security area field /================!//
 let urlObj;
 let imgFrame = document.getElementById("cap");
 ws.onopen = () => console.log("[INFO] Connected to", WS_URL);
 ws.onmessage = (payload) => {
-  const arrBuffer = payload.data;
   if (urlObj) {
     URL.revokeObjectURL(urlObj);
   }
-  urlObj = URL.createObjectURL(new Blob([arrBuffer]));
+  urlObj = URL.createObjectURL(new Blob([payload.data]));
   imgFrame.src = urlObj;
 };
 
@@ -149,7 +148,7 @@ ws.onmessage = (payload) => {
 
 //!============/ Others Script /===========!//
 
-//!===/ execute new instace class object define in <js-fluid-meter.js> /===!//
+//!=====/ execute new instace class object define in <js-fluid-meter.js> /=====!//
 var fm = new FluidMeter();
 fm.init({
   targetContainer: document.getElementById("fluid-meter"),

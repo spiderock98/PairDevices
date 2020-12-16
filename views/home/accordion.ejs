@@ -277,9 +277,9 @@
         // document.getElementById('checkDC<%-index%>').checked = "<%-child.val().dcMotor.NhoGiot%>" == "1" ? false : true;
         // document.getElementById('checkPump<%-index%>').checked = "<%-child.val().dcMotor.PhunSuong%>" == "1" ? false : true;
 
-        // <socket> is socketIO var declare in home-client.js
+        // gửi trạng thái ManualMode về server: SW LỚN
         $('#checkDC<%-index%>').on("click", () => {
-            // gửi trạng thái ManualMode về server
+            // <socket> is socketIO var declare in home-client.js
             socket.emit("customDC", {
                 gardenId: window.location.search.slice(10),
                 dvId: "<%-child.key%>",

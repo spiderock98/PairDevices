@@ -1,14 +1,14 @@
 // EEPROM structure [addr 0: this device is blank or not, addr 1:this device still exist in databse or not, addr 10: tThresh, addr 11,12: gThresh, addr 13,14: gThreshOffset, addr15: (0bxxxxxx11)rqModeManual-bit6, currMotor-bit7]
 
 #define DEBUG false
-#define VERSION 2
+#define VERSION 1
 
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
 #include <EEPROM.h>
 #include "DHT.h"
 
-String deviceId = "1A"; // fixed value
+String deviceId = "2B"; // fixed value
 
 #if VERSION == 1
 #define misty 5              // phun sương
@@ -104,11 +104,12 @@ void setup()
     // this is new device >> waiting for pairing via zigbee
     if (zigbee.available())
     {
-      String strRecv = zigbee.readStringUntil('\n');
-#if DEBUG
-      Serial.println(strRecv);
-#endif
-      DeserializationError error = deserializeJson(docParser, strRecv);
+      //       String strRecv = zigbee.readStringUntil('\n');
+      // #if DEBUG
+      //       Serial.println(strRecv);
+      // #endif
+      //       DeserializationError error = deserializeJson(docParser, strRecv);
+      DeserializationError error = deserializeJson(docParser, zigbee);
       if (error)
       {
 #if DEBUG
@@ -116,27 +117,30 @@ void setup()
         Serial.println(error.c_str());
         // Serial.println("Re-Init this device");
 #endif
-
-        blinkNtimes(LED, 3, 20);
+        blinkNtimes(LED, 1, 1000);
+        blinkNtimes(LED, 1, 20);
       }
-      else if (docParser["id"] == deviceId && docParser["ev"] == "init")
+      else
       {
-        zigbee.println("{\"id\":\"" + deviceId + "\",\"ev\":\"inOK\"}");
-        EEPROM.write(0, 1);
-        EEPROM.write(1, 1);
-        digitalWrite(LED_BUILTIN, 0);
-        blinkNtimes(BUZZER, 1, 1500);
+        if (docParser["id"] == deviceId && docParser["ev"] == "init")
+        {
+          zigbee.println("{\"id\":\"" + deviceId + "\",\"ev\":\"inOK\"}");
+          EEPROM.write(0, 1);
+          EEPROM.write(1, 1);
+          digitalWrite(LED_BUILTIN, 0);
+          blinkNtimes(BUZZER, 1, 1500);
 #if DEBUG
-        Serial.print("[Success] complete pairing new device");
+          Serial.print("[Success] complete pairing new device");
 #endif
-      }
-      else if (docParser["id"] == deviceId && docParser["ev"] == "delGarOK")
-      {
+        }
+        else if (docParser["id"] == deviceId && docParser["ev"] == "delGarOK")
+        {
 #if DEBUG
-        Serial.println("[INFO] This device not in database anymore");
+          Serial.println("[INFO] This device not in database anymore");
 #endif
-        blinkNtimes(BUZZER, 3, 100);
-        EEPROM.write(1, 0); // this device not in database anymore
+          blinkNtimes(BUZZER, 4, 100);
+          EEPROM.write(1, 0); // this device not in database anymore
+        }
       }
     }
   }
@@ -149,11 +153,13 @@ void loop()
   //!======/ scan zigbee buffer /======!//
   if (zigbee.available())
   {
-    String strRecv = zigbee.readStringUntil('\n');
-#if DEBUG
-    Serial.println(strRecv);
-#endif
-    DeserializationError error = deserializeJson(docParser, strRecv);
+    //     String strRecv = zigbee.readStringUntil('\n');
+    // #if DEBUG
+    //     Serial.println(strRecv);
+    // #endif
+    //     DeserializationError error = deserializeJson(docParser, strRecv);
+
+    DeserializationError error = deserializeJson(docParser, zigbee);
 
     if (error)
     {
@@ -182,9 +188,10 @@ void loop()
 
         else if (rqModeManual && (recvEvName == "mn"))
         {
+          zigbee.println("{\"id\":\"" + deviceId + "\",\"ev\":\"thrOK\"}");
+
           if (docParser["st"])
           {
-            zigbee.println("{\"id\":\"" + deviceId + "\",\"ev\":\"thrOK\"}");
             digitalWrite(motorGnd, 1);
             currMotor = 1;
             EEPROM.update(15, EEPROM.read(15) | 0b01);
@@ -194,7 +201,6 @@ void loop()
           }
           else
           {
-            zigbee.println("{\"id\":\"" + deviceId + "\",\"ev\":\"thrOK\"}");
             digitalWrite(motorGnd, 0);
             currMotor = 0;
             EEPROM.update(15, EEPROM.read(15) & 0b10);
