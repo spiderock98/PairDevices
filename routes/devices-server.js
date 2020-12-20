@@ -325,12 +325,22 @@ const ioFunc = (io) => {
             const socketCookie = socket.handshake.headers.cookie || '';
             admin.auth().verifySessionCookie(socketCookie.slice(8), true)
                 .then((decodedClaims) => {
-                    if (objEnCam.hasOwnProperty(garId)) {
-                        admin.database().ref(`Devices/${decodedClaims.uid}/${garId}`).once("value", snapDv => {
-                            snapDv.forEach(lstDV => {
-                                objEnCam[garId]["arrCamBrow"][0].send(`{"ev":"ckst","id":"${lstDV.key}"}`);
+                    //! send from <accordion.ejs>
+                    if (typeof (garId) === 'object') {
+                        // console.log(garId.garId);
+                        if (objEnCam.hasOwnProperty(garId.garId)) {
+                            objEnCam[garId.garId]["arrCamBrow"][0].send(`{"ev":"ckst","id":"${garId.dvId}"}`);
+                        }
+                    }
+                    //! send from <modalTableDV.ejs>
+                    else {
+                        if (objEnCam.hasOwnProperty(garId)) {
+                            admin.database().ref(`Devices/${decodedClaims.uid}/${garId}`).once("value", snapDv => {
+                                snapDv.forEach(lstDV => {
+                                    objEnCam[garId]["arrCamBrow"][0].send(`{"ev":"ckst","id":"${lstDV.key}"}`);
+                                });
                             });
-                        });
+                        }
                     }
                 })
         });
@@ -836,7 +846,11 @@ setInterval(() => {
                     status: 0 // offline
                 }, err => { if (err) console.log(err); });
                 console.error("[Server] Socket Error >> POP...ing Error CAMERA");
-                objEnCam[mac]["arrCamBrow"][0].send('{"ev":"RESTART_ESP"}');
+                // todo: testing
+                // objEnCam[mac]["arrCamBrow"][0].send('{"ev":"RESTART_ESP"}');
+                objEnCam[mac]["arrCamBrow"].forEach(elWs => {
+                    elWs.send('{"ev":"RESTART_ESP"}');
+                });
                 //todo: send messgae log error to all browser before delete
                 delete objEnCam[mac];
             }

@@ -180,7 +180,6 @@ void setup()
     Serial.println("Sending <espEnCamera> event");
 #endif
   }
-
   //! else if EEPROM value at addr no.0 is 0 then enter pairing mode WITHOUT asking
   else
   {
@@ -243,18 +242,17 @@ void setup()
     esp_err_t err = esp_camera_init(&config);
     if (err != ESP_OK)
     {
-      webSocket.sendTXT("[{\"ev\":\"std\",\"detail\":\"[Error] Init Camera\"}]");
+      // webSocket.sendTXT("[{\"ev\":\"std\",\"detail\":\"[Error] Init Camera\"}]");
 #if DEBUG
       Serial.printf("Camera init failed with error 0x%x", err);
 #endif
       return;
     }
-    else
-      webSocket.sendTXT("[{\"ev\":\"std\",\"detail\":\"[Success] Init Camera\"}]");
+    // else
+    // webSocket.sendTXT("[{\"ev\":\"std\",\"detail\":\"[Success] Init Camera\"}]");
   }
 
   //!================/ WebSocket Config /================!//
-  // webSocket.begin(HOST, PORT, "/"); // server address, port and URL
   webSocket.onEvent(webSocketEventHandle);
   webSocketCam.onEvent(webSocketCamEventHandle);
 }
@@ -475,9 +473,35 @@ void webSocketCamEventHandle(WStype_t type, uint8_t *payload, size_t length)
 
   case WStype_CONNECTED:
 #if DEBUG
-    Serial.printf("[WSc] Connected to url: %s\n", payload);
+    Serial.printf("[wsCAM] Connected to url: %s\n", payload);
 #endif
     webSocketCam.sendTXT(jsonOut);
+    break;
+
+    // todo: testing
+  case WStype_TEXT:
+    //? not use global <docParser> b/c may be duplicate thread use that variable
+    StaticJsonDocument<200> docParserCam;
+    DeserializationError error = deserializeJson(docParserCam, payload, length);
+    if (error)
+    {
+#if DEBUG
+      Serial.print(F("[ERROR] deserializeJson() failed"));
+#endif
+      return;
+    }
+    else
+    {
+      String eventName = docParserCam["ev"];
+
+      if (eventName == "RESTART_ESP")
+      {
+#if DEBUG
+        Serial.println("[INFO] Server request ESP to restart");
+#endif
+        ESP.restart();
+      }
+    }
     break;
   }
 }
@@ -501,7 +525,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
 
   case WStype_CONNECTED:
 #if DEBUG
-    Serial.printf("[WSc] Connected to url: %s\n", payload);
+    Serial.printf("[wsDATA] Connected to url: %s\n", payload);
 #endif
     //? ====/ send message to server when Connected /==== ?//
     // [{"ev":"espEnCamera","MAC":"24:6F:28:B0:B5:10","IP":"192.168.1.3","SSID":"VIETTEL","PSK":"Sherlock21vtag","UID":"bApb0Ypwg5YszGanWOBKre39zlg1"}]
@@ -509,7 +533,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
 
     break;
 
-    //!===============/ socket ON recieve data /================!//
+    //!===============/ ON recieve data /================!//
   case WStype_TEXT:
     // Serial.printf("[WSc] %s\n", payload);
 #if DEBUG

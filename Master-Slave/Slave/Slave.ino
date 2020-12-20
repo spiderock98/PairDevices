@@ -1,14 +1,14 @@
 // EEPROM structure [addr 0: this device is blank or not, addr 1:this device still exist in databse or not, addr 10: tThresh, addr 11,12: gThresh, addr 13,14: gThreshOffset, addr15: (0bxxxxxx11)rqModeManual-bit6, currMotor-bit7]
 
 #define DEBUG false
-#define VERSION 2
+#define VERSION 1
 
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
 #include <EEPROM.h>
 #include "DHT.h"
 
-String deviceId = "1A"; // fixed value
+String deviceId = "2B"; // fixed value
 
 #if VERSION == 1
 #define misty 5              // phun sương
@@ -281,7 +281,6 @@ void loop()
     currentGnd = avgGnd(1);
     if ((preGnd - currentGnd) || flagExeOnUpdateThrGround)
     {
-      // String sGnd = String(currentGnd);
       zigbee.println("{\"id\":\"" + deviceId + "\",\"ev\":\"lgG\",\"val\":\"" + String(currentGnd) + "\"}");
 
       if (!rqModeManual)

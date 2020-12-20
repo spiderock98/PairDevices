@@ -2,15 +2,6 @@ const express = require('express');
 const router = express.Router();
 const admin = require('firebase-admin');
 
-
-// const getSnapGardensInfo = (userId) => {
-//     return new Promise(resolve => {
-//         admin.database().ref(`Gardens/${userId}`).once('value', snap => {
-//             resolve(snap)
-//         })
-//     })
-// }
-
 router.get('/', (req, res) => {
     let sessionCookie = req.cookies.session || '';
     admin.auth().verifySessionCookie(sessionCookie, true)
