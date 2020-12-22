@@ -300,7 +300,30 @@ router.post('/updateDevice', (req, res) => {
 
         })
         .catch(err => console.error(err))
-})
+});
+
+//!==================/ Route Generate Report /==================!//
+router.get("/genReport", (req, res) => {
+    let cookie = req.cookies.session || "";
+    admin.auth().verifySessionCookie(cookie, true)
+        .then((decodedClaims) => {
+            const qrUID = decodedClaims.uid;
+            const qrGarId = req.query.garId;
+            const qrDvId = req.query.dvId;
+
+            var refLogT = admin.database().ref(`Devices/${qrUID}/${qrGarId}/${qrDvId}/sensor/logs/T`);
+            var refLogH = admin.database().ref(`Devices/${qrUID}/${qrGarId}/${qrDvId}/sensor/logs/H`);
+            var refLogG = admin.database().ref(`Devices/${qrUID}/${qrGarId}/${qrDvId}/sensor/logs/G`);
+            refLogT.once("value", snapLogT => {
+                refLogH.once("value", snapLogH => {
+                    refLogG.once("value", snapLogG => {
+                        res.json({ objLogT: snapLogT, objLogH: snapLogH, objLogG: snapLogG })
+                    })
+                })
+            });
+        })
+
+});
 
 //!==================/ SocketIO /==================!//
 let globIO;
@@ -320,14 +343,13 @@ const ioFunc = (io) => {
                 })
         });
 
-        //! when user click CHECK STATUS button in tabe devices
+        //! when user click CHECK STATUS button in <modalTableDV.ejs>
         socket.on("checkDVStt", ({ garId }) => {
             const socketCookie = socket.handshake.headers.cookie || '';
             admin.auth().verifySessionCookie(socketCookie.slice(8), true)
                 .then((decodedClaims) => {
                     //! send from <accordion.ejs>
                     if (typeof (garId) === 'object') {
-                        // console.log(garId.garId);
                         if (objEnCam.hasOwnProperty(garId.garId)) {
                             objEnCam[garId.garId]["arrCamBrow"][0].send(`{"ev":"ckst","id":"${garId.dvId}"}`);
                         }
@@ -336,9 +358,19 @@ const ioFunc = (io) => {
                     else {
                         if (objEnCam.hasOwnProperty(garId)) {
                             admin.database().ref(`Devices/${decodedClaims.uid}/${garId}`).once("value", snapDv => {
+                                var tmpArrCheckStt = [];
                                 snapDv.forEach(lstDV => {
-                                    objEnCam[garId]["arrCamBrow"][0].send(`{"ev":"ckst","id":"${lstDV.key}"}`);
+                                    tmpArrCheckStt.push(lstDV.key);
                                 });
+
+                                (function myLoop(i) {
+                                    setTimeout(function () {
+                                        //   code here
+                                        objEnCam[garId]["arrCamBrow"][0].send(`{"ev":"ckst","id":"${tmpArrCheckStt[i - 1]}"}`);
+                                        console.log("sent", tmpArrCheckStt[i - 1]);
+                                        if (--i) myLoop(i);
+                                    }, 1000)
+                                })(tmpArrCheckStt.length);
                             });
                         }
                     }
@@ -476,7 +508,42 @@ wsServerData.on("connection", wsCam => {
                     //! add data to new objEnCam instance create below
                     objEnCam[payload.MAC]["arrCamBrow"].push(wsCam);
                     console.log("[wsCam]", objEnCam);
+                    break;
 
+                case "browserEnCam":
+                    const browserRequestGardenId = payload.gardenId;
+                    const browserRequestUserId = payload.userId;
+                    console.log(`[Browser:82] We want to enable camera ${browserRequestGardenId}`);
+                    // has property because esp-cam init this object
+                    if (objEnCam.hasOwnProperty(browserRequestGardenId)) {
+                        // just exec if <arrCamBrow> got ONLY camera ws in there at index 0
+                        if (objEnCam[browserRequestGardenId]["arrCamBrow"].length == 2) {
+                            if (objEnCam[browserRequestGardenId]["state"] == 0) {
+                                objEnCam[browserRequestGardenId]["state"] = 1;
+                                objEnCam[browserRequestGardenId]["arrCamBrow"].push(wsCam);
+                                objEnCam[browserRequestGardenId]["arrCamBrow"][0].send('{"ev":"enC"}');
+                                console.log(`[NodeJS][wsCam:82] request gateway EnableCamera ${browserRequestGardenId}`);
+                            } else {
+                                console.error("[INFO] Something Wrong !!!");
+                            }
+                        }
+                        else if (objEnCam[browserRequestGardenId]["arrCamBrow"].length > 2) {
+                            if (objEnCam[browserRequestGardenId]["state"] == 0) {
+                                objEnCam[browserRequestGardenId]["state"] = 1;
+                                objEnCam[browserRequestGardenId]["arrCamBrow"][0].send('{"ev":"enC"}');
+                                console.log(`[NodeJS][wsCam:82] request gateway EnableCamera ${browserRequestGardenId}`);
+                            }
+                            if (objEnCam[browserRequestGardenId]["arrCamBrow"].includes(wsCam) == false)
+                                objEnCam[browserRequestGardenId]["arrCamBrow"].push(wsCam);
+                            else
+                                console.log("[NodeJS] Oops, you reopen AddDevicesModal");
+                        }
+                    } else {
+                        //TODO: return to browser
+                        console.error(`[NodeJS] Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
+                        // emit to <header.ejs>
+                        globIO.to(browserRequestUserId).emit("errBrowserEnCam", `Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
+                    }
                     break;
             }
         } catch (error) {
@@ -617,8 +684,6 @@ wsServer.on("connection", ws => {
                     break;
 
                 case "lgT":
-                    // var tempRef = admin.database().ref(`Devices/${payload.uId}/${payload.gId}/${payload.dvId}/sensor/DHT`);
-                    //todo: testing
                     var tempRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/DHT`);
                     // prvent update trash things 
                     tempRef.once("value", (snap) => {
@@ -626,12 +691,23 @@ wsServer.on("connection", ws => {
                             tempRef.update({
                                 temp: payload.val
                             });
+
+                            //todo: testing
+                            // del DB if too many logs
+                            var refLogT = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/logs/T`);
+                            refLogT.once("value", snapLogT => {
+                                if (snapLogT.numChildren() > 10)
+                                    refLogT.remove();
+                            });
+                            // log xlsl to DB
+                            var now = Date.now();
+                            var objLog = {};
+                            objLog[now] = payload.val;
+                            refLogT.update(objLog);
                         }
                     });
                     break;
                 case "lgH":
-                    // var humidRef = admin.database().ref(`Devices/${payload.uId}/${payload.gId}/${payload.dvId}/sensor/DHT`);
-                    //todo: testing
                     var humidRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/DHT`);
                     // prvent update trash things
                     humidRef.once("value", (snap) => {
@@ -639,11 +715,23 @@ wsServer.on("connection", ws => {
                             humidRef.update({
                                 humid: payload.val
                             });
+
+                            //todo: testing
+                            // del DB if too many logs
+                            var refLogH = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/logs/H`);
+                            refLogH.once("value", snapLogH => {
+                                if (snapLogH.numChildren() > 10)
+                                    refLogH.remove();
+                            });
+                            // log xlsl to DB
+                            var now = Date.now();
+                            var objLog = {};
+                            objLog[now] = payload.val;
+                            refLogH.update(objLog);
                         }
                     });
                     break;
                 case "lgG":
-                    // var groundRef = admin.database().ref(`Devices/${payload.uId}/${payload.gId}/${payload.dvId}/sensor`);
                     var groundRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor`);
                     // prvent update trash things 
                     groundRef.once("value", (snap) => {
@@ -651,6 +739,19 @@ wsServer.on("connection", ws => {
                             groundRef.update({
                                 ground: payload.val
                             });
+
+                            //todo: testing
+                            // del DB if too many logs
+                            var refLogG = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/logs/G`);
+                            refLogG.once("value", snapLogG => {
+                                if (snapLogG.numChildren() > 10)
+                                    refLogG.remove();
+                            });
+                            // log xlsl to DB
+                            var now = Date.now();
+                            var objLog = {};
+                            objLog[now] = payload.val;
+                            refLogG.update(objLog);
                         }
                     });
                     break;
@@ -742,10 +843,12 @@ wsServer.on("connection", ws => {
                     msgUID = payload.UID;
                     msgMAC = payload.MAC;
                     var refStatus = admin.database().ref(`Gardens/${msgUID}/${msgMAC}`);
-                    refStatus.once("value", () => {
-                        refStatus.update({
-                            status: 1 // online
-                        }, err => { if (err) console.log(err); });
+                    refStatus.once("value", (snap) => {
+                        if (snap.numChildren()) {
+                            refStatus.update({
+                                status: 1 // online
+                            }, err => { if (err) console.log(err); });
+                        }
                     });
 
                     //! create a new objEnCam instance
@@ -768,7 +871,7 @@ wsServer.on("connection", ws => {
                 case "browserEnCam":
                     const browserRequestGardenId = payload.gardenId;
                     const browserRequestUserId = payload.userId;
-                    console.log(`[Browser] We want to enable camera ${browserRequestGardenId}`);
+                    console.log(`[Browser:81] We want to enable camera ${browserRequestGardenId}`);
                     // has property because esp-cam init this object
                     if (objEnCam.hasOwnProperty(browserRequestGardenId)) {
                         // just exec if <arrCamBrow> got ONLY camera ws in there at index 0
@@ -777,6 +880,7 @@ wsServer.on("connection", ws => {
                                 objEnCam[browserRequestGardenId]["state"] = 1;
                                 objEnCam[browserRequestGardenId]["arrCamBrow"].push(ws);
                                 objEnCam[browserRequestGardenId]["arrCamBrow"][0].send('{"ev":"enC"}');
+                                console.log(`[NodeJS][ws:81] request gateway EnableCamera ${browserRequestGardenId}`);
                             } else {
                                 console.error("[INFO] Something Wrong !!!");
                             }
@@ -785,6 +889,7 @@ wsServer.on("connection", ws => {
                             if (objEnCam[browserRequestGardenId]["state"] == 0) {
                                 objEnCam[browserRequestGardenId]["state"] = 1;
                                 objEnCam[browserRequestGardenId]["arrCamBrow"][0].send('{"ev":"enC"}');
+                                console.log(`[NodeJS][ws:81] request gateway EnableCamera ${browserRequestGardenId}`);
                             }
                             if (objEnCam[browserRequestGardenId]["arrCamBrow"].includes(ws) == false)
                                 objEnCam[browserRequestGardenId]["arrCamBrow"].push(ws);

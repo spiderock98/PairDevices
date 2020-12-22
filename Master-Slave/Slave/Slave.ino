@@ -23,7 +23,7 @@ SoftwareSerial zigbee(3, 4); // RX TX
 #define motorGnd 6    // nhỏ giọt
 #define buzzer 8      // còi chíp
 #define DHTPIN 7      // Đọc dữ liệu từ DHT11 ở chân 4 trên mạch Arduino
-SoftwareSerial zigbee(4, 3); // RX TX
+SoftwareSerial zigbee(3, 4); // RX TX
 #endif
 #define DHTTYPE DHT11 // Khai báo loại cảm biến, có 2 loại là DHT11 và DHT22
 #define DHT_RATE 3000 // dht sampling rate time [milliseconds]

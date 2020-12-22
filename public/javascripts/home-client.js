@@ -46,7 +46,7 @@ getCurrentUID().then((uid) => {
 }); // Global Var
 
 //!================/ VanillaWebsocket /================!//
-const WS_URL = "ws:///192.168.1.99:81";
+const WS_URL = "ws:///192.168.2.156:82";
 let ws = new WebSocket(WS_URL);
 
 //!================/ ESP32-CAM on security area field /================!//

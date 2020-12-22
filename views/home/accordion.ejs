@@ -1,4 +1,5 @@
 <!-- Embbedded in <home.ejs> -->
+<script defer src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 
 <section class="accordion">
     <% let index=0; %>
@@ -139,6 +140,53 @@
             </div>
 
             <script>
+                // button download report
+                $("#genReport<%-index%>").on("click", () => {
+                    $.ajax({
+                        type: "GET",
+                        url: "devices/genReport",
+                        data: {
+                            garId: "<%-arrDeviceInfo.key%>",
+                            dvId: "<%-child.key%>"
+                        },
+                        success: ({ objLogT, objLogH, objLogG }) => {
+                            var tmpArrT = [], tmpArrG = [], tmpArrH = [], tmp, wb = XLSX.utils.book_new();
+
+                            for (const logT in objLogT) {
+                                const time = new Date();
+                                const tmpObj = {};
+                                time.setTime(logT);
+                                tmpObj["Time"] = time;
+                                tmpObj["Temp"] = objLogT[logT];
+                                tmpArrT.push(tmpObj);
+                            }
+                            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tmpArrT), 'Logs Temp');
+
+                            for (const logH in objLogH) {
+                                const time = new Date();
+                                const tmpObj = {};
+                                time.setTime(logT);
+                                tmpObj["Time"] = time;
+                                tmpObj["Temp"] = objLogH[logH];
+                                tmpArrH.push(tmpObj);
+                            }
+                            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tmpArrH), 'Logs Humid');
+
+                            for (const logG in objLogG) {
+                                const time = new Date();
+                                const tmpObj = {};
+                                time.setTime(logG);
+                                tmpObj["Time"] = time;
+                                tmpObj["Ground"] = objLogG[logG];
+                                tmpArrG.push(tmpObj);
+                            }
+                            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tmpArrG), 'Logs Ground');
+
+                            // export xlsx file
+                            XLSX.writeFile(wb, "logs__<%-arrDeviceInfo.key%>.xlsx");
+                        }
+                    });
+                })
                 // button check device status
                 $("#btnCheckStt<%-index%>").on("click", () => {
                     socket.emit("checkDVStt", {

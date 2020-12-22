@@ -24,7 +24,7 @@ WebSocketsClient webSocketCam;
 #define EEPROM_SIZE 100 // define the number of bytes you want to access
 bool flagEnCam = false;
 
-#define HOST "192.168.1.99"
+#define HOST "192.168.2.156"
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
@@ -193,9 +193,12 @@ void setup()
   param1["UID"] = finalUID;
   serializeJson(doc, jsonOut);
 
-  webSocket.begin(HOST, PORT, "/");  // server address, port and URL
+  //!================/ WebSocket Config /================!//
+  webSocket.begin(HOST, PORT, "/"); // server address, port and URL
+  webSocket.onEvent(webSocketEventHandle);
   delay(2000);                       // delay for DATA socket go first then CAMERA socket
   webSocketCam.begin(HOST, 82, "/"); // server address, port and URL
+  webSocketCam.onEvent(webSocketCamEventHandle);
 
   //!================/ AI-Thinker Camera Config /================!//
   if (EEPROM.read(0) == 1)
@@ -251,10 +254,6 @@ void setup()
     // else
     // webSocket.sendTXT("[{\"ev\":\"std\",\"detail\":\"[Success] Init Camera\"}]");
   }
-
-  //!================/ WebSocket Config /================!//
-  webSocket.onEvent(webSocketEventHandle);
-  webSocketCam.onEvent(webSocketCamEventHandle);
 }
 
 void loop()
