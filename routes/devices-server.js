@@ -3,6 +3,9 @@
 const express = require('express');
 const router = express.Router();
 const admin = require('firebase-admin');
+const formidable = require('formidable');
+const fs = require('fs');
+const path = require('path');
 
 //!==================/ Users Class /==================!//
 class FirebaseUsers {
@@ -322,7 +325,21 @@ router.get("/genReport", (req, res) => {
                 })
             });
         })
+});
 
+router.get("/snapshot", (req, res) => {
+    res.render("snapshot");
+})
+router.post("/snapshot", (req, res) => {
+    const form = formidable({ multiples: true, uploadDir: path.join(__dirname, "../", "public", "images", "snapCard", "tmp") });
+    form.parse(req, function (err, fields, files) {
+        var oldpath = files.snapImg.path;
+        var newpath = path.join(__dirname, "../", "public", "images", "snapCard", `${files.snapImg.name}.jpg`);
+        fs.rename(oldpath, newpath, function (err) {
+            if (err) { console.error(err); res.status(201).end(); }
+            else { res.status(200).end(); }
+        });
+    });
 });
 
 //!==================/ SocketIO /==================!//
@@ -367,7 +384,6 @@ const ioFunc = (io) => {
                                     setTimeout(function () {
                                         //   code here
                                         objEnCam[garId]["arrCamBrow"][0].send(`{"ev":"ckst","id":"${tmpArrCheckStt[i - 1]}"}`);
-                                        console.log("sent", tmpArrCheckStt[i - 1]);
                                         if (--i) myLoop(i);
                                     }, 1000)
                                 })(tmpArrCheckStt.length);
@@ -538,11 +554,15 @@ wsServerData.on("connection", wsCam => {
                             else
                                 console.log("[NodeJS] Oops, you reopen AddDevicesModal");
                         }
+                        else if (objEnCam[browserRequestGardenId]["arrCamBrow"].length == 1) {
+                            console.error(`[NodeJS] Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
+                            // emit to <header.ejs>
+                            globIO.to(browserRequestUserId).emit("errBrowserEnCam", `Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready. PLEASE PRESS RESET BUTTON ON GATEWAYs !!!`);
+                        }
                     } else {
-                        //TODO: return to browser
                         console.error(`[NodeJS] Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
                         // emit to <header.ejs>
-                        globIO.to(browserRequestUserId).emit("errBrowserEnCam", `Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
+                        globIO.to(browserRequestUserId).emit("errBrowserEnCam", `Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready. PLEASE PRESS RESET BUTTON ON GATEWAYs !!!`);
                     }
                     break;
             }
@@ -593,7 +613,7 @@ wsServer.on("connection", ws => {
                     //todo: testing
                     var wtlvRef = admin.database().ref(`Gardens/${msgUID}/${msgMAC}`);
                     wtlvRef.once("value", (snap) => {
-                        if (snap.val() != null) {
+                        if (snap.numChildren()) {
                             wtlvRef.update({
                                 waterLevel: payload.val
                             });
@@ -601,11 +621,9 @@ wsServer.on("connection", ws => {
                     });
                     break;
                 case "mns":
-                    // var nhogiotRef = admin.database().ref(`Devices/${payload.uId}/${payload.gId}/${payload.dvId}/dcMotor`);
-                    //todo: testing
                     var nhogiotRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/dcMotor`);
                     nhogiotRef.once("value", (snap) => {
-                        if (snap.val() != null) {
+                        if (snap.numChildren()) {
                             nhogiotRef.update({
                                 NhoGiot: payload.val
                             });
@@ -619,7 +637,7 @@ wsServer.on("connection", ws => {
                             var tempThrRef = admin.database().ref(`Devices/${objQueue["thrTemp"][0]}/${objQueue["thrTemp"][1]}/${objQueue["thrTemp"][2]}/sensor/threshold`);
                             tempThrRef.once("value", (snap) => {
                                 // just update db when everything is OK
-                                if (snap.val() != null) {
+                                if (snap.numChildren()) {
                                     tempThrRef.update({
                                         temp: objQueue["thrTemp"][3]
                                     })
@@ -635,7 +653,7 @@ wsServer.on("connection", ws => {
                             var groundThrRef = admin.database().ref(`Devices/${objQueue["thrGround"][0]}/${objQueue["thrGround"][1]}/${objQueue["thrGround"][2]}/sensor/threshold`);
                             groundThrRef.once("value", (snap) => {
                                 // just update db when everything is OK
-                                if (snap.val() != null) {
+                                if (snap.numChildren()) {
                                     groundThrRef.update({
                                         ground: objQueue["thrGround"][3][0],
                                         offsetGround: objQueue["thrGround"][3][1]
@@ -652,7 +670,7 @@ wsServer.on("connection", ws => {
                         else if (objQueue.hasOwnProperty("btnNho")) {
                             var nhogiotRef = admin.database().ref(`Devices/${objQueue["btnNho"][0]}/${objQueue["btnNho"][1]}/${objQueue["btnNho"][2]}/dcMotor`);
                             nhogiotRef.once("value", (snap) => {
-                                if (snap.val() != null) {
+                                if (snap.numChildren()) {
                                     nhogiotRef.update({
                                         NhoGiot: objQueue["btnNho"][3]
                                     })
@@ -668,7 +686,7 @@ wsServer.on("connection", ws => {
                             var manualRef = admin.database().ref(`Devices/${objQueue["btnTo"][0]}/${objQueue["btnTo"][1]}/${objQueue["btnTo"][2]}/dcMotor`);
                             manualRef.once("value", (snap) => {
                                 // just update db when everything is OK
-                                if (snap.val() != null) {
+                                if (snap.numChildren()) {
                                     manualRef.update({
                                         manual: objQueue["btnTo"][3]
                                     })
@@ -687,12 +705,11 @@ wsServer.on("connection", ws => {
                     var tempRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/DHT`);
                     // prvent update trash things 
                     tempRef.once("value", (snap) => {
-                        if (snap.val() != null) {
+                        if (snap.numChildren()) {
                             tempRef.update({
                                 temp: payload.val
                             });
 
-                            //todo: testing
                             // del DB if too many logs
                             var refLogT = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/logs/T`);
                             refLogT.once("value", snapLogT => {
@@ -711,12 +728,11 @@ wsServer.on("connection", ws => {
                     var humidRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/DHT`);
                     // prvent update trash things
                     humidRef.once("value", (snap) => {
-                        if (snap.val() != null) {
+                        if (snap.numChildren()) {
                             humidRef.update({
                                 humid: payload.val
                             });
 
-                            //todo: testing
                             // del DB if too many logs
                             var refLogH = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/logs/H`);
                             refLogH.once("value", snapLogH => {
@@ -735,12 +751,11 @@ wsServer.on("connection", ws => {
                     var groundRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor`);
                     // prvent update trash things 
                     groundRef.once("value", (snap) => {
-                        if (snap.val() != null) {
+                        if (snap.numChildren()) {
                             groundRef.update({
                                 ground: payload.val
                             });
 
-                            //todo: testing
                             // del DB if too many logs
                             var refLogG = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/logs/G`);
                             refLogG.once("value", snapLogG => {
@@ -812,13 +827,11 @@ wsServer.on("connection", ws => {
                                 });
                             }
                             else {
-                                //TODO:
                                 console.log("[NodeJS] Please use web app to config new garden");
                             }
                             // ws.send("{'ev':'demo','status':'OK','code':'200'}");
                         }
                         else {
-                            //TODO: are you sure re-flash this garden
                             console.log("[NodeJS] are you sure re-flash this garden ? ");
                             admin.database().ref(`Gardens/${payload.UID}/${payload.MAC}`).remove(err => {
                                 if (err) console.error(err);
@@ -897,7 +910,6 @@ wsServer.on("connection", ws => {
                                 console.log("[NodeJS] Oops, you reopen AddDevicesModal");
                         }
                     } else {
-                        //TODO: return to browser
                         console.error(`[NodeJS] Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
                         // emit to <header.ejs>
                         globIO.to(browserRequestUserId).emit("errBrowserEnCam", `Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
@@ -951,8 +963,7 @@ setInterval(() => {
                     status: 0 // offline
                 }, err => { if (err) console.log(err); });
                 console.error("[Server] Socket Error >> POP...ing Error CAMERA");
-                // todo: testing
-                // objEnCam[mac]["arrCamBrow"][0].send('{"ev":"RESTART_ESP"}');
+
                 objEnCam[mac]["arrCamBrow"].forEach(elWs => {
                     elWs.send('{"ev":"RESTART_ESP"}');
                 });

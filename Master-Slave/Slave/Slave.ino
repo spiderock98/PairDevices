@@ -50,7 +50,7 @@ float preTemp = 0, currentTemp, preHumid = 0, currentHumid;
 uint16_t preGnd = 0, currentGnd;
 volatile bool rqModeManual = EEPROM.read(15) & 0b10;
 bool currMotor = EEPROM.read(15) & 0b01;
-StaticJsonDocument<200> docParser; //todo: try to change this
+StaticJsonDocument<200> docParser;
 DHT dht(DHTPIN, DHTTYPE);
 
 void setup()

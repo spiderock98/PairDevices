@@ -46,7 +46,7 @@ getCurrentUID().then((uid) => {
 }); // Global Var
 
 //!================/ VanillaWebsocket /================!//
-const WS_URL = "ws:///192.168.2.156:82";
+const WS_URL = "ws:///192.168.1.99:82";
 let ws = new WebSocket(WS_URL);
 
 //!================/ ESP32-CAM on security area field /================!//
@@ -224,66 +224,3 @@ $(() => {
     fm.setPercentage(numMsg);
   });
 });
-
-// TODO: <!-- Overlay Button still get error - PLEASE COMMMENT to FIX LATER -->
-// (function () {
-//   'use strict';
-
-//   var $mainButton = $(".main-button"),
-//     $closeButton = $(".close-button"),
-//     $buttonWrapper = $(".button-wrapper"),
-//     $layer = $(".layered-content");
-
-//   $mainButton.on("click", function () {
-//     $buttonWrapper.addClass("clicked").delay(900).queue(function (next) {
-//       $layer.addClass("active");
-//       next();
-//     });
-//   });
-
-//   $closeButton.on("click", function () {
-//     $layer.removeClass("active");
-//     $buttonWrapper.removeClass("clicked");
-//   });
-// })();
-
-
-
-
-// $('#startTime').change((data) => {
-//   console.log(data.target.value)
-// })
-
-// $('#formGarden').submit((event) => {
-//     event.preventDefault()
-//     Swal.mixin({
-//         toast: true,
-//         position: 'top-end',
-//         showConfirmButton: false,
-//         timer: 3000,
-//         timerProgressBar: true,
-//     }).fire({
-//         icon: 'success',
-//         title: 'Import New Device Successfully'
-//     })
-// })
-// $('#formGarden').submit((event) => {
-//     event.preventDefault()
-//     $.ajax({
-//         url: '/devices/newDevices',
-//         method: 'POST',
-//         data: {
-//             name: $('#formGarden').find("input[name='name']").val(),
-//             locat: $('#formGarden').find("input[name='locat']").val(),
-//             //TODO: ssid is <input> or <select>
-//             ssid: $('#formGarden').find("input[name='ssid']").val(),
-//             psk: $('#formGarden').find("input[name='psk']").val(),
-//             baud: $('#formGarden').find("select[name='baud']").val(),
-//             port: $('#formGarden').find("select[name='port']").val(),
-//         },
-//         success: (data, stt) => {
-//             //TODO: b/c XHR so it cannot take res.download here
-//             console.log(stt);
-//         }
-//     })
-// })

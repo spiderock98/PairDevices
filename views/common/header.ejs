@@ -28,14 +28,14 @@
                     <span>&nbsp;Dashboard</span>
                 </a>
                 <div class="dropdown-menu">
-                    <% let index = 0; %>
-                    <!-- https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
-                    <% objGardenInfo.forEach(child => { %>
-                    <a class="dropdown-item" href="home?gardenId=<%- child.val().gardenId %>">
-                        <%= child.val().gardenName %>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <% ++index; }) %>
+                    <% let index=0; %>
+                        <!-- https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
+                        <% objGardenInfo.forEach(child=> { %>
+                            <a class="dropdown-item" href="home?gardenId=<%- child.val().gardenId %>">
+                                <%= child.val().gardenName %>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <% ++index; }) %>
                 </div>
 
                 <!-- </a> -->

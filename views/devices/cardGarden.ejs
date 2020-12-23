@@ -23,7 +23,7 @@
                         <button class="fas fa-trash" id="btnRemoveGarden<%-index%>"></button>
                     </div>
                     <div class="card-text card-container">
-                        <div class="portada">
+                        <div class="portada" style="background-image: url('images/snapCard/<%-rawGarId%>.jpg');">
                         </div>
                         <div class="title-total">
                             <h1 id="gardenName<%-index%>" class="title">
@@ -63,7 +63,7 @@
                                 text: "Place qr code to the front of the camera",
                                 confirmButtonText: "Next",
                                 html:
-                                    '<div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div><canvas id="canvas" hidden></canvas><img hidden width="1" height="1" id="cap" onerror="this.src=`images/icons8-disconnected.svg`"><div id="output" hidden><div id="outputMessage">No QR code detected.</div><div hidden><b>Data:</b> <span id="outputData"></span></div><button id="btnReScan" hidden>Rescan</button></div>',
+                                    '<div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div><canvas id="canvas" hidden></canvas><img hidden width="1" height="1" id="cap" onerror="this.src=`images/icons8-disconnected.svg`"><div id="output" hidden><div id="outputMessage">No QR code detected.</div><button id="btnThumb" type="button" class="btn btn-primary">Take Thumbnail</button><div hidden><b>Data:</b> <span id="outputData"></span></div><button id="btnReScan" hidden>Rescan</button></div>',
                             },
                             {
                                 title: "Pairing New Devices",
@@ -127,7 +127,7 @@
                         //!================/ ESP32-CAM on QR SCANNER /================!//
                         let urlObj;
                         let imgFrame = document.getElementById("cap");
-                        const WS_URL = "ws:///192.168.2.156:82";
+                        const WS_URL = "ws:///192.168.1.99:82";
                         let ws; // global websocket var
 
                         var canvasElement = document.getElementById("canvas");
@@ -195,6 +195,29 @@
                                 }
                                 urlObj = URL.createObjectURL(new Blob([payload.data]));
                                 imgFrame.src = urlObj;
+                                $("#btnThumb").on("click", () => {
+                                    var formData = new FormData();
+                                    formData.append("snapImg", new Blob([payload.data]), "<%-rawGarId%>");
+                                    $.ajax({
+                                        method: "POST",
+                                        processData: false,
+                                        contentType: false,
+                                        url: "/devices/snapshot",
+                                        data: formData,
+                                        success: (data, code) => {
+                                            if (code == 'success') {
+                                                Swal.fire({
+                                                    icon: 'success',
+                                                    title: "Snapshot Taken",
+                                                }).then(result => {
+                                                    if (result.value) {
+                                                        location.reload();
+                                                    }
+                                                })
+                                            }
+                                        }
+                                    });
+                                });
                             };
 
                             setTimeout(() => {

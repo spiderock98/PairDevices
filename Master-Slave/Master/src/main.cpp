@@ -24,7 +24,7 @@ WebSocketsClient webSocketCam;
 #define EEPROM_SIZE 100 // define the number of bytes you want to access
 bool flagEnCam = false;
 
-#define HOST "192.168.2.156"
+#define HOST "192.168.1.99"
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
@@ -231,6 +231,7 @@ void setup()
       // config.frame_size = FRAMESIZE_VGA;
       config.frame_size = FRAMESIZE_CIF;
       // config.frame_size = FRAMESIZE_QCIF;
+
       // config.jpeg_quality = 40;
       config.jpeg_quality = 62;
       config.fb_count = 2;
@@ -313,19 +314,16 @@ void Task2Func(void *pvParameters)
           {
             // low
           case 0b11111111:
-            //todo: testing
             webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":30}]");
             break;
 
             // medium
           case 0b01111111:
-            //todo: testing
             webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":60}]");
             break;
 
             // high
           case 0b00111111:
-            //todo: testing
             webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":90}]");
             break;
           }
@@ -477,7 +475,6 @@ void webSocketCamEventHandle(WStype_t type, uint8_t *payload, size_t length)
     webSocketCam.sendTXT(jsonOut);
     break;
 
-    // todo: testing
   case WStype_TEXT:
     //? not use global <docParser> b/c may be duplicate thread use that variable
     StaticJsonDocument<200> docParserCam;

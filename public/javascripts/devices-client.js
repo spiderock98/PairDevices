@@ -202,7 +202,6 @@ function floatBtnNewGarden() {
 }
 
 //!============/ Others  /===========!//
-// TODO: get database state
 let arrState = [];
 for (let i = 0; i < objDeviceName.length; i++) {
     const element = objDeviceName[i];
