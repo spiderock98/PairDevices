@@ -1,306 +1,386 @@
 <!-- Embbedded in <home.ejs> -->
+<script defer src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 
 <section class="accordion">
     <% let index=0; %>
-    <script>
-        let arrChart = [];
-    </script>
+        <script>
+            let arrChart = [];
+        </script>
 
-    <% arrDeviceInfo.forEach(child => { %>
+        <% arrDeviceInfo.forEach(child=> { %>
 
-    <script>
-        arrChart.push([null, null]);
-    </script>
+            <script>
+                arrChart.push([null, null]);
+            </script>
 
-    <div class="accordion-item">
-        <!-- <img src="https://f9ir.github.io/acc/acc/img/Location-Pin.png" alt=""> -->
-        <h3><%= child.val().deviceName %></h3>
-    </div>
-    <div class="toggle-wrapper all-toogle">
-        <div class="toggle checkcross all-toogle">
-            <div class="container">
-
-                <div class="row align-items-center mb-10">
-                    <table class="table table-bordered text-center">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th scope="col">Nhiệt Độ</th>
-                                <th scope="col">Độ Ẩm Không Khí</th>
-                                <th scope="col">Độ Ẩm Đất</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td id="tdTemp<%-index%>"><%-child.val().sensor.DHT.temp%></td>
-                                <td id="tdHum<%-index%>"><%-child.val().sensor.DHT.humid%></td>
-                                <td id="tdGr<%-index%>"><%-child.val().sensor.ground%></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="row align-items-center">
-                    <!--Div that will hold the pie chart-->
-                    <div id="chart_div<%-index%>"></div>
-                </div>
-
-                <form>
-                    <div class="form-group row pt-0" id="lbTempThresh<%-index%>">
-                        <label class="col-5" for="formControlTempRange<%-index%>">
-                            Giới hạn <strong>NHIỆT ĐỘ</strong>
-                        </label>
-                        <i class="col-4" style="font-size: larger;"><%-child.val().sensor.threshold.temp%> °C</i>
-                        <button type="button" class="btn disabled col-3">Cập Nhật</button>
-                        <input oninput="percentTempThresh('<%-index%>')" type="range" class="custom-range" min="10"
-                            max="40" step="1" id="formControlTempRange<%-index%>">
-                    </div>
-                </form>
-
-                <div class="row align-items-center">
-
-                    <div style="text-align: right;" class="col-md-5 p-2 txt" id="lbManualMode<%-index%>">
-                        điều khiển Thủ Công
-                    </div>
-                    <div class="col-md-auto p-0">
-                        <input id="checkDC<%-index%>" type="checkbox" class="all-toogle" />
-                        <label class="toggle-item all-toogle" for="checkDC<%-index%>">
-                            <div class="check all-toogle"></div>
-                        </label>
-                    </div>
-                    <div style="text-align: left;" class="col-md-5 p-2 txt" id="lbSensorMode<%-index%>">
-                        điều khiển Tự Động bằng Cảm Biến
-                    </div>
-
-                    <!-- <div class="col-md-auto p-0">
-                        <input id="checkPump<%-index%>" type="checkbox" class="all-toogle" />
-                        <label class="toggle-item all-toogle" for="checkPump<%-index%>">
-                            <div class="check all-toogle"></div>
-                        </label>
-                    </div>
-                    <div class="col-md p-2 txt">
-                        Động cơ phun sương
-                    </div> -->
-
-                </div>
-
-                <div class="row align-items-center" id="groupMotorSw<%-index%>">
-                    <div class="col-3 pr-0" style="text-align: right;">
-                        OFF
-                    </div>
-                    <div class="col-1 pl-2 pr-1">
-                        <label class="motorSwitch">
-                            <input id="motorSw<%-index%>" type="checkbox">
-                            <span class="sliderSw roundSw"></span>
-                        </label>
-                    </div>
-                    <div class="col-1 pl-0" style="text-align: left;">
-                        ON
-                    </div>
-                </div>
-
-                <div class="row-12 pt-5" id="groupSliderThresh<%-index%>">
-
-                    <form>
-                        <div class="form-group row pt-0" id="lbGroundThresh<%-index%>">
-                            <label class="col-5" for="formControlGroundRange<%-index%>">
-                                Giới hạn <strong>ĐỘ ẨM ĐẤT</strong>
-                            </label>
-                            <i class="col-4" style="font-size: larger;">
-                                <i class="sliderVal"><%-child.val().sensor.threshold.ground%></i>
-                                <i>±</i>
-                                <input oninput="offsetGroundThresh('<%-index%>')" type="number"
-                                    id="offsetGround<%-index%>" min="0" max="500" step="10" style="width: 80px;">
-                                <i> %</i>
-                            </i>
-
-                            <button type="button" class="btn disabled col-3">Cập Nhật</button>
-                            <input oninput="percentGroundThresh('<%-index%>')" type="range" class="custom-range"
-                                min="10" max="1023" step="1" id="formControlGroundRange<%-index%>">
+            <div class="accordion-item">
+                <h3>
+                    <%= child.val().deviceName %>
+                </h3>
+            </div>
+            <div class="toggle-wrapper all-toogle">
+                <div class="toggle checkcross all-toogle">
+                    <div class="container">
+                        <div class="row align-items-center pb-4">
+                            <div class="col-6">
+                                <button type="button" id="genReport<%-index%>"
+                                    class="btn btn-block btn-outline-success">
+                                    <i class="fas fa-download"></i> Generate Report
+                                </button>
+                            </div>
+                            <div class="col-5">
+                                <button type="button" id="btnCheckStt<%-index%>"
+                                    class="btn btn-block btn-outline-warning">
+                                    <i class="fas fa-check-double"></i> Check Garden Status
+                                </button>
+                            </div>
+                            <div class="col-1" id="lbDvStt<%-child.key%>">
+                            </div>
                         </div>
-                    </form>
 
+                        <div class="row align-items-center pb-4">
+                            <table class="table table-bordered text-center">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th scope="col">Nhiệt Độ</th>
+                                        <th scope="col">Độ Ẩm Không Khí</th>
+                                        <th scope="col">Độ Ẩm Đất</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="tdTemp<%-index%>">
+                                            <%-child.val().sensor.DHT.temp%>
+                                        </td>
+                                        <td id="tdHum<%-index%>">
+                                            <%-child.val().sensor.DHT.humid%>
+                                        </td>
+                                        <td id="tdGr<%-index%>">
+                                            <%-child.val().sensor.ground%>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row align-items-center pb-4">
+                            <!--Div that will hold the pie chart-->
+                            <div id="chart_div<%-index%>"></div>
+                        </div>
+
+                        <form>
+                            <div class="form-group row pt-0" id="lbTempThresh<%-index%>">
+                                <label class="col-5" for="formControlTempRange<%-index%>">
+                                    Giới hạn <strong>NHIỆT ĐỘ</strong>
+                                </label>
+                                <i class="col-4" style="font-size: larger;">
+                                    <%-child.val().sensor.threshold.temp%> °C
+                                </i>
+                                <button type="button" class="btn disabled col-3">Cập Nhật</button>
+                                <input oninput="percentTempThresh('<%-index%>')" type="range" class="custom-range"
+                                    min="10" max="40" step="1" id="formControlTempRange<%-index%>">
+                            </div>
+                        </form>
+
+                        <div class="row align-items-center pt-4">
+                            <div style="text-align: right;" class="col-md-5 p-2 txt" id="lbManualMode<%-index%>">
+                                điều khiển Thủ Công
+                            </div>
+                            <div class="col-md-auto p-0">
+                                <input id="checkDC<%-index%>" type="checkbox" class="all-toogle" />
+                                <label class="toggle-item all-toogle" for="checkDC<%-index%>">
+                                    <div class="check all-toogle"></div>
+                                </label>
+                            </div>
+                            <div style="text-align: left;" class="col-md-5 p-2 txt" id="lbSensorMode<%-index%>">
+                                điều khiển Tự Động bằng Cảm Biến
+                            </div>
+                        </div>
+
+                        <div class="row align-items-center" id="groupMotorSw<%-index%>">
+                            <div class="col-3 pr-0" style="text-align: right;">
+                                OFF
+                            </div>
+                            <div class="col-1 pl-2 pr-1">
+                                <label class="motorSwitch">
+                                    <input id="motorSw<%-index%>" type="checkbox">
+                                    <span class="sliderSw roundSw"></span>
+                                </label>
+                            </div>
+                            <div class="col-1 pl-0" style="text-align: left;">
+                                ON
+                            </div>
+                        </div>
+
+                        <div class="row-12" id="groupSliderThresh<%-index%>">
+                            <form>
+                                <div class="form-group row pt-0" id="lbGroundThresh<%-index%>">
+                                    <label class="col-5" for="formControlGroundRange<%-index%>">
+                                        Giới hạn <strong>ĐỘ ẨM ĐẤT</strong>
+                                    </label>
+                                    <i class="col-4" style="font-size: larger;">
+                                        <i class="sliderVal">
+                                            <%-child.val().sensor.threshold.ground%>
+                                        </i>
+                                        <i>±</i>
+                                        <input oninput="offsetGroundThresh('<%-index%>')" type="number"
+                                            id="offsetGround<%-index%>" min="0" max="500" step="10"
+                                            style="width: 80px;">
+                                        <i> %</i>
+                                    </i>
+
+                                    <button type="button" class="btn disabled col-3">Cập Nhật</button>
+                                    <input oninput="percentGroundThresh('<%-index%>')" type="range" class="custom-range"
+                                        min="10" max="1023" step="1" id="formControlGroundRange<%-index%>">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <script>
-        //====/ google chart configuration https://developers.google.com/chart/interactive/docs/gallery/areachart /====//
-        google.charts.load('current', { 'packages': ['corechart'] });
-        var globChartOptions;
-        google.charts.setOnLoadCallback(() => {
-            arrChart[parseInt("<%-index%>")][0] = new google.visualization.AreaChart(document.getElementById('chart_div<%-index%>'));
-            arrChart[parseInt("<%-index%>")][1] = google.visualization.arrayToDataTable([[{ label: 'Time', type: 'datetime' }, { label: "Temp", type: 'number' }, { label: "Humid", type: 'number' }, { label: "Dirt", type: 'number' }]]);
-            arrChart[parseInt("<%-index%>")][2] = arrChart[parseInt("<%-index%>")][3] = arrChart[parseInt("<%-index%>")][4] = 0;
+            <script>
+                // button download report
+                $("#genReport<%-index%>").on("click", () => {
+                    $.ajax({
+                        type: "GET",
+                        url: "devices/genReport",
+                        data: {
+                            garId: "<%-arrDeviceInfo.key%>",
+                            dvId: "<%-child.key%>"
+                        },
+                        success: ({ objLogT, objLogH, objLogG }) => {
+                            var tmpArrT = [], tmpArrG = [], tmpArrH = [], tmp, wb = XLSX.utils.book_new();
 
-            globChartOptions = {
-                title: 'My Chart',
-                hAxis: { title: 'Year', titleTextStyle: { color: '#333' } },
-                vAxis: { minValue: 0 },
-                animation: { startup: true, duration: 1750, easing: 'out' },
-                hAxis: { title: 'Time', titleTextStyle: { color: '#333' }, },
-                vAxis: { title: 'Sensor Value', minValue: 0 },
-                explorer: { axis: 'horizontal', keepInBounds: true, maxZoomIn: .05 },
-                'width': 800,
-                crosshair: { trigger: 'both' },
-            };
-            arrChart[parseInt("<%-index%>")][0].draw(arrChart[parseInt("<%-index%>")][1], globChartOptions);
-        });
+                            for (const logT in objLogT) {
+                                const time = new Date();
+                                const tmpObj = {};
+                                time.setTime(logT);
+                                tmpObj["Time"] = time;
+                                tmpObj["Temp"] = objLogT[logT];
+                                tmpArrT.push(tmpObj);
+                            }
+                            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tmpArrT), 'Logs Temp');
 
-        $(() => {
-            // listen db change value update btnNho state
-            socket.on("lgMnStt<%-child.key%>", msg => {
-                document.getElementById('motorSw<%-index%>').checked = (msg == 1) ? true : false
-            });
-            // listen db change value to update table use global socketIO <socket> var declare in <home-client.js>
-            socket.on("lgG<%-child.key%>", msg => {
-                var numMsg = parseInt(msg);
+                            for (const logH in objLogH) {
+                                const time = new Date();
+                                const tmpObj = {};
+                                time.setTime(logT);
+                                tmpObj["Time"] = time;
+                                tmpObj["Temp"] = objLogH[logH];
+                                tmpArrH.push(tmpObj);
+                            }
+                            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tmpArrH), 'Logs Humid');
 
-                $("#tdGr<%-index%>").addClass("bg-success");
-                $("#tdGr<%-index%>").text(msg);
-                arrChart[parseInt("<%-index%>")][4] = numMsg;
+                            for (const logG in objLogG) {
+                                const time = new Date();
+                                const tmpObj = {};
+                                time.setTime(logG);
+                                tmpObj["Time"] = time;
+                                tmpObj["Ground"] = objLogG[logG];
+                                tmpArrG.push(tmpObj);
+                            }
+                            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tmpArrG), 'Logs Ground');
 
-                // chart event data handle
-                arrChart[parseInt("<%-index%>")][1].addRows([
-                    [new Date(), arrChart[parseInt("<%-index%>")][2], arrChart[parseInt("<%-index%>")][3], numMsg]
-                ]);
-                arrChart[parseInt("<%-index%>")][0].draw(arrChart[parseInt("<%-index%>")][1], globChartOptions);
+                            // export xlsx file
+                            XLSX.writeFile(wb, "logs__<%-arrDeviceInfo.key%>.xlsx");
+                        }
+                    });
+                })
+                // button check device status
+                $("#btnCheckStt<%-index%>").on("click", () => {
+                    socket.emit("checkDVStt", {
+                        garId: {
+                            dvId: "<%-child.key%>",
+                            garId: "<%-arrDeviceInfo.key%>"
+                        }
+                    });
+                    $("#lbDvStt<%-child.key%> *").remove();
+                    $("#lbDvStt<%-child.key%>").append('<div class="spinner-border text-warning" role="status"></div>');
 
-                // blink the change value data table 
-                setTimeout(() => {
-                    $("#tdGr<%-index%>").removeClass("bg-success");
-                }, 1500);
-            });
-            socket.on("lgH<%-child.key%>", msg => {
-                var numMsg = parseInt(msg);
+                    // socketIO handle ckstOK event
+                    socket.once("ckstOK", dvId => {
+                        $(`#lbDvStt${dvId} *`).remove();
+                        $(`#lbDvStt${dvId}`).append('<img src="\\images\\ok.svg">');
+                    });
+                });
 
-                $("#tdHum<%-index%>").addClass("bg-success");
-                $("#tdHum<%-index%>").text(msg);
+                //====/ google chart configuration https://developers.google.com/chart/interactive/docs/gallery/areachart /====//
+                google.charts.load('current', { 'packages': ['corechart'] });
+                var globChartOptions;
+                google.charts.setOnLoadCallback(() => {
+                    arrChart[parseInt("<%-index%>")][0] = new google.visualization.AreaChart(document.getElementById('chart_div<%-index%>'));
+                    arrChart[parseInt("<%-index%>")][1] = google.visualization.arrayToDataTable([[{ label: 'Time', type: 'datetime' }, { label: "Temp", type: 'number' }, { label: "Humid", type: 'number' }, { label: "Dirt", type: 'number' }]]);
+                    arrChart[parseInt("<%-index%>")][2] = arrChart[parseInt("<%-index%>")][3] = arrChart[parseInt("<%-index%>")][4] = 0;
 
-                arrChart[parseInt("<%-index%>")][1].addRows([
-                    [new Date(), arrChart[parseInt("<%-index%>")][2], numMsg, arrChart[parseInt("<%-index%>")][4]]
-                ]);
-                arrChart[parseInt("<%-index%>")][0].draw(arrChart[parseInt("<%-index%>")][1], globChartOptions);
+                    globChartOptions = {
+                        title: 'My Chart',
+                        hAxis: { title: 'Year', titleTextStyle: { color: '#333' } },
+                        vAxis: { minValue: 0 },
+                        animation: { startup: true, duration: 1750, easing: 'out' },
+                        hAxis: { title: 'Time', titleTextStyle: { color: '#333' }, },
+                        vAxis: { title: 'Sensor Value', minValue: 0 },
+                        explorer: { axis: 'horizontal', keepInBounds: true, maxZoomIn: .05 },
+                        'width': 900,
+                        crosshair: { trigger: 'both' },
+                    };
+                    arrChart[parseInt("<%-index%>")][0].draw(arrChart[parseInt("<%-index%>")][1], globChartOptions);
+                });
 
-                setTimeout(() => {
-                    $("#tdHum<%-index%>").removeClass("bg-success");
-                }, 1500);
-            });
-            socket.on("lgT<%-child.key%>", msg => {
-                var numMsg = parseInt(msg);
+                $(() => {
+                    // listen db change value update btnNho state
+                    socket.on("lgMnStt<%-child.key%>", msg => {
+                        document.getElementById('motorSw<%-index%>').checked = (msg == 1) ? true : false
+                    });
+                    // listen db change value to update table use global socketIO <socket> var declare in <home-client.js>
+                    socket.on("lgG<%-child.key%>", msg => {
+                        var numMsg = parseInt(msg);
 
-                $("#tdTemp<%-index%>").addClass("bg-success");
-                $("#tdTemp<%-index%>").text(msg);
+                        $("#tdGr<%-index%>").addClass("bg-success");
+                        $("#tdGr<%-index%>").text(msg);
+                        arrChart[parseInt("<%-index%>")][4] = numMsg;
 
-                arrChart[parseInt("<%-index%>")][1].addRows([
-                    [new Date(), numMsg, arrChart[parseInt("<%-index%>")][3], arrChart[parseInt("<%-index%>")][4]]
-                ]);
-                arrChart[parseInt("<%-index%>")][0].draw(arrChart[parseInt("<%-index%>")][1], globChartOptions);
+                        // chart event data handle
+                        arrChart[parseInt("<%-index%>")][1].addRows([
+                            [new Date(), arrChart[parseInt("<%-index%>")][2], arrChart[parseInt("<%-index%>")][3], numMsg]
+                        ]);
+                        arrChart[parseInt("<%-index%>")][0].draw(arrChart[parseInt("<%-index%>")][1], globChartOptions);
 
-                setTimeout(() => {
-                    $("#tdTemp<%-index%>").removeClass("bg-success");
-                }, 1500);
-            });
-        })
+                        // blink the change value data table 
+                        setTimeout(() => {
+                            $("#tdGr<%-index%>").removeClass("bg-success");
+                        }, 1500);
+                    });
+                    socket.on("lgH<%-child.key%>", msg => {
+                        var numMsg = parseInt(msg);
 
-        // init threshold value from firebase for SLIDER
-        $("#lbTempThresh<%-index%> input").val("<%-child.val().sensor.threshold.temp%>");
-        $("#offsetGround<%-index%>").val("<%-child.val().sensor.threshold.offsetGround%>");
-        $("#formControlGroundRange<%-index%>").val("<%-child.val().sensor.threshold.ground%>");
+                        $("#tdHum<%-index%>").addClass("bg-success");
+                        $("#tdHum<%-index%>").text(msg);
 
-        // event on change range SLIDER
-        percentTempThresh = (index) => {
-            $(`#lbTempThresh${index} i`).text(document.getElementById(`formControlTempRange${index}`).value + " °C");
-            $(`#lbTempThresh${index} button`).addClass("btn-success");
-            $(`#lbTempThresh${index} button`).removeClass("disabled");
-        }
-        percentGroundThresh = (index) => {
-            $("i.sliderVal").text(document.getElementById(`formControlGroundRange${index}`).value);
-            $(`#lbGroundThresh${index} button`).addClass("btn-success");
-            $(`#lbGroundThresh${index} button`).removeClass("disabled");
-        }
-        offsetGroundThresh = (index) => {
-            $(`#lbGroundThresh${index} button`).addClass("btn-success");
-            $(`#lbGroundThresh${index} button`).removeClass("disabled");
-        }
+                        arrChart[parseInt("<%-index%>")][1].addRows([
+                            [new Date(), arrChart[parseInt("<%-index%>")][2], numMsg, arrChart[parseInt("<%-index%>")][4]]
+                        ]);
+                        arrChart[parseInt("<%-index%>")][0].draw(arrChart[parseInt("<%-index%>")][1], globChartOptions);
 
-        // submit threshold
-        $("#lbTempThresh<%-index%> button").on("click", () => {
-            $("#lbTempThresh<%-index%> button").addClass("diabled");
-            $("#lbTempThresh<%-index%> button").removeClass("btn-success");
-            // use global socketIO <socket> var declare in <home-client.js>
-            socket.emit("thresh", {
-                type: "temp",
-                gardenId: window.location.search.slice(10),
-                dvId: "<%-child.key%>",
-                val: parseInt(document.getElementById("formControlTempRange<%-index%>").value),
-            })
-        })
-        $("#lbGroundThresh<%-index%> button").on("click", () => {
-            $("#lbGroundThresh<%-index%> button").addClass("diabled");
-            $("#lbGroundThresh<%-index%> button").removeClass("btn-success");
-            // use global socketIO <socket> var declare in <home-client.js>
-            socket.emit("thresh", {
-                type: "ground",
-                gardenId: window.location.search.slice(10),
-                dvId: "<%-child.key%>",
-                val: [parseInt(document.getElementById("formControlGroundRange<%-index%>").value), parseInt(document.getElementById("offsetGround<%-index%>").value)]
-            })
-        })
-        // update w3school button state to server via socketio: Small Button
-        $("#motorSw<%-index%>").on("click", () => {
-            // gửi trạng thái động cơ nhỏ giọt về server
-            socket.emit("manualStt", {
-                gardenId: window.location.search.slice(10),
-                dvId: "<%-child.key%>",
-                state: document.getElementById('motorSw<%-index%>').checked ? 1 : 0
-            });
-        })
-        // init w3school button
-        document.getElementById('motorSw<%-index%>').checked = "<%-child.val().dcMotor.NhoGiot%>" == "1" ? true : false
+                        setTimeout(() => {
+                            $("#tdHum<%-index%>").removeClass("bg-success");
+                        }, 1500);
+                    });
+                    socket.on("lgT<%-child.key%>", msg => {
+                        var numMsg = parseInt(msg);
 
-        // init button state from database
-        if ("<%-child.val().dcMotor.manual%>" == "1") {
-            document.getElementById('checkDC<%-index%>').checked = false;
-            $("#lbManualMode<%-index%>").css("color", "#88cf8f");
-            $("#lbSensorMode<%-index%>").css("color", "gray");
-            $("#groupMotorSw<%-index%>").show();
-            $("#groupSliderThresh<%-index%>").hide();
-        }
-        else {
-            document.getElementById('checkDC<%-index%>').checked = true;
-            $("#lbManualMode<%-index%>").css("color", "gray");
-            $("#lbSensorMode<%-index%>").css("color", "#88cf8f");
-            $("#groupMotorSw<%-index%>").hide();
-            $("#groupSliderThresh<%-index%>").show();
-        }
-        // document.getElementById('checkDC<%-index%>').checked = "<%-child.val().dcMotor.NhoGiot%>" == "1" ? false : true;
-        // document.getElementById('checkPump<%-index%>').checked = "<%-child.val().dcMotor.PhunSuong%>" == "1" ? false : true;
+                        $("#tdTemp<%-index%>").addClass("bg-success");
+                        $("#tdTemp<%-index%>").text(msg);
 
-        // gửi trạng thái ManualMode về server: SW LỚN
-        $('#checkDC<%-index%>').on("click", () => {
-            // <socket> is socketIO var declare in home-client.js
-            socket.emit("customDC", {
-                gardenId: window.location.search.slice(10),
-                dvId: "<%-child.key%>",
-                state: document.getElementById('checkDC<%-index%>').checked ? 0 : 1
-            });
-            // blur text
-            if (document.getElementById('checkDC<%-index%>').checked) {
-                $("#lbManualMode<%-index%>").css("color", "gray");
-                $("#lbSensorMode<%-index%>").css("color", "#88cf8f");
-                $("#groupMotorSw<%-index%>").hide();
-                $("#groupSliderThresh<%-index%>").show();
-            }
-            else {
-                $("#lbManualMode<%-index%>").css("color", "#88cf8f");
-                $("#lbSensorMode<%-index%>").css("color", "gray");
-                $("#groupMotorSw<%-index%>").show();
-                $("#groupSliderThresh<%-index%>").hide();
-            }
-        })
-    </script>
+                        arrChart[parseInt("<%-index%>")][1].addRows([
+                            [new Date(), numMsg, arrChart[parseInt("<%-index%>")][3], arrChart[parseInt("<%-index%>")][4]]
+                        ]);
+                        arrChart[parseInt("<%-index%>")][0].draw(arrChart[parseInt("<%-index%>")][1], globChartOptions);
 
+                        setTimeout(() => {
+                            $("#tdTemp<%-index%>").removeClass("bg-success");
+                        }, 1500);
+                    });
+                })
 
-    <% ++index; }) %>
+                // init threshold value from firebase for SLIDER
+                $("#lbTempThresh<%-index%> input").val("<%-child.val().sensor.threshold.temp%>");
+                $("#offsetGround<%-index%>").val("<%-child.val().sensor.threshold.offsetGround%>");
+                $("#formControlGroundRange<%-index%>").val("<%-child.val().sensor.threshold.ground%>");
+
+                // event on change range SLIDER
+                percentTempThresh = (index) => {
+                    $(`#lbTempThresh${index} i`).text(document.getElementById(`formControlTempRange${index}`).value + " °C");
+                    $(`#lbTempThresh${index} button`).addClass("btn-success");
+                    $(`#lbTempThresh${index} button`).removeClass("disabled");
+                }
+                percentGroundThresh = (index) => {
+                    $("i.sliderVal").text(document.getElementById(`formControlGroundRange${index}`).value);
+                    $(`#lbGroundThresh${index} button`).addClass("btn-success");
+                    $(`#lbGroundThresh${index} button`).removeClass("disabled");
+                }
+                offsetGroundThresh = (index) => {
+                    $(`#lbGroundThresh${index} button`).addClass("btn-success");
+                    $(`#lbGroundThresh${index} button`).removeClass("disabled");
+                }
+
+                // submit threshold
+                $("#lbTempThresh<%-index%> button").on("click", () => {
+                    $("#lbTempThresh<%-index%> button").addClass("diabled");
+                    $("#lbTempThresh<%-index%> button").removeClass("btn-success");
+                    // use global socketIO <socket> var declare in <home-client.js>
+                    socket.emit("thresh", {
+                        type: "temp",
+                        gardenId: window.location.search.slice(10),
+                        dvId: "<%-child.key%>",
+                        val: parseInt(document.getElementById("formControlTempRange<%-index%>").value),
+                    })
+                })
+                $("#lbGroundThresh<%-index%> button").on("click", () => {
+                    $("#lbGroundThresh<%-index%> button").addClass("diabled");
+                    $("#lbGroundThresh<%-index%> button").removeClass("btn-success");
+                    // use global socketIO <socket> var declare in <home-client.js>
+                    socket.emit("thresh", {
+                        type: "ground",
+                        gardenId: window.location.search.slice(10),
+                        dvId: "<%-child.key%>",
+                        val: [parseInt(document.getElementById("formControlGroundRange<%-index%>").value), parseInt(document.getElementById("offsetGround<%-index%>").value)]
+                    })
+                })
+                // update w3school button state to server via socketio: Small Button
+                $("#motorSw<%-index%>").on("click", () => {
+                    // gửi trạng thái động cơ nhỏ giọt về server
+                    socket.emit("manualStt", {
+                        gardenId: window.location.search.slice(10),
+                        dvId: "<%-child.key%>",
+                        state: document.getElementById('motorSw<%-index%>').checked ? 1 : 0
+                    });
+                })
+                // init w3school button
+                document.getElementById('motorSw<%-index%>').checked = "<%-child.val().dcMotor.NhoGiot%>" == "1" ? true : false
+
+                // init button state from database
+                if ("<%-child.val().dcMotor.manual%>" == "1") {
+                    document.getElementById('checkDC<%-index%>').checked = false;
+                    $("#lbManualMode<%-index%>").css("color", "#88cf8f");
+                    $("#lbSensorMode<%-index%>").css("color", "gray");
+                    $("#groupMotorSw<%-index%>").show();
+                    $("#groupSliderThresh<%-index%>").hide();
+                }
+                else {
+                    document.getElementById('checkDC<%-index%>').checked = true;
+                    $("#lbManualMode<%-index%>").css("color", "gray");
+                    $("#lbSensorMode<%-index%>").css("color", "#88cf8f");
+                    $("#groupMotorSw<%-index%>").hide();
+                    $("#groupSliderThresh<%-index%>").show();
+                }
+                // document.getElementById('checkDC<%-index%>').checked = "<%-child.val().dcMotor.NhoGiot%>" == "1" ? false : true;
+                // document.getElementById('checkPump<%-index%>').checked = "<%-child.val().dcMotor.PhunSuong%>" == "1" ? false : true;
+
+                // gửi trạng thái ManualMode về server: SW LỚN
+                $('#checkDC<%-index%>').on("click", () => {
+                    // <socket> is socketIO var declare in home-client.js
+                    socket.emit("customDC", {
+                        gardenId: window.location.search.slice(10),
+                        dvId: "<%-child.key%>",
+                        state: document.getElementById('checkDC<%-index%>').checked ? 0 : 1
+                    });
+                    // blur text
+                    if (document.getElementById('checkDC<%-index%>').checked) {
+                        $("#lbManualMode<%-index%>").css("color", "gray");
+                        $("#lbSensorMode<%-index%>").css("color", "#88cf8f");
+                        $("#groupMotorSw<%-index%>").hide();
+                        $("#groupSliderThresh<%-index%>").show();
+                    }
+                    else {
+                        $("#lbManualMode<%-index%>").css("color", "#88cf8f");
+                        $("#lbSensorMode<%-index%>").css("color", "gray");
+                        $("#groupMotorSw<%-index%>").show();
+                        $("#groupSliderThresh<%-index%>").hide();
+                    }
+                })
+            </script>
+
+            <% ++index; }) %>
+
 </section>

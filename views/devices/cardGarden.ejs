@@ -9,211 +9,215 @@
 <script defer src="javascripts/UI/jsQR.js"></script>
 
 <div class="card-body">
-    <% let index = 0; %>
-    <!--? https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
-    <% objGardenInfo.forEach((child) => { %>
+    <% let index=0; %>
+        <!--? https://firebase.google.com/docs/reference/js/firebase.database.DataSnapshot#foreach ?-->
+        <% objGardenInfo.forEach((child)=> { %>
 
-    <% var rawGarId = child.val().gardenId.replace(/:/g,''); %>
+            <% var rawGarId=child.val().gardenId.replace(/:/g,''); %>
 
-    <div class="card-detail card" style="--background: rgb(255, 174, 174); --text:black;">
-        <div class="multi-button">
-            <button class="fas fa-plus" id="btnAddGarden<%-index%>"></button>
-            <button class="fas fa-receipt" id="btnShowTableDV<%-rawGarId%>"></button>
-            <button class="fas fa-cog" id="btnConfig<%-index%>"></button>
-            <button class="fas fa-trash" id="btnRemoveGarden<%-index%>"></button>
-        </div>
-        <div class="card-text card-container">
-            <div class="portada">
-            </div>
-            <div class="title-total">
-                <h1 id="gardenName<%-index%>" class="title"><%= child.val().gardenName %></h1>
+                <div class="card-detail card" style="--background: rgb(255, 174, 174); --text:black;">
+                    <div class="multi-button">
+                        <button class="fas fa-plus" id="btnAddGarden<%-index%>"></button>
+                        <button class="fas fa-receipt" id="btnShowTableDV<%-rawGarId%>"></button>
+                        <button class="fas fa-cog" id="btnConfig<%-index%>"></button>
+                        <button class="fas fa-trash" id="btnRemoveGarden<%-index%>"></button>
+                    </div>
+                    <div class="card-text card-container">
+                        <div class="portada">
+                        </div>
+                        <div class="title-total">
+                            <h1 id="gardenName<%-index%>" class="title">
+                                <%= child.val().gardenName %>
+                            </h1>
 
-                <ul class="desc" style="list-style-type: none;">
-                    <li id="gardenId<%-index%>" class="">
-                        <img src="images/fingerprint.svg" width="30px" height="30px"> <%= child.val().gardenId %>
-                    </li>
-                    <li id="gardenPlace<%-index%>">
-                        <img src="images/flag_filled.svg" width="30px" height="30px"> <%= child.val().location.place %>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
+                            <ul class="desc" style="list-style-type: none;">
+                                <li id="gardenId<%-index%>" class="">
+                                    <img src="images/fingerprint.svg" width="30px" height="30px">
+                                    <%= child.val().gardenId %>
+                                </li>
+                                <li id="gardenPlace<%-index%>">
+                                    <img src="images/flag_filled.svg" width="30px" height="30px">
+                                    <%= child.val().location.place %>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-    <script>
-        $("#btnShowTableDV<%-rawGarId%>").on("click", () => {
-            $("#modalTableDV<%-rawGarId%>").modal("toggle");
-        })
+                <script>
+                    $("#btnShowTableDV<%-rawGarId%>").on("click", () => {
+                        $("#modalTableDV<%-rawGarId%>").modal("toggle");
+                    })
 
-        $("#btnConfig<%-index%>").on("click", () => {
-            $("#modalConfig<%-index%>").modal("toggle");
-        })
+                    $("#btnConfig<%-index%>").on("click", () => {
+                        $("#modalConfig<%-index%>").modal("toggle");
+                    })
 
-        $("#btnAddGarden<%-index%>").on("click", () => {
-            let objDeviceInfo;
+                    $("#btnAddGarden<%-index%>").on("click", () => {
+                        let objDeviceInfo;
 
-            Swal.queue([
-                {
-                    showConfirmButton: false,
-                    title: "Pairing New Devices",
-                    text: "Place qr code to the front of the camera",
-                    confirmButtonText: "Next",
-                    html:
-                        '<div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div><canvas id="canvas" hidden></canvas><img hidden width="1" height="1" id="cap" onerror="this.src=`images/icons8-disconnected.svg`"><div id="output" hidden><div id="outputMessage">No QR code detected.</div><div hidden><b>Data:</b> <span id="outputData"></span></div><button id="btnReScan" hidden>Rescan</button></div>',
-                },
-                {
-                    title: "Pairing New Devices",
-                    text: "Name Your Garden",
-                    input: 'text',
-                    inputValidator: (value) => {
-                        if (!value) {
-                            return 'You need to write something!'
-                        }
-                    }
-                }
-            ]).then(result => {
-                if (result.value) {
-                    setTimeout(() => {
-                        Swal.showLoading();
-                    }, 500);
-                    $.ajax({
-                        method: "POST",
-                        timeout: 4000,
-                        error: () => {
-                            Swal.fire({
-                                icon: 'error',
-                                title: "TIMEOUT",
-                                text: "SERVER cannot recieve pong back from GATEWAY"
-                            }).then(result => {
-                                if (result.value) {
-                                    stopStream();
+                        Swal.queue([
+                            {
+                                showConfirmButton: false,
+                                title: "Pairing New Devices",
+                                text: "Place qr code to the front of the camera",
+                                confirmButtonText: "Next",
+                                html:
+                                    '<div id="loadingMessage">🎥 Unable to access video stream (please make sure you have a webcam enabled)</div><canvas id="canvas" hidden></canvas><img hidden width="1" height="1" id="cap" onerror="this.src=`images/icons8-disconnected.svg`"><div id="output" hidden><div id="outputMessage">No QR code detected.</div><div hidden><b>Data:</b> <span id="outputData"></span></div><button id="btnReScan" hidden>Rescan</button></div>',
+                            },
+                            {
+                                title: "Pairing New Devices",
+                                text: "Name Your Garden",
+                                input: 'text',
+                                inputValidator: (value) => {
+                                    if (!value) {
+                                        return 'You need to write something!'
+                                    }
                                 }
-                            })
-                        },
-                        url: "/devices/updateDevice",
-                        data: {
-                            gardenId: "<%- child.val().gardenId %>",
-                            deviceId: objDeviceInfo.deviceId,
-                            deviceName: result.value[1],
-                        },
-                        success: () => {
-                            Swal.fire({
-                                icon: 'success',
-                                title: "DONE",
-                                text: "Device has been paired"
-                            }).then(result => {
-                                if (result.value) {
-                                    stopStream();
-                                    location.reload();
-                                }
-                            })
+                            }
+                        ]).then(result => {
+                            if (result.value) {
+                                setTimeout(() => {
+                                    Swal.showLoading();
+                                }, 500);
+                                $.ajax({
+                                    method: "POST",
+                                    timeout: 4000,
+                                    error: () => {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: "TIMEOUT",
+                                            text: "SERVER cannot recieve pong back from GATEWAY"
+                                        }).then(result => {
+                                            if (result.value) {
+                                                stopStream();
+                                            }
+                                        })
+                                    },
+                                    url: "/devices/updateDevice",
+                                    data: {
+                                        gardenId: "<%- child.val().gardenId %>",
+                                        deviceId: objDeviceInfo.deviceId,
+                                        deviceName: result.value[1],
+                                    },
+                                    success: () => {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: "DONE",
+                                            text: "Device has been paired"
+                                        }).then(result => {
+                                            if (result.value) {
+                                                stopStream();
+                                                location.reload();
+                                            }
+                                        })
+                                    }
+                                });
+                            }
+                            else {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: "Suddenly Stopped",
+                                    text: "Camera Stream has stopped working"
+                                });
+                                stopStream();
+                            }
+                        })
+
+                        //!================/ ESP32-CAM on QR SCANNER /================!//
+                        let urlObj;
+                        let imgFrame = document.getElementById("cap");
+                        const WS_URL = "ws:///192.168.2.156:82";
+                        let ws; // global websocket var
+
+                        var canvasElement = document.getElementById("canvas");
+                        var canvas = canvasElement.getContext("2d");
+                        var loadingMessage = document.getElementById("loadingMessage");
+                        var outputContainer = document.getElementById("output");
+                        var outputMessage = document.getElementById("outputMessage");
+                        var outputData = document.getElementById("outputData");
+                        const btnReScan = document.getElementById("btnReScan");
+
+                        function drawLine(begin, end, color) {
+                            canvas.beginPath();
+                            canvas.moveTo(begin.x, begin.y);
+                            canvas.lineTo(end.x, end.y);
+                            canvas.lineWidth = 4;
+                            canvas.strokeStyle = color;
+                            canvas.stroke();
                         }
-                    });
-                }
-                else {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: "Suddenly Stopped",
-                        text: "Camera Stream has stopped working"
-                    });
-                    stopStream();
-                }
-            })
+                        function tick() {
+                            // loadingMessage.innerText = "⌛ Loading video..."
+                            loadingMessage.hidden = true;
+                            canvasElement.hidden = false;
+                            outputContainer.hidden = false;
 
-            //!================/ ESP32-CAM on QR SCANNER /================!//
-            let urlObj;
-            let imgFrame = document.getElementById("cap");
-            const WS_URL = "ws:///192.168.1.99:81";
-            let ws; // global websocket var
+                            canvasElement.height = 120;
+                            canvasElement.width = 160;
+                            // display video on canvas
+                            canvas.drawImage(imgFrame, 0, 0, canvasElement.width, canvasElement.height);
+                            var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                            // try to find QR Image
+                            var code = jsQR(imageData.data, imageData.width, imageData.height, {
+                                inversionAttempts: "dontInvert",
+                            });
+                            // ON detect QR Image
+                            if (code) {
+                                // draw red retangle qrcode
+                                drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+                                drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+                                drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+                                drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
 
-            var canvasElement = document.getElementById("canvas");
-            var canvas = canvasElement.getContext("2d");
-            var loadingMessage = document.getElementById("loadingMessage");
-            var outputContainer = document.getElementById("output");
-            var outputMessage = document.getElementById("outputMessage");
-            var outputData = document.getElementById("outputData");
-            const btnReScan = document.getElementById("btnReScan");
+                                outputMessage.hidden = true;
+                                outputData.parentElement.hidden = false;
+                                outputData.innerText = code.data;
 
-            function drawLine(begin, end, color) {
-                canvas.beginPath();
-                canvas.moveTo(begin.x, begin.y);
-                canvas.lineTo(end.x, end.y);
-                canvas.lineWidth = 4;
-                canvas.strokeStyle = color;
-                canvas.stroke();
-            }
-            function tick() {
-                // loadingMessage.innerText = "⌛ Loading video..."
-                loadingMessage.hidden = true;
-                canvasElement.hidden = false;
-                outputContainer.hidden = false;
+                                btnReScan.hidden = false;
+                                objDeviceInfo = JSON.parse(code.data);
 
-                canvasElement.height = 120;
-                canvasElement.width = 160;
-                // display video on canvas
-                canvas.drawImage(imgFrame, 0, 0, canvasElement.width, canvasElement.height);
-                var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-                // try to find QR Image
-                var code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "dontInvert",
-                });
-                // ON detect QR Image
-                if (code) {
-                    // draw red retangle qrcode
-                    drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
-                    drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
-                    drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
-                    drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+                                $(".swal2-actions").removeAttr("style");
+                                $("button.swal2-confirm").removeAttr("style");
+                                return;
+                            } else {
+                                outputMessage.hidden = false;
+                                outputData.parentElement.hidden = true;
+                            }
+                            requestAnimationFrame(tick);
+                        }
+                        // trigger when add new device
+                        const startStream = () => {
+                            ws = new WebSocket(WS_URL);
+                            ws.onopen = () => console.log("[INFO] Connected to", WS_URL);
+                            ws.onmessage = (payload) => {
+                                if (urlObj) {
+                                    URL.revokeObjectURL(urlObj);
+                                }
+                                urlObj = URL.createObjectURL(new Blob([payload.data]));
+                                imgFrame.src = urlObj;
+                            };
 
-                    outputMessage.hidden = true;
-                    outputData.parentElement.hidden = false;
-                    outputData.innerText = code.data;
+                            setTimeout(() => {
+                                if (ws.readyState == WebSocket.OPEN)
+                                    ws.send(`[{"ev":"browserEnCam","gardenId":"<%-child.val().gardenId%>","userId": "<%-objGardenInfo.key%>"}]`);
+                                else
+                                    console.error(ws.readyState);
+                            }, 1000);
 
-                    btnReScan.hidden = false;
-                    objDeviceInfo = JSON.parse(code.data);
+                            btnReScan.hidden = true;
+                            requestAnimationFrame(tick);
+                        }
+                        const stopStream = () => {
+                            ws.close();
+                            ws.onclose = () => console.log("[WS] CLOSED ", WS_URL);
+                        }
+                        $("#btnReScan").on("click", () => {
+                            startStream();
+                        })
+                        startStream();
+                    })
+                </script>
 
-                    $(".swal2-actions").removeAttr("style");
-                    $("button.swal2-confirm").removeAttr("style");
-                    return;
-                } else {
-                    outputMessage.hidden = false;
-                    outputData.parentElement.hidden = true;
-                }
-                requestAnimationFrame(tick);
-            }
-            // trigger when add new device
-            const startStream = () => {
-                ws = new WebSocket(WS_URL);
-                ws.onopen = () => console.log("[INFO] Connected to", WS_URL);
-                ws.onmessage = (payload) => {
-                    if (urlObj) {
-                        URL.revokeObjectURL(urlObj);
-                    }
-                    urlObj = URL.createObjectURL(new Blob([payload.data]));
-                    imgFrame.src = urlObj;
-                };
-
-                setTimeout(() => {
-                    if (ws.readyState == WebSocket.OPEN)
-                        ws.send(`[{"ev":"browserEnCam","gardenId":"<%-child.val().gardenId%>","userId": "<%-objGardenInfo.key%>"}]`);
-                    else
-                        console.error(ws.readyState);
-                }, 1000);
-
-                btnReScan.hidden = true;
-                requestAnimationFrame(tick);
-            }
-            const stopStream = () => {
-                ws.close();
-                ws.onclose = () => console.log("[WS] CLOSED ", WS_URL);
-            }
-            $("#btnReScan").on("click", () => {
-                startStream();
-            })
-            startStream();
-        })
-    </script>
-
-    <% ++index; }) %>
+                <% ++index; }) %>
 
 </div>

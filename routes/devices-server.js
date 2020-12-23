@@ -300,7 +300,30 @@ router.post('/updateDevice', (req, res) => {
 
         })
         .catch(err => console.error(err))
-})
+});
+
+//!==================/ Route Generate Report /==================!//
+router.get("/genReport", (req, res) => {
+    let cookie = req.cookies.session || "";
+    admin.auth().verifySessionCookie(cookie, true)
+        .then((decodedClaims) => {
+            const qrUID = decodedClaims.uid;
+            const qrGarId = req.query.garId;
+            const qrDvId = req.query.dvId;
+
+            var refLogT = admin.database().ref(`Devices/${qrUID}/${qrGarId}/${qrDvId}/sensor/logs/T`);
+            var refLogH = admin.database().ref(`Devices/${qrUID}/${qrGarId}/${qrDvId}/sensor/logs/H`);
+            var refLogG = admin.database().ref(`Devices/${qrUID}/${qrGarId}/${qrDvId}/sensor/logs/G`);
+            refLogT.once("value", snapLogT => {
+                refLogH.once("value", snapLogH => {
+                    refLogG.once("value", snapLogG => {
+                        res.json({ objLogT: snapLogT, objLogH: snapLogH, objLogG: snapLogG })
+                    })
+                })
+            });
+        })
+
+});
 
 //!==================/ SocketIO /==================!//
 let globIO;
@@ -320,17 +343,36 @@ const ioFunc = (io) => {
                 })
         });
 
-        //! when user click CHECK STATUS button in tabe devices
+        //! when user click CHECK STATUS button in <modalTableDV.ejs>
         socket.on("checkDVStt", ({ garId }) => {
             const socketCookie = socket.handshake.headers.cookie || '';
             admin.auth().verifySessionCookie(socketCookie.slice(8), true)
                 .then((decodedClaims) => {
-                    if (objEnCam.hasOwnProperty(garId)) {
-                        admin.database().ref(`Devices/${decodedClaims.uid}/${garId}`).once("value", snapDv => {
-                            snapDv.forEach(lstDV => {
-                                objEnCam[garId]["arrCamBrow"][0].send(`{"ev":"ckst","id":"${lstDV.key}"}`);
+                    //! send from <accordion.ejs>
+                    if (typeof (garId) === 'object') {
+                        if (objEnCam.hasOwnProperty(garId.garId)) {
+                            objEnCam[garId.garId]["arrCamBrow"][0].send(`{"ev":"ckst","id":"${garId.dvId}"}`);
+                        }
+                    }
+                    //! send from <modalTableDV.ejs>
+                    else {
+                        if (objEnCam.hasOwnProperty(garId)) {
+                            admin.database().ref(`Devices/${decodedClaims.uid}/${garId}`).once("value", snapDv => {
+                                var tmpArrCheckStt = [];
+                                snapDv.forEach(lstDV => {
+                                    tmpArrCheckStt.push(lstDV.key);
+                                });
+
+                                (function myLoop(i) {
+                                    setTimeout(function () {
+                                        //   code here
+                                        objEnCam[garId]["arrCamBrow"][0].send(`{"ev":"ckst","id":"${tmpArrCheckStt[i - 1]}"}`);
+                                        console.log("sent", tmpArrCheckStt[i - 1]);
+                                        if (--i) myLoop(i);
+                                    }, 1000)
+                                })(tmpArrCheckStt.length);
                             });
-                        });
+                        }
                     }
                 })
         });
@@ -448,13 +490,90 @@ const ioFunc = (io) => {
     })
 }
 
-//!================/ Vanilla WebSocket for enable/disable pair/repair ESP32-CAM /================!//
 const WebSocket = require("ws");
-const wsServer = new WebSocket.Server({
-    port: 81,
-});
-// let arrSocket = [];
 let objEnCam = {};
+
+// //!================/ OneMore WebSocket for gateway CAMERA sensor /================!//
+const wsServerData = new WebSocket.Server({ port: 82 });
+wsServerData.on("connection", wsCam => {
+    let msgUIDcam, msgMACcam;
+
+    wsCam.on("message", msg => {
+        try {
+            const payload = JSON.parse(msg)[0];
+            switch (payload.ev) {
+                case "espEnCamera":
+                    msgUIDcam = payload.UID;
+                    msgMACcam = payload.MAC;
+                    //! add data to new objEnCam instance create below
+                    objEnCam[payload.MAC]["arrCamBrow"].push(wsCam);
+                    console.log("[wsCam]", objEnCam);
+                    break;
+
+                case "browserEnCam":
+                    const browserRequestGardenId = payload.gardenId;
+                    const browserRequestUserId = payload.userId;
+                    console.log(`[Browser:82] We want to enable camera ${browserRequestGardenId}`);
+                    // has property because esp-cam init this object
+                    if (objEnCam.hasOwnProperty(browserRequestGardenId)) {
+                        // just exec if <arrCamBrow> got ONLY camera ws in there at index 0
+                        if (objEnCam[browserRequestGardenId]["arrCamBrow"].length == 2) {
+                            if (objEnCam[browserRequestGardenId]["state"] == 0) {
+                                objEnCam[browserRequestGardenId]["state"] = 1;
+                                objEnCam[browserRequestGardenId]["arrCamBrow"].push(wsCam);
+                                objEnCam[browserRequestGardenId]["arrCamBrow"][0].send('{"ev":"enC"}');
+                                console.log(`[NodeJS][wsCam:82] request gateway EnableCamera ${browserRequestGardenId}`);
+                            } else {
+                                console.error("[INFO] Something Wrong !!!");
+                            }
+                        }
+                        else if (objEnCam[browserRequestGardenId]["arrCamBrow"].length > 2) {
+                            if (objEnCam[browserRequestGardenId]["state"] == 0) {
+                                objEnCam[browserRequestGardenId]["state"] = 1;
+                                objEnCam[browserRequestGardenId]["arrCamBrow"][0].send('{"ev":"enC"}');
+                                console.log(`[NodeJS][wsCam:82] request gateway EnableCamera ${browserRequestGardenId}`);
+                            }
+                            if (objEnCam[browserRequestGardenId]["arrCamBrow"].includes(wsCam) == false)
+                                objEnCam[browserRequestGardenId]["arrCamBrow"].push(wsCam);
+                            else
+                                console.log("[NodeJS] Oops, you reopen AddDevicesModal");
+                        }
+                    } else {
+                        //TODO: return to browser
+                        console.error(`[NodeJS] Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
+                        // emit to <header.ejs>
+                        globIO.to(browserRequestUserId).emit("errBrowserEnCam", `Sorry, Camera ${browserRequestGardenId} is not connect to server or not ready !!!`);
+                    }
+                    break;
+            }
+        } catch (error) {
+            if (objEnCam.hasOwnProperty(msgMACcam)) {
+                const arrSocket = objEnCam[msgMACcam]["arrCamBrow"];
+                arrSocket.forEach((wsItem, index) => {
+                    // The current state of the connection https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
+                    if (wsItem.readyState === wsItem.OPEN) {
+                        if (index > 1)
+                            wsItem.send(msg);
+                    } else {
+                        // if camera is connected but cannot send msg to any browser
+                        console.error("[Server] Socket Error >> POP...ing Error BROWSER");
+                        arrSocket.splice(index, 1);
+                        // check if only camera in <arrSocket>
+                        if (arrSocket.length == 2) {
+                            console.log('[Server] Sent <browserDisCam>');
+                            objEnCam[msgMACcam]["arrCamBrow"][0].send('{"ev":"diC"}');
+                            objEnCam[msgMACcam]["state"] = 0;
+                        }
+                    }
+                });
+            }
+        }
+    });
+});
+
+//!=======/ Vanilla WebSocket for DATA & enable/disable pair/repair ESP32-CAM /======!//
+const wsServer = new WebSocket.Server({ port: 81 });
+// let arrSocket = [];
 wsServer.on("connection", ws => {
     // init some stuff if ESP submit <handShakeEnCam> event
     let msgUID, msgMAC;
@@ -473,20 +592,24 @@ wsServer.on("connection", ws => {
                     // var wtlvRef = admin.database().ref(`Gardens/${payload.uId}/${payload.gId}`);
                     //todo: testing
                     var wtlvRef = admin.database().ref(`Gardens/${msgUID}/${msgMAC}`);
-                    wtlvRef.once("value", () => {
-                        wtlvRef.update({
-                            waterLevel: payload.val
-                        });
+                    wtlvRef.once("value", (snap) => {
+                        if (snap.val() != null) {
+                            wtlvRef.update({
+                                waterLevel: payload.val
+                            });
+                        }
                     });
                     break;
                 case "mns":
                     // var nhogiotRef = admin.database().ref(`Devices/${payload.uId}/${payload.gId}/${payload.dvId}/dcMotor`);
                     //todo: testing
                     var nhogiotRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/dcMotor`);
-                    nhogiotRef.once("value", () => {
-                        nhogiotRef.update({
-                            NhoGiot: payload.val
-                        });
+                    nhogiotRef.once("value", (snap) => {
+                        if (snap.val() != null) {
+                            nhogiotRef.update({
+                                NhoGiot: payload.val
+                            });
+                        }
                     });
                     break;
 
@@ -494,93 +617,142 @@ wsServer.on("connection", ws => {
                     objEnCam[msgMAC]["arrQueue"].forEach((objQueue, index) => {
                         if (objQueue.hasOwnProperty("thrTemp")) {
                             var tempThrRef = admin.database().ref(`Devices/${objQueue["thrTemp"][0]}/${objQueue["thrTemp"][1]}/${objQueue["thrTemp"][2]}/sensor/threshold`);
-                            tempThrRef.once("value", () => {
+                            tempThrRef.once("value", (snap) => {
                                 // just update db when everything is OK
-                                tempThrRef.update({
-                                    temp: objQueue["thrTemp"][3]
-                                })
-                                    .then(() => {
-                                        // pop queue out
-                                        objEnCam[msgMAC]["arrQueue"].splice(index, 1);
+                                if (snap.val() != null) {
+                                    tempThrRef.update({
+                                        temp: objQueue["thrTemp"][3]
                                     })
-                                    .catch(err => { console.error(err); })
+                                        .then(() => {
+                                            // pop queue out
+                                            objEnCam[msgMAC]["arrQueue"].splice(index, 1);
+                                        })
+                                        .catch(err => { console.error(err); })
+                                }
                             });
                         }
                         else if (objQueue.hasOwnProperty("thrGround")) {
                             var groundThrRef = admin.database().ref(`Devices/${objQueue["thrGround"][0]}/${objQueue["thrGround"][1]}/${objQueue["thrGround"][2]}/sensor/threshold`);
-                            groundThrRef.once("value", () => {
+                            groundThrRef.once("value", (snap) => {
                                 // just update db when everything is OK
-                                groundThrRef.update({
-                                    ground: objQueue["thrGround"][3][0],
-                                    offsetGround: objQueue["thrGround"][3][1]
-                                })
-                                    .then(() => {
-                                        // pop queue out
-                                        objEnCam[msgMAC]["arrQueue"].splice(index, 1);
+                                if (snap.val() != null) {
+                                    groundThrRef.update({
+                                        ground: objQueue["thrGround"][3][0],
+                                        offsetGround: objQueue["thrGround"][3][1]
                                     })
-                                    .catch(err => { console.error(err); })
+                                        .then(() => {
+                                            // pop queue out
+                                            objEnCam[msgMAC]["arrQueue"].splice(index, 1);
+                                        })
+                                        .catch(err => { console.error(err); })
+                                }
+
                             });
                         }
                         else if (objQueue.hasOwnProperty("btnNho")) {
                             var nhogiotRef = admin.database().ref(`Devices/${objQueue["btnNho"][0]}/${objQueue["btnNho"][1]}/${objQueue["btnNho"][2]}/dcMotor`);
-                            nhogiotRef.once("value", () => {
-                                nhogiotRef.update({
-                                    NhoGiot: objQueue["btnNho"][3]
-                                })
-                                    .then(() => {
-                                        // pop queue out
-                                        objEnCam[msgMAC]["arrQueue"].splice(index, 1);
+                            nhogiotRef.once("value", (snap) => {
+                                if (snap.val() != null) {
+                                    nhogiotRef.update({
+                                        NhoGiot: objQueue["btnNho"][3]
                                     })
-                                    .catch(err => { console.error(err); })
+                                        .then(() => {
+                                            // pop queue out
+                                            objEnCam[msgMAC]["arrQueue"].splice(index, 1);
+                                        })
+                                        .catch(err => { console.error(err); })
+                                }
                             })
                         }
                         else if (objQueue.hasOwnProperty("btnTo")) {
                             var manualRef = admin.database().ref(`Devices/${objQueue["btnTo"][0]}/${objQueue["btnTo"][1]}/${objQueue["btnTo"][2]}/dcMotor`);
-                            manualRef.once("value", () => {
+                            manualRef.once("value", (snap) => {
                                 // just update db when everything is OK
-                                manualRef.update({
-                                    manual: objQueue["btnTo"][3]
-                                })
-                                    .then(() => {
-                                        // pop queue out
-                                        objEnCam[msgMAC]["arrQueue"].splice(index, 1);
+                                if (snap.val() != null) {
+                                    manualRef.update({
+                                        manual: objQueue["btnTo"][3]
                                     })
-                                    .catch(err => { console.error(err); })
+                                        .then(() => {
+                                            // pop queue out
+                                            objEnCam[msgMAC]["arrQueue"].splice(index, 1);
+                                        })
+                                        .catch(err => { console.error(err); })
+                                }
                             });
                         }
                     });
                     break;
 
                 case "lgT":
-                    // var tempRef = admin.database().ref(`Devices/${payload.uId}/${payload.gId}/${payload.dvId}/sensor/DHT`);
-                    //todo: testing
                     var tempRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/DHT`);
                     // prvent update trash things 
-                    tempRef.once("value", () => {
-                        tempRef.update({
-                            temp: payload.val
-                        });
-                    })
+                    tempRef.once("value", (snap) => {
+                        if (snap.val() != null) {
+                            tempRef.update({
+                                temp: payload.val
+                            });
+
+                            //todo: testing
+                            // del DB if too many logs
+                            var refLogT = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/logs/T`);
+                            refLogT.once("value", snapLogT => {
+                                if (snapLogT.numChildren() > 10)
+                                    refLogT.remove();
+                            });
+                            // log xlsl to DB
+                            var now = Date.now();
+                            var objLog = {};
+                            objLog[now] = payload.val;
+                            refLogT.update(objLog);
+                        }
+                    });
                     break;
                 case "lgH":
-                    // var humidRef = admin.database().ref(`Devices/${payload.uId}/${payload.gId}/${payload.dvId}/sensor/DHT`);
-                    //todo: testing
                     var humidRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/DHT`);
-                    // prvent update trash things 
-                    humidRef.once("value", () => {
-                        humidRef.update({
-                            humid: payload.val
-                        });
+                    // prvent update trash things
+                    humidRef.once("value", (snap) => {
+                        if (snap.val() != null) {
+                            humidRef.update({
+                                humid: payload.val
+                            });
+
+                            //todo: testing
+                            // del DB if too many logs
+                            var refLogH = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/logs/H`);
+                            refLogH.once("value", snapLogH => {
+                                if (snapLogH.numChildren() > 10)
+                                    refLogH.remove();
+                            });
+                            // log xlsl to DB
+                            var now = Date.now();
+                            var objLog = {};
+                            objLog[now] = payload.val;
+                            refLogH.update(objLog);
+                        }
                     });
                     break;
                 case "lgG":
-                    // var groundRef = admin.database().ref(`Devices/${payload.uId}/${payload.gId}/${payload.dvId}/sensor`);
                     var groundRef = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor`);
                     // prvent update trash things 
-                    groundRef.once("value", () => {
-                        groundRef.update({
-                            ground: payload.val
-                        });
+                    groundRef.once("value", (snap) => {
+                        if (snap.val() != null) {
+                            groundRef.update({
+                                ground: payload.val
+                            });
+
+                            //todo: testing
+                            // del DB if too many logs
+                            var refLogG = admin.database().ref(`Devices/${msgUID}/${msgMAC}/${payload.dvId}/sensor/logs/G`);
+                            refLogG.once("value", snapLogG => {
+                                if (snapLogG.numChildren() > 10)
+                                    refLogG.remove();
+                            });
+                            // log xlsl to DB
+                            var now = Date.now();
+                            var objLog = {};
+                            objLog[now] = payload.val;
+                            refLogG.update(objLog);
+                        }
                     });
                     break;
 
@@ -668,14 +840,15 @@ wsServer.on("connection", ws => {
                     break;
 
                 case "espEnCamera":
-                    console.log("[ESP] here your camera data is available");
                     msgUID = payload.UID;
                     msgMAC = payload.MAC;
                     var refStatus = admin.database().ref(`Gardens/${msgUID}/${msgMAC}`);
-                    refStatus.once("value", () => {
-                        refStatus.update({
-                            status: 1 // online
-                        }, err => { if (err) console.log(err); });
+                    refStatus.once("value", (snap) => {
+                        if (snap.numChildren()) {
+                            refStatus.update({
+                                status: 1 // online
+                            }, err => { if (err) console.log(err); });
+                        }
                     });
 
                     //! create a new objEnCam instance
@@ -686,7 +859,7 @@ wsServer.on("connection", ws => {
                             objEnCam[payload.MAC]["pingpong"] = true;
                         }
                     })
-                    console.log(objEnCam);
+                    console.log("[ESP] here your camera data is available", objEnCam);
                     console.log("UID:", msgUID);
                     console.log("GardenID:", msgMAC);
                     break;
@@ -698,7 +871,7 @@ wsServer.on("connection", ws => {
                 case "browserEnCam":
                     const browserRequestGardenId = payload.gardenId;
                     const browserRequestUserId = payload.userId;
-                    console.log(`[Browser] We want to enable camera ${browserRequestGardenId}`);
+                    console.log(`[Browser:81] We want to enable camera ${browserRequestGardenId}`);
                     // has property because esp-cam init this object
                     if (objEnCam.hasOwnProperty(browserRequestGardenId)) {
                         // just exec if <arrCamBrow> got ONLY camera ws in there at index 0
@@ -707,6 +880,7 @@ wsServer.on("connection", ws => {
                                 objEnCam[browserRequestGardenId]["state"] = 1;
                                 objEnCam[browserRequestGardenId]["arrCamBrow"].push(ws);
                                 objEnCam[browserRequestGardenId]["arrCamBrow"][0].send('{"ev":"enC"}');
+                                console.log(`[NodeJS][ws:81] request gateway EnableCamera ${browserRequestGardenId}`);
                             } else {
                                 console.error("[INFO] Something Wrong !!!");
                             }
@@ -715,6 +889,7 @@ wsServer.on("connection", ws => {
                             if (objEnCam[browserRequestGardenId]["state"] == 0) {
                                 objEnCam[browserRequestGardenId]["state"] = 1;
                                 objEnCam[browserRequestGardenId]["arrCamBrow"][0].send('{"ev":"enC"}');
+                                console.log(`[NodeJS][ws:81] request gateway EnableCamera ${browserRequestGardenId}`);
                             }
                             if (objEnCam[browserRequestGardenId]["arrCamBrow"].includes(ws) == false)
                                 objEnCam[browserRequestGardenId]["arrCamBrow"].push(ws);
@@ -760,7 +935,7 @@ wsServer.on("connection", ws => {
     })
 
     ws.on("error", (err) => {
-        console.log("WSerr", err);
+        console.log("[WSerr]", err);
     })
 })
 
@@ -776,7 +951,11 @@ setInterval(() => {
                     status: 0 // offline
                 }, err => { if (err) console.log(err); });
                 console.error("[Server] Socket Error >> POP...ing Error CAMERA");
-                objEnCam[mac]["arrCamBrow"][0].send('{"ev":"RESTART_ESP"}');
+                // todo: testing
+                // objEnCam[mac]["arrCamBrow"][0].send('{"ev":"RESTART_ESP"}');
+                objEnCam[mac]["arrCamBrow"].forEach(elWs => {
+                    elWs.send('{"ev":"RESTART_ESP"}');
+                });
                 //todo: send messgae log error to all browser before delete
                 delete objEnCam[mac];
             }

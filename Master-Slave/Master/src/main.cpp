@@ -1,3 +1,4 @@
+#define VERSION 1
 #define DEBUG false
 #define TEST true
 #define FLASH false
@@ -18,11 +19,12 @@
 #endif
 
 WebSocketsClient webSocket;
+WebSocketsClient webSocketCam;
 
 #define EEPROM_SIZE 100 // define the number of bytes you want to access
 bool flagEnCam = false;
 
-#define HOST "192.168.1.99"
+#define HOST "192.168.2.156"
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
@@ -31,6 +33,7 @@ String finalUID = "";
 
 String jsonOut;
 void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length);
+void webSocketCamEventHandle(WStype_t type, uint8_t *payload, size_t length);
 void Task2Func(void *pvParameters);
 // TaskHandle_t Task1;
 TaskHandle_t Task2;
@@ -45,7 +48,11 @@ void setup()
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   EEPROM.begin(EEPROM_SIZE);
+#ifdef VERSION == 1
   Wire.begin(15, 14); // i2c water level SDA SCK
+#elif VERSION == 2
+  Wire.begin(14, 15); // i2c water level SDA SCK
+#endif
 
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(FLASH_BUILTIN, OUTPUT);
@@ -107,29 +114,7 @@ void setup()
 
   WiFi.begin(arrSSID, arrPsk);
 
-  // uint8_t idxTimeOutInit = 1;
-  // // 20s timeout
-  // while ((WiFi.status() != WL_CONNECTED) && (idxTimeOutInit < 100))
-  // {
-  //   digitalWrite(LED_BUILTIN, 1);
-  //   delay(100);
-  //   digitalWrite(LED_BUILTIN, 0);
-  //   delay(100);
-  //   ++idxTimeOutInit;
-  // }
-  //   if (WiFi.status() != WL_CONNECTED)
-  //   {
-  //     digitalWrite(FLASH_BUILTIN, 1);
-  //     delay(1000);
-  //     digitalWrite(FLASH_BUILTIN, 0);
-  //     digitalWrite(LED_BUILTIN, 0);
-  // #if DEBUG
-  //     Serial.println("Cannot connect to this wifi network\nRestarting ...");
-  // #endif
-  //     ESP.restart(); // return
-  //   }
-
-  //! if cannot connect to any wifi network then program will be stuck here
+  //? if cannot connect to any wifi network then program will be stuck here
   while (WiFi.status() != WL_CONNECTED)
   {
     digitalWrite(LED_BUILTIN, 1);
@@ -189,38 +174,12 @@ void setup()
     digitalWrite(FLASH_BUILTIN, 0);
     delay(109);
 
-    //!  if agree then enter Pairing Mode
-    //     if (!digitalRead(0))
-    //     {
-    //       delay(20);
-    //       if (!digitalRead(0))
-    //       {
-    //         EEPROM.write(0, 0);
-    //         EEPROM.commit();
-
-    //         digitalWrite(FLASH_BUILTIN, 1);
-    //         delay(20);
-    //         digitalWrite(FLASH_BUILTIN, 0);
-    //         delay(20);
-    //         digitalWrite(FLASH_BUILTIN, 1);
-    //         delay(20);
-    //         digitalWrite(FLASH_BUILTIN, 0);
-
-    // #if DEBUG
-    //         Serial.println("[ESP] BUTTON PRESSED >> EEPROM value at addr 0 is cleared");
-    //         Serial.println("[ESP] Resetting ESP ... !!!");
-    // #endif
-    //         ESP.restart(); // return
-    //       }
-    //     }
-
     //! if EEP value at addr 0 is 1 && not hold button >> send camera is ready
     param1["ev"] = "espEnCamera";
 #if DEBUG
     Serial.println("Sending <espEnCamera> event");
 #endif
   }
-
   //! else if EEPROM value at addr no.0 is 0 then enter pairing mode WITHOUT asking
   else
   {
@@ -234,7 +193,12 @@ void setup()
   param1["UID"] = finalUID;
   serializeJson(doc, jsonOut);
 
+  //!================/ WebSocket Config /================!//
   webSocket.begin(HOST, PORT, "/"); // server address, port and URL
+  webSocket.onEvent(webSocketEventHandle);
+  delay(2000);                       // delay for DATA socket go first then CAMERA socket
+  webSocketCam.begin(HOST, 82, "/"); // server address, port and URL
+  webSocketCam.onEvent(webSocketCamEventHandle);
 
   //!================/ AI-Thinker Camera Config /================!//
   if (EEPROM.read(0) == 1)
@@ -281,64 +245,20 @@ void setup()
     esp_err_t err = esp_camera_init(&config);
     if (err != ESP_OK)
     {
-      webSocket.sendTXT("[{\"ev\":\"std\",\"detail\":\"[Error] Init Camera\"}]");
+      // webSocket.sendTXT("[{\"ev\":\"std\",\"detail\":\"[Error] Init Camera\"}]");
 #if DEBUG
       Serial.printf("Camera init failed with error 0x%x", err);
 #endif
       return;
     }
-    else
-      webSocket.sendTXT("[{\"ev\":\"std\",\"detail\":\"[Success] Init Camera\"}]");
+    // else
+    // webSocket.sendTXT("[{\"ev\":\"std\",\"detail\":\"[Success] Init Camera\"}]");
   }
-
-  //!================/ WebSocket Config /================!//
-  // webSocket.begin(HOST, PORT, "/"); // server address, port and URL
-  webSocket.onEvent(webSocketEventHandle);
 }
 
 void loop()
 {
-  //! polling gpio16 INT
-  // TODO: if interrupt when websocket not ready thì sao
-  if (!digitalRead(16))
-  {
-    Wire.beginTransmission(PCF);
-    Wire.write(0xFF); // have to write this >> Totem Pole
-    Wire.endTransmission();
-    Wire.requestFrom(PCF, 1); // 1 byte
-    while (Wire.available())
-    {
-      currWtlv = Wire.read();
-      if (currWtlv - preWtlv)
-      {
-        switch (currWtlv)
-        {
-          // low
-        case 0b11111111:
-          // webSocket.sendTXT("[{\"ev\":\"wtlv\",\"uId\":\"" + finalUID + "\",\"gId\":\"" + WiFi.macAddress() + "\",\"val\":30}]");
-          //todo: testing
-          webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":30}]");
-          break;
-
-          // medium
-        case 0b01111111:
-          // webSocket.sendTXT("[{\"ev\":\"wtlv\",\"uId\":\"" + finalUID + "\",\"gId\":\"" + WiFi.macAddress() + "\",\"val\":60}]");
-          //todo: testing
-          webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":60}]");
-          break;
-
-          // high
-        case 0b00111111:
-          // webSocket.sendTXT("[{\"ev\":\"wtlv\",\"uId\":\"" + finalUID + "\",\"gId\":\"" + WiFi.macAddress() + "\",\"val\":90}]");
-          //todo: testing
-          webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":90}]");
-          break;
-        }
-        preWtlv = currWtlv;
-      }
-    }
-  }
-
+  //!================/ send CAMERA stream to server /=================!//
   if (flagEnCam)
   {
     camera_fb_t *fb = esp_camera_fb_get();
@@ -357,71 +277,12 @@ void loop()
 #endif
       return;
     }
-    webSocket.sendBIN(fb->buf, fb->len); // send message to server when Connected
+    webSocketCam.sendBIN(fb->buf, fb->len); // send message to server when Connected
 
     esp_camera_fb_return(fb);
   }
 
-  //!================= Zigbee OnEvent ==================!//
-  if (Serial1.available())
-  {
-    // String recvZigbee = Serial1.readStringUntil('\n');
-    // #if DEBUG
-    //     Serial.println(recvZigbee);
-    // #endif
-
-    // StaticJsonDocument<200> docParser;
-    DeserializationError error = deserializeJson(docParser, Serial1);
-    if (error)
-    {
-#if DEBUG
-      Serial.print(F("deserializeJson() failed: "));
-      Serial.println(error.c_str());
-#endif
-    }
-    else
-    {
-      String slaveId = docParser["id"];
-      String recvEvent = docParser["ev"];
-
-      if (recvEvent == "lgH")
-      {
-        webSocket.sendTXT("[{\"ev\":\"lgH\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
-      }
-      else if (recvEvent == "lgT")
-      {
-        webSocket.sendTXT("[{\"ev\":\"lgT\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
-      }
-      else if (recvEvent == "lgG")
-      {
-        webSocket.sendTXT("[{\"ev\":\"lgG\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
-      }
-      else if (recvEvent == "mns")
-      {
-        webSocket.sendTXT("[{\"ev\":\"mns\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<bool>() + "}]");
-      }
-      else if (recvEvent == "thrOK")
-      {
-        webSocket.sendTXT("[{\"ev\":\"thrOK\"}]");
-      }
-      else if (recvEvent == "ckstOK")
-      {
-        webSocket.sendTXT("[{\"ev\":\"ckstOK\",\"dvId\":\"" + slaveId + "\"}]");
-      }
-      else if (recvEvent == "delGar")
-      {
-        webSocket.sendTXT("[{\"ev\":\"delGar\",\"dvId\":\"" + slaveId + "\"}]");
-      }
-      else if (recvEvent == "inOK")
-      {
-        webSocket.sendTXT("[{\"ev\":\"inOK\"}]");
-#if DEBUG
-        Serial.println("[INFO] " + slaveId + " complete pairing new device");
-#endif
-      }
-    }
-  }
-  webSocket.loop();
+  webSocketCam.loop();
 }
 
 //!================/ FreeRTOS Tasks Func /================!//
@@ -433,7 +294,101 @@ void Task2Func(void *pvParameters)
 #endif
   while (1)
   {
-    //! on event add new gardens
+    webSocket.loop();
+
+    //!=========/ polling gpio16 INT /========!//
+    // todo: if interrupt when websocket not ready thì sao
+    if (!digitalRead(16))
+    {
+      Wire.beginTransmission(PCF);
+      Wire.write(0xFF); // have to write this >> Totem Pole
+      Wire.endTransmission();
+      Wire.requestFrom(PCF, 1); // 1 byte
+      while (Wire.available())
+      {
+        currWtlv = Wire.read();
+        if (currWtlv - preWtlv)
+        {
+          switch (currWtlv)
+          {
+            // low
+          case 0b11111111:
+            //todo: testing
+            webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":30}]");
+            break;
+
+            // medium
+          case 0b01111111:
+            //todo: testing
+            webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":60}]");
+            break;
+
+            // high
+          case 0b00111111:
+            //todo: testing
+            webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":90}]");
+            break;
+          }
+          preWtlv = currWtlv;
+        }
+      }
+    }
+
+    //!================= Zigbee OnEvent ==================!//
+    if (Serial1.available())
+    {
+      DeserializationError error = deserializeJson(docParser, Serial1);
+      if (error)
+      {
+#if DEBUG
+        Serial.print(F("deserializeJson() failed: "));
+        Serial.println(error.c_str());
+#endif
+      }
+      else
+      {
+        String slaveId = docParser["id"];
+        String recvEvent = docParser["ev"];
+
+        if (recvEvent == "lgH")
+        {
+          webSocket.sendTXT("[{\"ev\":\"lgH\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
+        }
+        else if (recvEvent == "lgT")
+        {
+          webSocket.sendTXT("[{\"ev\":\"lgT\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
+        }
+        else if (recvEvent == "lgG")
+        {
+          webSocket.sendTXT("[{\"ev\":\"lgG\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<String>() + "}]");
+        }
+        else if (recvEvent == "mns")
+        {
+          webSocket.sendTXT("[{\"ev\":\"mns\",\"dvId\":\"" + slaveId + "\",\"val\":" + docParser["val"].as<bool>() + "}]");
+        }
+        else if (recvEvent == "thrOK")
+        {
+          webSocket.sendTXT("[{\"ev\":\"thrOK\"}]");
+        }
+        else if (recvEvent == "ckstOK")
+        {
+          webSocket.sendTXT("[{\"ev\":\"ckstOK\",\"dvId\":\"" + slaveId + "\"}]");
+        }
+        else if (recvEvent == "delGar")
+        {
+          webSocket.sendTXT("[{\"ev\":\"delGar\",\"dvId\":\"" + slaveId + "\"}]");
+        }
+        else if (recvEvent == "inOK")
+        {
+          webSocket.sendTXT("[{\"ev\":\"inOK\"}]");
+#if DEBUG
+          Serial.println("[INFO] " + slaveId + " complete pairing new device");
+#endif
+        }
+      }
+    }
+
+    //!========= on event add new gardens via TTL USB ========!//
     if (Serial.available())
     {
       // String recvTTL = Serial.readStringUntil('\n');
@@ -507,7 +462,50 @@ void Task2Func(void *pvParameters)
   }
 }
 
-//!================/ Func Define /================!//
+//!================/ CAMERA Func Define /================!//
+void webSocketCamEventHandle(WStype_t type, uint8_t *payload, size_t length)
+{
+  switch (type)
+  {
+  case WStype_DISCONNECTED:
+    break;
+
+  case WStype_CONNECTED:
+#if DEBUG
+    Serial.printf("[wsCAM] Connected to url: %s\n", payload);
+#endif
+    webSocketCam.sendTXT(jsonOut);
+    break;
+
+    // todo: testing
+  case WStype_TEXT:
+    //? not use global <docParser> b/c may be duplicate thread use that variable
+    StaticJsonDocument<200> docParserCam;
+    DeserializationError error = deserializeJson(docParserCam, payload, length);
+    if (error)
+    {
+#if DEBUG
+      Serial.print(F("[ERROR] deserializeJson() failed"));
+#endif
+      return;
+    }
+    else
+    {
+      String eventName = docParserCam["ev"];
+
+      if (eventName == "RESTART_ESP")
+      {
+#if DEBUG
+        Serial.println("[INFO] Server request ESP to restart");
+#endif
+        ESP.restart();
+      }
+    }
+    break;
+  }
+}
+
+//!================/ DATA Func Define /================!//
 void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
 {
   switch (type)
@@ -526,7 +524,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
 
   case WStype_CONNECTED:
 #if DEBUG
-    Serial.printf("[WSc] Connected to url: %s\n", payload);
+    Serial.printf("[wsDATA] Connected to url: %s\n", payload);
 #endif
     //? ====/ send message to server when Connected /==== ?//
     // [{"ev":"espEnCamera","MAC":"24:6F:28:B0:B5:10","IP":"192.168.1.3","SSID":"VIETTEL","PSK":"Sherlock21vtag","UID":"bApb0Ypwg5YszGanWOBKre39zlg1"}]
@@ -534,7 +532,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
 
     break;
 
-    //!===============/ socket ON recieve data /================!//
+    //!===============/ ON recieve data /================!//
   case WStype_TEXT:
     // Serial.printf("[WSc] %s\n", payload);
 #if DEBUG
@@ -601,28 +599,7 @@ void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
 #endif
         ESP.restart();
       }
-
-      //       else if (eventName == "regDV")
-      //       {
-      // #if DEBUG
-      //         Serial.println("[INFO] New QR Device Detected");
-      //         Serial.println("[INFO] Ready to send ack confirm via UART1 Zigbee");
-      // #endif
-      //         String initDvAddr = recvDoc["initDvAddr"];
-      //         // sending init json string
-      //         Serial1.println("{\"id\":\"" + initDvAddr + "\",\"ev\":\"init\"}");
-      //       }
     }
-
-    //? Fetch values.
-    // char json[] = "{\"sensor\":\"gps\",\"time\":1351824120,\"data\":[48.756080,2.302038]}";
-    // Most of the time, you can rely on the implicit casts.
-    // In other case, you can do doc["time"].as<long>();
-    // const char *sensor = recvDoc["sensor"];
-    // long time = recvDoc["time"];
-    // double latitude = recvDoc["data"][0];
-    // double longitude = recvDoc["data"][1];
-
     break;
   }
 }
