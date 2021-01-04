@@ -1,33 +1,32 @@
 // EEPROM structure [addr 0: this device is blank or not, addr 1:this device still exist in databse or not, addr 10: tThresh, addr 11,12: gThresh, addr 13,14: gThreshOffset, addr15: (0bxxxxxx11)rqModeManual-bit6, currMotor-bit7]
 
 #define DEBUG false
-#define VERSION 1
+#define VERSION 2
 
 #include <SoftwareSerial.h>
 #include <ArduinoJson.h>
 #include <EEPROM.h>
 #include "DHT.h"
 
-String deviceId = "2B"; // fixed value
+String deviceId = "1A"; // fixed value
 
 #if VERSION == 1
-#define misty 5              // phun sương
-#define btnClearEEP 7        // xoá eeprom
-#define motorGnd 6           // nhỏ giọt
-#define buzzer 8             // còi chíp
-#define DHTPIN 2             // Đọc dữ liệu từ DHT11 ở chân 4 trên mạch Arduino
-SoftwareSerial zigbee(3, 4); // RX TX
+#define misty 5       // phun sương
+#define btnClearEEP 7 // xoá eeprom
+#define motorGnd 6    // nhỏ giọt
+#define buzzer 8      // còi chíp
+#define DHTPIN 2      // Đọc dữ liệu từ DHT11 ở chân 4 trên mạch Arduino
 #elif VERSION == 2
 #define misty 5       // phun sương
 #define btnClearEEP 2 // xoá eeprom
 #define motorGnd 6    // nhỏ giọt
 #define buzzer 8      // còi chíp
 #define DHTPIN 7      // Đọc dữ liệu từ DHT11 ở chân 4 trên mạch Arduino
-SoftwareSerial zigbee(3, 4); // RX TX
 #endif
-#define DHTTYPE DHT11 // Khai báo loại cảm biến, có 2 loại là DHT11 và DHT22
-#define DHT_RATE 3000 // dht sampling rate time [milliseconds]
-#define GND_RATE 3000 // earth sensor sampling rate time [milliseconds]
+#define DHTTYPE DHT11        // Khai báo loại cảm biến, có 2 loại là DHT11 và DHT22
+#define DHT_RATE 3000        // dht sampling rate time [milliseconds]
+#define GND_RATE 3000        // earth sensor sampling rate time [milliseconds]
+SoftwareSerial zigbee(3, 4); // RX TX
 
 enum blinkTypes
 {
@@ -330,7 +329,7 @@ void loop()
 #endif
         }
 
-        //!======/ send dht temperature sensor to server every 1 sec /======!//
+        //!======/ send dht temperature sensor to server every 3 sec /======!//
         if (++countTemp >= 1)
         {
           zigbee.println("{\"id\":\"" + deviceId + "\",\"ev\":\"lgT\",\"val\":\"" + String(currentTemp) + "\"}");

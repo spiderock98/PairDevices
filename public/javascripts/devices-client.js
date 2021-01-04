@@ -197,8 +197,18 @@ function configMap() {
 //     $("#modalNewDevice").modal("toggle")
 // }
 function floatBtnNewGarden() {
-    //? views/devices/modalNewGarden.ejs
-    $("#modalNewGarden").modal("toggle")
+    if ($("#inputGroupSelectPORT").val() == null) {
+        Swal.fire({
+            icon: "error",
+            showConfirmButton: false,
+            width: 500,
+            background: '#fff url("https://cdn.arstechnica.net/wp-content/uploads/2014/08/usb.gif")'
+        }).then(() => (location.href = "/devices"))
+    }
+    else {
+        //? views/devices/modalNewGarden.ejs
+        $("#modalNewGarden").modal("toggle");
+    }
 }
 
 //!============/ Others  /===========!//

@@ -1,4 +1,4 @@
-#define VERSION 1
+#define VERSION 2
 #define DEBUG false
 #define TEST true
 #define FLASH false
@@ -24,7 +24,8 @@ WebSocketsClient webSocketCam;
 #define EEPROM_SIZE 100 // define the number of bytes you want to access
 bool flagEnCam = false;
 
-#define HOST "192.168.1.99"
+// #define HOST "115.76.144.9"
+#define HOST "192.168.2.123"
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
@@ -40,7 +41,16 @@ TaskHandle_t Task2;
 
 StaticJsonDocument<200> docParser;
 
-uint8_t currWtlv = 0, preWtlv = 0;
+uint8_t currWtlv = 0,
+        preWtlv = 0;
+uint32_t nowWdCam = 0;
+uint32_t nowPCF = 0;
+
+// uint32_t pongDogSocketData = 50000;
+// uint32_t pongDogSocketData = 15;
+// uint32_t pongDogSocketCamera = 70000;
+// bool isWsDataAlive = false;
+// bool isWsCamAlive = false;
 
 void setup()
 {
@@ -48,16 +58,18 @@ void setup()
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   EEPROM.begin(EEPROM_SIZE);
-#ifdef VERSION == 1
-  Wire.begin(15, 14); // i2c water level SDA SCK
-#elif VERSION == 2
   Wire.begin(14, 15); // i2c water level SDA SCK
-#endif
+
+  // #ifdef VERSION == 1
+  //   Wire.begin(15, 14); // i2c water level SDA SCK
+  // #elif VERSION == 2
+  // Wire.begin(14, 15); // i2c water level SDA SCK
+  // #endif
 
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(FLASH_BUILTIN, OUTPUT);
-  pinMode(0, INPUT_PULLUP);
-  pinMode(16, INPUT); // interrupt water level
+  // pinMode(0, INPUT_PULLUP);
+  pinMode(0, INPUT); // interrupt water level
 
   //!create a task that will be executed in the TaskxFunc() function, with priority 1 and executed on core x
   // xTaskCreatePinnedToCore(
@@ -232,8 +244,8 @@ void setup()
       config.frame_size = FRAMESIZE_CIF;
       // config.frame_size = FRAMESIZE_QCIF;
 
-      // config.jpeg_quality = 40;
-      config.jpeg_quality = 62;
+      config.jpeg_quality = 40;
+      // config.jpeg_quality = 62;
       config.fb_count = 2;
     }
     else
@@ -284,6 +296,11 @@ void loop()
   }
 
   webSocketCam.loop();
+  //todo testing
+  // if (!(--pongDogSocketCamera))
+  // {
+  //   ESP.restart();
+  // }
 }
 
 //!================/ FreeRTOS Tasks Func /================!//
@@ -295,12 +312,35 @@ void Task2Func(void *pvParameters)
 #endif
   while (1)
   {
+    //todo testing
+    // if (!(--pongDogSocketData))
+    // {
+    //   ESP.restart();
+    // }
+    // else
+    // {
+    //   Serial.println(pongDogSocketData);
+    // }
+
+    // if (millis() - nowWdCam > 1000)
+    // {
+    //   if (!(--pongDogSocketData))
+    //   {
+    //     ESP.restart();
+    //   }
+    //   nowWdCam = millis();
+    // }
+
     webSocket.loop();
 
     //!=========/ polling gpio16 INT /========!//
     // todo: if interrupt when websocket not ready thì sao
-    if (!digitalRead(16))
+    // Serial.println(analogRead(4));
+
+    if (!digitalRead(0) && (millis() - nowPCF > 1000))
+    // if (analogRead(4) < 2482) // 2V
     {
+      // digitalWrite(FLASH_BUILTIN,1);
       Wire.beginTransmission(PCF);
       Wire.write(0xFF); // have to write this >> Totem Pole
       Wire.endTransmission();
@@ -308,28 +348,40 @@ void Task2Func(void *pvParameters)
       while (Wire.available())
       {
         currWtlv = Wire.read();
+        // Serial.println(currWtlv, BIN);
         if (currWtlv - preWtlv)
         {
           switch (currWtlv)
           {
             // low
           case 0b11111111:
-            webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":30}]");
+            // digitalWrite(FLASH_BUILTIN, 1);
+            webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":10}]");
             break;
 
             // medium
           case 0b01111111:
-            webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":60}]");
+            // digitalWrite(FLASH_BUILTIN, 0);
+            webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":40}]");
             break;
 
             // high
           case 0b00111111:
-            webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":90}]");
+            // digitalWrite(FLASH_BUILTIN, 1);
+            webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":70}]");
+            break;
+
+            // ultra high
+          case 0b00011111:
+            // digitalWrite(FLASH_BUILTIN, 0);
+            webSocket.sendTXT("[{\"ev\":\"wtlv\",\"val\":100}]");
             break;
           }
           preWtlv = currWtlv;
         }
       }
+
+      nowPCF = millis();
     }
 
     //!================= Zigbee OnEvent ==================!//
@@ -460,19 +512,30 @@ void Task2Func(void *pvParameters)
   }
 }
 
-//!================/ CAMERA Func Define /================!//
+//!================/ port 82 CAMERA Func Define /================!//
 void webSocketCamEventHandle(WStype_t type, uint8_t *payload, size_t length)
 {
   switch (type)
   {
+    //todo testing
+  case WStype_PING:
+    // if esp got ping >> pong will be send automatically
+    // pongDogSocketCamera = 70000;
+    break;
+
   case WStype_DISCONNECTED:
+    // isWsCamAlive = false;
     break;
 
   case WStype_CONNECTED:
+    // isWsCamAlive = true;
 #if DEBUG
     Serial.printf("[wsCAM] Connected to url: %s\n", payload);
 #endif
     webSocketCam.sendTXT(jsonOut);
+    digitalWrite(FLASH_BUILTIN, 1);
+    delay(1000);
+    digitalWrite(FLASH_BUILTIN, 0);
     break;
 
   case WStype_TEXT:
@@ -502,24 +565,26 @@ void webSocketCamEventHandle(WStype_t type, uint8_t *payload, size_t length)
   }
 }
 
-//!================/ DATA Func Define /================!//
+//!================/ port 81 DATA Func Define /================!//
 void webSocketEventHandle(WStype_t type, uint8_t *payload, size_t length)
 {
   switch (type)
   {
+    //todo testing
   case WStype_PING:
-    // pong will be send automatically
-    // Serial.printf("[WSc] get ping\n");
+    // if esp got ping >> pong will be send automatically
+    // pongDogSocketData = 50000;
     break;
 
   case WStype_DISCONNECTED:
+    // isWsDataAlive = false;
 #if DEBUG
     Serial.printf("[WSc] Disconnected from %s:%s\n", HOST, PORT);
 #endif
-    digitalWrite(LED_BUILTIN, 1);
     break;
 
   case WStype_CONNECTED:
+    // isWsDataAlive = true;
 #if DEBUG
     Serial.printf("[wsDATA] Connected to url: %s\n", payload);
 #endif

@@ -62,7 +62,7 @@
                                 <i class="fas fa-download fa-sm text-white-50"></i>&nbsp;Generate Report
                             </a>
                         </div>
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="col-md-6 col-xl-3 mb-4">
                                 <div class="card shadow border-left-primary py-2">
                                     <div class="card-body">
@@ -84,7 +84,7 @@
                                 <div class="card shadow border-left-success py-2">
                                     <div class="card-body">
                                         <div class="row align-items-center no-gutters">
-                                            <div class="col mr-2">
+                                            <div class  ="col mr-2">
                                                 <div class="text-uppercase text-success font-weight-bold text-xs mb-1">
                                                     <span>Earnings (annual)</span>
                                                 </div>
@@ -145,15 +145,15 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- Start:  -->
                         <div class="row">
-                            <div class="col-lg-7 col-xl-10">
+                            <div class="col-lg-12 col-xl-12">
                                 <div class="card shadow mb-4">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <h6 class="text-primary font-weight-bold m-0">Vị trí đặt thiết bị</h6>
                                     </div>
-                                    <div id="viewMap" style="height:280px; ">
+                                    <div id="viewMap" style="height:400px; ">
                                         <!-- pass value to home-client.js -->
                                         <p style="display: none;" class="hidLatCoor">
                                             <%= detailGardenInfo.val().location.latCoor %>
@@ -167,7 +167,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-5 col-xl-2">
+                            <!-- <div class="col-lg-5 col-xl-2">
                                 <div class="card shadow mb-4">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <h6 class="text-primary font-weight-bold m-0">Security Camera</h6>
@@ -175,18 +175,17 @@
                                             Camera</button>
                                     </div>
                                     <div class="card-body">
-                                        <!-- 640x480 -->
                                         <div>
                                             <img width="320" height="240" id="cap" src=""
                                                 onerror="this.src='images/icons8-disconnected.svg'">
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
 
                         <!-- End:  -->
-                        <div class="row">
+                        <!-- <div class="row">
                             <div class="col-lg-6 mb-4">
                                 <div class="card shadow mb-4">
                                     <div class="card-header py-3">
@@ -284,23 +283,37 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-
+                        </div> -->
 
                         <!-- Start: Chart -->
                         <div class="row">
-                            <div class="col-lg-7 col-xl-10">
+                            <!-- <div class="col-lg-7 col-xl-10">
                                 <div class="card shadow mb-4">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <h6 class="text-primary font-weight-bold m-0">My Chart</h6>
                                     </div>
                                     <div class="card-body">
-                                        <!--Div that will hold the pie chart-->
                                         <div id="chart_div"></div>
                                     </div>
                                 </div>
+                            </div> -->
+
+                            <div class="col-lg-7 col-xl-10">
+                                <div class="card shadow mb-4">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="text-primary font-weight-bold m-0">Security Camera</h6>
+                                        <button id="btnReloadCam" type="button" class="btn btn-warning">Refresh
+                                            Camera</button>
+                                    </div>
+                                    <div class="card-body">
+                                        <div>
+                                            <img width="400" height="296" id="cap" src=""
+                                                onerror="this.src='images/icons8-disconnected.svg'">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+
                             <div class="col-lg-5 col-xl-2">
                                 <div class="card shadow mb-4">
                                     <div class="card-header d-flex justify-content-between align-items-center">

@@ -1,4 +1,4 @@
-// objEnCam = { gardenIdMac1: { arrCamBrow: [wsESP, wsBrowser, wsElectron, ...], uid: ownerUID,  state: 0, pingpong: true, arrQueue: [ { thrTemp: [uid, garId, dvId, valTemp] }, { thrGround: [uid, garId, dvId, valGround] }, {swrNho: 1/0}, {swTO: 1/0}, {delDeviceCmdFromBrow: 1} ...] } }
+// objEnCam = { gardenIdMac1: { arrCamBrow: [wsESP, wsBrowser, wsElectron, ...], uid: ownerUID,  state: 0, pingpongData: true,pingpongCam: true, arrQueue: [ { thrTemp: [uid, garId, dvId, valTemp] }, { thrGround: [uid, garId, dvId, valGround] }, {swrNho: 1/0}, {swTO: 1/0}, {delDeviceCmdFromBrow: 1} ...] } }
 
 const express = require('express');
 const router = express.Router();
@@ -327,9 +327,6 @@ router.get("/genReport", (req, res) => {
         })
 });
 
-router.get("/snapshot", (req, res) => {
-    res.render("snapshot");
-})
 router.post("/snapshot", (req, res) => {
     const form = formidable({ multiples: true, uploadDir: path.join(__dirname, "../", "public", "images", "snapCard", "tmp") });
     form.parse(req, function (err, fields, files) {
@@ -523,6 +520,11 @@ wsServerData.on("connection", wsCam => {
                     msgMACcam = payload.MAC;
                     //! add data to new objEnCam instance create below
                     objEnCam[payload.MAC]["arrCamBrow"].push(wsCam);
+                    // wsCam.on("pong", () => {
+                    //     if (objEnCam.hasOwnProperty(payload.MAC)) {
+                    //         objEnCam[payload.MAC]["pingpongCam"] = true;
+                    //     }
+                    // })
                     console.log("[wsCam]", objEnCam);
                     break;
 
@@ -865,11 +867,12 @@ wsServer.on("connection", ws => {
                     });
 
                     //! create a new objEnCam instance
-                    objEnCam[payload.MAC] = { "arrCamBrow": [ws], uid: msgUID, state: 0, pingpong: true, arrQueue: [] };
-                    // listener pong back from esp32
+                    objEnCam[payload.MAC] = { "arrCamBrow": [ws], uid: msgUID, state: 0, pingpongData: true, pingpongCam: true, arrQueue: [] };
+
+                    // listener pong back from esp32 DATA socket
                     ws.on("pong", () => {
                         if (objEnCam.hasOwnProperty(payload.MAC)) {
-                            objEnCam[payload.MAC]["pingpong"] = true;
+                            objEnCam[payload.MAC]["pingpongData"] = true;
                         }
                     })
                     console.log("[ESP] here your camera data is available", objEnCam);
@@ -956,25 +959,46 @@ setInterval(() => {
     for (const mac in objEnCam) {
         if (objEnCam.hasOwnProperty(mac)) {
             const el = objEnCam[mac];
-            // check ping pong state
-            if (el["pingpong"] == false) {
-                console.error("[Server] Cannot recieve PONG from", mac);
+
+            // check ping pong state DATA socket
+            if (el["pingpongData"] == false) {
+                console.error("[Server] Cannot recieve PONG from DATA socket", mac);
                 admin.database().ref(`Gardens/${el["uid"]}/${mac}`).update({
                     status: 0 // offline
                 }, err => { if (err) console.log(err); });
-                console.error("[Server] Socket Error >> POP...ing Error CAMERA");
+                console.error("[Server] Socket Error >> POP...ing Error DATA socket");
 
-                objEnCam[mac]["arrCamBrow"].forEach(elWs => {
-                    elWs.send('{"ev":"RESTART_ESP"}');
-                });
+                // objEnCam[mac]["arrCamBrow"].forEach(elWs => {
+                //     elWs.send('{"ev":"RESTART_ESP"}');
+                // });
                 //todo: send messgae log error to all browser before delete
                 delete objEnCam[mac];
             }
             if (objEnCam.hasOwnProperty(mac)) {
-                el["pingpong"] = false
+                el["pingpongData"] = false
+                // send PING to gateway DATA socket
                 el["arrCamBrow"][0].ping();
             }
 
+            // check ping pong state CAMERA socket
+            // if (el["pingpongCam"] == false) {
+            //     console.error("[Server] Cannot recieve PONG from CAMERA socket", mac);
+            //     admin.database().ref(`Gardens/${el["uid"]}/${mac}`).update({
+            //         status: 0 // offline
+            //     }, err => { if (err) console.log(err); });
+            //     console.error("[Server] Socket Error >> POP...ing Error CAMERA socket");
+
+            //     // objEnCam[mac]["arrCamBrow"].forEach(elWs => {
+            //     //     elWs.send('{"ev":"RESTART_ESP"}');
+            //     // });
+            //     //todo: send messgae log error to all browser before delete
+            //     delete objEnCam[mac];
+            // }
+            // if (objEnCam.hasOwnProperty(mac)) {
+            //     el["pingpongCam"] = false
+            //     // send PING to gateway CAMERA socket
+            //     el["arrCamBrow"][1].ping();
+            // }
         }
     }
 }, 15000);
