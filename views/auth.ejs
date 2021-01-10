@@ -29,11 +29,12 @@
     <form action="/auth" id="loginForm">
       <h2 class="text-center">Đề Tài Tốt Nghiệp</h2>
       <div class="text-center social-btn">
-        <a id="authFacebook" class="btn btn-primary btn-block"><i class="fab fa-facebook"></i> Sign in with
+        <a id="authFacebook" class="btn btn-primary btn-block"><i class="fab fa-facebook"></i> Đăng nhập bằng
           <b>Facebook</b></a>
-        <a id="authGoogle" class="btn btn-danger btn-block"><i class="fab fa-google"></i> Sign in with <b>Google</b></a>
+        <a id="authGoogle" class="btn btn-danger btn-block"><i class="fab fa-google"></i> Đăng nhập bằng
+          <b>Google</b></a>
       </div>
-      <div class="or-seperator"><i>or</i></div>
+      <div class="or-seperator"><i>hoặc</i></div>
 
       <div class="form-group">
         <div class="input-group">
@@ -47,8 +48,13 @@
           <input type="password" class="form-control" name="psk" placeholder="Password" required="required">
         </div>
       </div>
-      <div class="form-group">
-        <button type="submit" class="btn btn-success btn-block login-btn">Sign in</button>
+      <div class="form-group row">
+        <div class="col-6">
+          <button type="submit" id="btnUp" class="btn btn-success btn-block login-btn">Đăng Ký</button>
+        </div>
+        <div class="col-6">
+          <button type="submit" id="btnIn" class="btn btn-success btn-block login-btn">Đăng Nhập</button>
+        </div>
       </div>
     </form>
 

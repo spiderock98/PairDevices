@@ -8,20 +8,20 @@
 #include <EEPROM.h>
 #include "DHT.h"
 
-String deviceId = "1A"; // fixed value
+String deviceId = "2B"; // fixed value
 
 #if VERSION == 1
 #define misty 5       // phun sương
 #define btnClearEEP 7 // xoá eeprom
 #define motorGnd 6    // nhỏ giọt
 #define buzzer 8      // còi chíp
-#define DHTPIN 2      // Đọc dữ liệu từ DHT11 ở chân 4 trên mạch Arduino
+#define DHTPIN 2      // Đọc dữ liệu từ DHT11 ở trên mạch Arduino
 #elif VERSION == 2
 #define misty 5       // phun sương
 #define btnClearEEP 2 // xoá eeprom
 #define motorGnd 6    // nhỏ giọt
 #define buzzer 8      // còi chíp
-#define DHTPIN 7      // Đọc dữ liệu từ DHT11 ở chân 4 trên mạch Arduino
+#define DHTPIN 7      // Đọc dữ liệu từ DHT11 ở trên mạch Arduino
 #endif
 #define DHTTYPE DHT11        // Khai báo loại cảm biến, có 2 loại là DHT11 và DHT22
 #define DHT_RATE 3000        // dht sampling rate time [milliseconds]
@@ -175,7 +175,7 @@ void loop()
         {
           zigbee.println("{\"id\":\"" + deviceId + "\",\"ev\":\"thrOK\"}");
           rqModeManual = docParser["st"];
-          EEPROM.update(15, rqModeManual ? (0b10 | EEPROM.read(15)) : (0b01 & EEPROM.read(15)));
+          EEPROM.write(15, rqModeManual ? (0b10 | EEPROM.read(15)) : (0b01 & EEPROM.read(15)));
 #if DEBUG
           String recvMode = rqModeManual ? "True" : "False";
           Serial.println("[INFO] rqModeManual: " + recvMode);
@@ -190,7 +190,7 @@ void loop()
           {
             digitalWrite(motorGnd, 1);
             currMotor = 1;
-            EEPROM.update(15, EEPROM.read(15) | 0b01);
+            EEPROM.write(15, EEPROM.read(15) | 0b01);
 #if DEBUG
             Serial.println("[Manual_ing] BAT");
 #endif
@@ -199,7 +199,7 @@ void loop()
           {
             digitalWrite(motorGnd, 0);
             currMotor = 0;
-            EEPROM.update(15, EEPROM.read(15) & 0b10);
+            EEPROM.write(15, EEPROM.read(15) & 0b10);
 #if DEBUG
             Serial.println("[Manual_ing] TAT");
 #endif
@@ -219,7 +219,7 @@ void loop()
           tThresh = recvT;
           // hThresh = recvH;
           flagExeOnUpdateThrTemp = true;
-          EEPROM.update(10, tThresh);
+          EEPROM.write(10, tThresh);
           blinkNtimes(BUZZER, 2, 100);
 #if DEBUG
           Serial.print("Temp threshold updated: ");
@@ -263,7 +263,7 @@ void loop()
 #if DEBUG
           Serial.println("Clearing EEPROM at addr 0 and Trying delete database");
 #endif
-          EEPROM.update(0, 0);
+          EEPROM.write(0, 0);
           blinkNtimes(BUZZER, 1, 2000);
 #if DEBUG
           Serial.println("Reseting ...");
@@ -312,7 +312,8 @@ void loop()
         if (currentTemp >= tThresh)
         {
           byte out = 150 + ((currentTemp - tThresh) * 8); // maximum outside temp: 45,
-          analogWrite(misty, out);
+          analogWrite(misty, map(out, 0, 255, 0, 106));
+
 #if DEBUG
           Serial.print("currentTemp: ");
           Serial.println(currentTemp);
@@ -410,7 +411,7 @@ void gndAutoHandle(uint16_t gndVal, uint16_t upThresh, uint16_t lowThresh)
     zigbee.println("{\"id\":\"" + deviceId + "\",\"ev\":\"mns\",\"val\":1}");
     digitalWrite(motorGnd, 1);
     currMotor = 1;
-    EEPROM.update(15, EEPROM.read(15) | 0b01);
+    EEPROM.write(15, EEPROM.read(15) | 0b01);
 #if DEBUG
     Serial.println("[Thresh]: BAT");
 #endif
@@ -420,7 +421,7 @@ void gndAutoHandle(uint16_t gndVal, uint16_t upThresh, uint16_t lowThresh)
     zigbee.println("{\"id\":\"" + deviceId + "\",\"ev\":\"mns\",\"val\":0}");
     digitalWrite(motorGnd, 0);
     currMotor = 0;
-    EEPROM.update(15, EEPROM.read(15) & 0b10);
+    EEPROM.write(15, EEPROM.read(15) & 0b10);
 #if DEBUG
     Serial.println("[Thresh]: TAT");
 #endif
@@ -456,8 +457,8 @@ void EEPROMWriteInt(uint16_t addr, uint16_t value)
   uint8_t lsb = (value & 0xFF);
   uint8_t msb = ((value >> 8) & 0xFF);
 
-  EEPROM.update(addr, lsb);
-  EEPROM.update(addr + 1, msb);
+  EEPROM.write(addr, lsb);
+  EEPROM.write(addr + 1, msb);
 }
 
 int EEPROMReadInt(uint16_t addr)

@@ -97,100 +97,105 @@ firebase
 
 $("#loginForm").on('submit', event => {
   event.preventDefault();
-  Swal.showLoading();
-
   let id = $("#loginForm").find("input[name='id']").val();
   let psk = $("#loginForm").find("input[name='psk']").val();
+
+  if (event.originalEvent.submitter.innerHTML == "Đăng Nhập") {
+    firebase
+      .auth()
+      .signInWithEmailAndPassword(id, psk)
+      .catch(err => {
+        Swal.fire({
+          title: err,
+          icon: "error",
+          allowOutsideClick: false
+        })
+      })
+  }
+  else if (event.originalEvent.submitter.innerHTML == "Đăng Ký") {
+    Swal.showLoading();
+    Swal.fire({
+      icon: 'question',
+      confirmButtonText: 'Đăng ký tài khoản mới'
+    }).then((result) => {
+      if (result.value) {
+        Swal.mixin({
+          input: 'text',
+          confirmButtonText: 'Next &rarr;',
+          showCancelButton: true,
+          progressSteps: ['1', '2', '3']
+        }).queue([
+          {
+            title: 'Email',
+            input: 'email',
+            inputPlaceholder: 'Enter your email address'
+          },
+          {
+            title: 'Mật Khẩu',
+            input: 'password',
+            inputPlaceholder: 'Enter your password'
+          },
+          {
+            title: 'Họ và Tên',
+            input: 'text',
+            inputValidator: txtDisplayName => {
+              if (!txtDisplayName) {
+                return 'You need to write something!'
+              }
+            }
+          }
+        ]).then((result) => {
+          if (result.value) {
+            Swal.showLoading();
+            $.ajax({
+              method: "POST",
+              url: "/auth/register",
+              data: {
+                email: result.value[0],
+                password: result.value[1],
+                displayName: result.value[2]
+              },
+              success: (data) => {
+                switch (data.code) {
+                  case "auth/email-already-exists":
+                    Swal.fire({
+                      title: "The provided email is already in use by an existing user. Each user must have a unique email",
+                      text: "choose an other email address",
+                      icon: "error",
+                      showConfirmButton: false,
+                      timer: 4000
+                    })
+                    break;
+
+                  case "auth/invalid-password":
+                    Swal.fire({
+                      title: "The provided value for the password user property is invalid. It must be a string with at least 6 characters",
+                      icon: "error",
+                      showConfirmButton: false,
+                      timer: 4000
+                    })
+                    break;
+
+                  default:
+                    Swal.fire({
+                      title: "Đăng ký tài khoản thành công",
+                      icon: "info"
+                    }).then(() => {
+                      location.href = "/auth";
+                    })
+                    break;
+                }
+              }
+            })
+          }
+        })
+      }
+    })
+  }
+
 
   // As httpOnly cookies are to be used, do not persist any state client side.
   // firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE);
 
   //!=============/signInWithEmailAndPassword(id, psk) on client-side/==============!//
-  //!=============/wrong id => suggest register/==============!//
-  firebase
-    .auth()
-    .signInWithEmailAndPassword(id, psk)
-    .catch(err => {
-      Swal.fire({
-        title: err,
-        icon: "error",
-        allowOutsideClick: false
-      }).then(result => {
-        // use regexp here
-        if (result.value && (err.code.toString().match(/user/g) != null)) {
-          Swal.fire({
-            icon: 'question',
-            confirmButtonText: 'Đăng ký tài khoản mới'
-          }).then((result) => {
-            if (result.value) {
-              Swal.mixin({
-                input: 'text',
-                confirmButtonText: 'Next &rarr;',
-                showCancelButton: true,
-                progressSteps: ['1', '2', '3']
-              }).queue([
-                {
-                  title: 'Email',
-                  input: 'email',
-                  inputPlaceholder: 'Enter your email address'
-                },
-                {
-                  title: 'Mật Khẩu',
-                  input: 'password',
-                  inputPlaceholder: 'Enter your password'
-                },
-                {
-                  title: 'Họ và Tên',
-                  input: 'text',
-                  inputValidator: txtDisplayName => {
-                    if (!txtDisplayName) {
-                      return 'You need to write something!'
-                    }
-                  }
-                }
-              ]).then((result) => {
-                if (result.value) {
-                  Swal.showLoading();
-                  $.ajax({
-                    method: "POST",
-                    url: "/auth/register",
-                    data: {
-                      email: result.value[0],
-                      password: result.value[1],
-                      displayName: result.value[2]
-                    },
-                    success: (data) => {
-                      switch (data.code) {
-                        case "auth/email-already-exists":
-                          Swal.fire({
-                            title: "The provided email is already in use by an existing user. Each user must have a unique email",
-                            text: "choose an other email address",
-                            icon: "error",
-                            showConfirmButton: false,
-                            timer: 4000
-                          })
-                          break;
-
-                        case "auth/invalid-password":
-                          Swal.fire({
-                            title: "The provided value for the password user property is invalid. It must be a string with at least 6 characters",
-                            icon: "error",
-                            showConfirmButton: false,
-                            timer: 4000
-                          })
-                          break;
-
-                        default:
-                          location.href = "/auth"
-                          break;
-                      }
-                    }
-                  })
-                }
-              })
-            }
-          })
-        }
-      })
-    });
 });

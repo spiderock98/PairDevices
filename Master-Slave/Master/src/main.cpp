@@ -25,7 +25,7 @@ WebSocketsClient webSocketCam;
 bool flagEnCam = false;
 
 // #define HOST "115.76.144.9"
-#define HOST "192.168.2.123"
+#define HOST "192.168.43.145"
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4

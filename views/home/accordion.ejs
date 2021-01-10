@@ -197,13 +197,15 @@
                     });
                     $("#lbDvStt<%-child.key%> *").remove();
                     $("#lbDvStt<%-child.key%>").append('<div class="spinner-border text-warning" role="status"></div>');
-
-                    // socketIO handle ckstOK event
-                    socket.once("ckstOK", dvId => {
-                        $(`#lbDvStt${dvId} *`).remove();
-                        $(`#lbDvStt${dvId}`).append('<img src="\\images\\ok.svg">');
-                    });
                 });
+                $(() => {
+                    // socketIO handle ckstOK event
+                    socket.on("ckstOK", dvId => {
+                        $(`#lbDvStt${dvId} *`).remove();
+                        $(`#lbDvStt${dvId}`).append('<i style="color: green;" class="fas fa-check-circle"></i>');
+                    });
+                })
+
 
                 //====/ google chart configuration https://developers.google.com/chart/interactive/docs/gallery/areachart /====//
                 google.charts.load('current', { 'packages': ['corechart'] });

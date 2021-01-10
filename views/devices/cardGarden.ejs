@@ -82,7 +82,7 @@
                                 }, 500);
                                 $.ajax({
                                     method: "POST",
-                                    timeout: 4000,
+                                    timeout: 7000,
                                     error: () => {
                                         Swal.fire({
                                             icon: 'error',
@@ -127,7 +127,7 @@
                         //!================/ ESP32-CAM on QR SCANNER /================!//
                         let urlObj;
                         let imgFrame = document.getElementById("cap");
-                        const WS_URL = "ws:///192.168.2.123:82";
+                        const WS_URL = "ws:///192.168.43.145:82";
                         let ws; // global websocket var
 
                         var canvasElement = document.getElementById("canvas");
