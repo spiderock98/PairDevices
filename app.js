@@ -28,7 +28,7 @@ app.use("/", require("./routes/index-server"));
 app.use("/home", require("./routes/home-server"));
 app.use("/auth", require("./routes/auth-server"));
 app.use("/devices", require("./routes/devices-server").router);
-// app.use("/home", require("./routes/home-server").router);
+app.use("/qrGen", require("./routes/qrGen-server"));
 //!====================//Firebase admin sdk config//====================!//
 const admin = require("firebase-admin");
 admin.initializeApp({
