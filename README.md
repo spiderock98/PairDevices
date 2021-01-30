@@ -17,6 +17,6 @@ Truy cập bằng browser sẽ không có đầy đủ tính năng [spiderock.xy
 * [Thuyết trình .pptx](docs/slide.pptx)
 
 ## Tác Giả
-* Nguyễn Minh Tiến - [Facebook](fb.com/spiderock98) | [Github](https://github.com/spiderock98)
+* Nguyễn Minh Tiến - [Facebook](https://www.facebook.com/spiderock98) | [Github](https://github.com/spiderock98)
 * Phạm Chí Tâm - [Facebook](https://www.facebook.com/profile.php?id=100007889464843)
 * Ngô Quốc Cường - [Facebook](https://www.facebook.com/Henry2901)
