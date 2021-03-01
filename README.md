@@ -12,6 +12,10 @@ Kéo [source](https://github.com/spiderock98/PairDevice-ElectronApp) về tự b
 ## Website Demo
 Truy cập bằng browser sẽ không có đầy đủ tính năng [spiderock.xyz](http://spiderock.xyz/)
 
+## Utilities
+### Đổi IP tự động
+`node .\utils\ChangeIP.js <YOUR_PUBLIC_IP>`
+
 ## Báo Cáo
 * [Báo Cáo .docx](docs/word.docx)
 * [Thuyết trình .pptx](docs/slide.pptx)
