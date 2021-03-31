@@ -11,22 +11,22 @@
   "dependencies": {
     "cookie-parser": "~1.4.5",
     "debug": "~4.3.1",
-    "ejs": "~3.1.5",
+    "ejs": "~3.1.6",
     "express": "~4.17.1",
-    "firebase-admin": "^9.4.2",
+    "firebase-admin": "^9.6.0",
     "formidable": "^1.2.2",
     "g": "^2.0.1",
     "http-errors": "~1.8.0",
-    "jquery": "^3.5.1",
+    "jquery": "^3.6.0",
     "morgan": "~1.10.0",
     "nodemon": "^2.0.7",
     "qrcode": "^1.4.4",
-    "socket.io": "^3.1.0",
-    "sweetalert2": "^10.14.0",
-    "ws": "^7.4.2",
+    "socket.io": "^4.0.0",
+    "sweetalert2": "^10.15.7",
+    "ws": "^7.4.4",
     "xlsx": "^0.16.9"
   },
   "devDependencies": {
-    "livereload": "^0.9.1"
+    "livereload": "^0.9.3"
   }
 }
