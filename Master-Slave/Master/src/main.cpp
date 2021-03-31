@@ -25,7 +25,7 @@ WebSocketsClient webSocketCam;
 bool flagEnCam = false;
 
 #define HOST "116.102.2.48"
-#define PORT 81
+#define PORT 8881
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4
 
@@ -207,8 +207,8 @@ void setup()
   //!================/ WebSocket Config /================!//
   webSocket.begin(HOST, PORT, "/"); // server address, port and URL
   webSocket.onEvent(webSocketEventHandle);
-  delay(2000);                       // delay for DATA socket go first then CAMERA socket
-  webSocketCam.begin(HOST, 82, "/"); // server address, port and URL
+  delay(2000);                         // delay for DATA socket go first then CAMERA socket
+  webSocketCam.begin(HOST, 8884, "/"); // server address, port and URL
   webSocketCam.onEvent(webSocketCamEventHandle);
 
   //!================/ AI-Thinker Camera Config /================!//
