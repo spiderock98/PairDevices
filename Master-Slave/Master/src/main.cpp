@@ -24,8 +24,7 @@ WebSocketsClient webSocketCam;
 #define EEPROM_SIZE 100 // define the number of bytes you want to access
 bool flagEnCam = false;
 
-#define HOST "115.76.144.9"
-// #define HOST "192.168.43.145"
+#define HOST "116.102.2.48"
 #define PORT 81
 #define LED_BUILTIN 33
 #define FLASH_BUILTIN 4

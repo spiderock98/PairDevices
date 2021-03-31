@@ -3,7 +3,10 @@ const socket = io();
 //!======/ map on homepage /=======!//
 var viewMap;
 function initViewMap() {
-  const initLatLng = new google.maps.LatLng($(".hidLatCoor").text(), $(".hidLngCoor").text());
+  const initLatLng = new google.maps.LatLng(
+    $(".hidLatCoor").text(),
+    $(".hidLngCoor").text()
+  );
   const currentPlace = $(".hidPlace").text();
 
   viewMap = new google.maps.Map(document.getElementById("viewMap"), {
@@ -21,7 +24,7 @@ function initViewMap() {
   const marker = new google.maps.Marker({
     position: initLatLng,
     map: viewMap,
-    animation: google.maps.Animation.BOUNCE
+    animation: google.maps.Animation.BOUNCE,
   });
   const infowindow = new google.maps.InfoWindow({
     content: currentPlace,
@@ -46,7 +49,7 @@ getCurrentUID().then((uid) => {
 }); // Global Var
 
 //!================/ VanillaWebsocket /================!//
-const WS_URL = "ws:///192.168.137.251:82";
+const WS_URL = "ws:///116.102.2.48:8882";
 let ws = new WebSocket(WS_URL);
 
 //!================/ ESP32-CAM on security area field /================!//
@@ -107,7 +110,6 @@ ws.onmessage = (payload) => {
 //       outputData.parentElement.hidden = false;
 //       outputData.innerText = code.data;
 
-
 //       console.log(code.data);
 //       stopStream();
 //       btnReScan.hidden = false;
@@ -167,16 +169,16 @@ fm.init({
       angularSpeed: 100,
       maxAmplitude: 12,
       frequency: 30,
-      horizontalSpeed: -150
+      horizontalSpeed: -150,
     },
     backgroundFluidLayer: {
       fillStyle: "#00ffff",
       angularSpeed: 100,
       maxAmplitude: 9,
       frequency: 30,
-      horizontalSpeed: 150
-    }
-  }
+      horizontalSpeed: 150,
+    },
+  },
 });
 
 //!====/ google chart configuration https://developers.google.com/chart/interactive/docs/gallery/areachart /====!//
@@ -209,18 +211,17 @@ fm.init({
 //   // chart.draw(data, options);
 // }
 
-
 //!=======/ when page load finish /=======!//
 $(() => {
-  $('.accordion-item').on("click", function () {
+  $(".accordion-item").on("click", function () {
     $(this).next().slideToggle(100);
-    $('p').not($(this).next()).slideUp('fast');
+    $("p").not($(this).next()).slideUp("fast");
   });
 
   // init watterlv from db
   fm.setPercentage(Number($(".hidWaterLevel").text()));
   // waterlv db listerner
-  socket.on("wtlv", numMsg => {
+  socket.on("wtlv", (numMsg) => {
     fm.setPercentage(numMsg);
   });
 });
