@@ -4,14 +4,18 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const app = express();
-const livereload = require('livereload').createServer({
-  exts: ['js', 'ejs', 'css']
+const livereload = require("livereload").createServer({
+  exts: ["js", "ejs", "css"],
 });
-livereload.watch(path.join(__dirname, 'public'));
-livereload.watch(path.join(__dirname, 'views'));
+livereload.watch(path.join(__dirname, "public"));
+livereload.watch(path.join(__dirname, "views"));
 
-app.set("port", process.env.PORT || 8880)
-app.set("views", [path.join(__dirname, "views"), path.join(__dirname, "views", "devices"), path.join(__dirname, "views", "home")]);
+app.set("port", process.env.PORT || 8883);
+app.set("views", [
+  path.join(__dirname, "views"),
+  path.join(__dirname, "views", "devices"),
+  path.join(__dirname, "views", "home"),
+]);
 app.set("view engine", "ejs");
 app.use(logger("dev"));
 app.use(express.json());
@@ -41,12 +45,11 @@ admin.initializeApp({
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
 server.listen(app.get("port"), () => {
-  console.log(`Server started at: http://localhost:${app.get('port')}`);
+  console.log(`Server started at: http://localhost:${app.get("port")}`);
 });
 //?========/ load consumer.js and pass it the socket.io object /========?//
-require('./routes/devices-server.js').start(io);
+require("./routes/devices-server.js").start(io);
 // require('./routes/home-server.js').start(io);
-
 
 io.on("connection", (socket) => {
   // from browser: onLoad() to put browser in to owm room
